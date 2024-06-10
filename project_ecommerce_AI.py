@@ -13,20 +13,10 @@ from nltk.metrics import edit_distance
 
 import unicodedata
 
-# import sys
-# import os
-
-# # Addings the folder path 'config'
-# config_path = "D:\\matheus_lucy_mkd\\Documents\\exercicios_faculdade\\TCC_stuff\\new_idea_ecommerce\\config.py"
-
-# # Adiciona o diretório pai do arquivo config.py ao sys.path
-# sys.path.append(os.path.dirname(config_path))
-
-# import config
+from config import SECRET_KEY
 
 # Configurando a API do Gemini
-# GOOGLE_API_KEY = config.SECRET_KEY
-GOOGLE_API_KEY = 'AIzaSyBskS4hcTWUP0L0QROEbuPEKdvp4KVlWkQ'
+GOOGLE_API_KEY = SECRET_KEY
 genai.configure(api_key=GOOGLE_API_KEY)
 
 generation_config = {

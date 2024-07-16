@@ -1,4 +1,5 @@
 import google.generativeai as genai
+
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 import pandas as pd
@@ -17,6 +18,12 @@ from config import SECRET_KEY
 
 from fuzzywuzzy import fuzz
 
+from database_connection import conn
+import psycopg2
+
+import spacy
+import re
+
 # Configurando a API do Gemini
 GOOGLE_API_KEY = SECRET_KEY
 genai.configure(api_key=GOOGLE_API_KEY)
@@ -26,8 +33,10 @@ generation_config = {
     "candidate_count": 1,
 }
 
-model_2 = genai.GenerativeModel("gemini-1.0-pro",
+model_2 = genai.GenerativeModel("gemini-1.5-flash",
                                 generation_config=generation_config)
+# model_2 = genai.GenerativeModel("gemini-1.0-pro",
+#                                 generation_config=generation_config)
 
 
 # nltk.data.clear_cache()
@@ -42,94 +51,306 @@ global index_dict_answer
 
 index_dict_answer = 0
 
+pre_processed_prompt_products_list = []
+
+dict_of_client_products = {}
+
+nlp = spacy.load("pt_core_news_lg")
+
+pattern = r"\[(.*?)\]"
+
+contains_a_product = True
+products_list_after_user_input = []
+
+# model_text_generator = models.get("text-davinci-003")
+
+## I HAVE THE DF IN MY DATABASE
+# cur = conn.cursor()
+
+# products_list = []
+
+
+# cur.execute("""
+#             SELECT * FROM products 
+#             """)
+
+# rows = cur.fetchall()
+
+# conn.commit()
+# # conn.close()
+
+# # 1	"#REFRIG. GUARANA ANTARCT PET CACULINHA"	"Seção 3"	1.2	"PC"	"22021000"	0.89	0.89	1.2	true
+# # 2	"REFRIG. GUARANA ANTARCT PET"	"Seção 3"	6	"PC"	"22021000"	4.89	4.89	6	true
+
+
+# for row in rows:
+#     products = {
+#         "Nome": row[1],
+#         "Secao": row[2],
+#         "PrecoVenda": float(row[3]),
+#         "UnidadeMedida": row[4],
+#         "Disponivel": row[9],
+#     }
+#     products_list.append(products)
+
 
 # Products DataFrame
-products = [
-    {"Nome": "Café Ouro Verde", "Seção": "Seção 1", "Disponivel": True},
-    {"Nome": "Leite Camponesa", "Seção": "Seção 2", "Disponivel": True},
-    {"Nome": "Arroz Caçarola", "Seção": "Seção 2", "Disponivel": False},
-    {"Nome": "Feijão Carioca", "Seção": "Seção 2", "Disponivel": True},
-    {"Nome": "Macarrão Barilla", "Seção": "Seção 2", "Disponivel": True},
-    {"Nome": "Suco de Laranja Natural", "Seção": "Seção 3", "Disponivel": True},
-    {"Nome": "Refrigerante Coca-Cola", "Seção": "Seção 3", "Disponivel": True},
-    {"Nome": "Água Mineral", "Seção": "Seção 3", "Disponivel": True},
-    {"Nome": "Ovos Brancos", "Seção": "Seção 4", "Disponivel": True},
-    {"Nome": "Frango Congelado", "Seção": "Seção 4", "Disponivel": True},
-    {"Nome": "Banana Nanica", "Seção": "Seção 5", "Disponivel": True},
-    {"Nome": "Maçã Gala", "Seção": "Seção 5", "Disponivel": True},
-    {"Nome": "Tomate", "Seção": "Seção 5", "Disponivel": False},
-    {"Nome": "Cebola", "Seção": "Seção 5", "Disponivel": True},
-    {"Nome": "Sabão em Pó Omo", "Seção": "Seção 6", "Disponivel": True},
-    {"Nome": "Detergente Limpol", "Seção": "Seção 6", "Disponivel": False},
-    {"Nome": "Papel Higiênico", "Seção": "Seção 7", "Disponivel": True},
-    {"Nome": "Shampoo Head & Shoulders", "Seção": "Seção 8", "Disponivel": True},
-    {"Nome": "Pasta de Dente Colgate", "Seção": "Seção 8", "Disponivel": True},
-    {"Nome": "Biscoito Negresco", "Seção": "Seção 9", "Disponivel": True},
-]
+# products = [
+#     {"Nome": "Café Ouro Verde", "Seção": "Seção 1", "Disponivel": True},
+#     {"Nome": "Leite Camponesa", "Seção": "Seção 2", "Disponivel": True},
+#     {"Nome": "Arroz Caçarola", "Seção": "Seção 2", "Disponivel": False},
+#     {"Nome": "Feijão Carioca", "Seção": "Seção 2", "Disponivel": True},
+#     {"Nome": "Macarrão Barilla", "Seção": "Seção 2", "Disponivel": True},
+#     {"Nome": "Suco de Laranja Natural", "Seção": "Seção 3", "Disponivel": True},
+#     {"Nome": "Refrigerante Coca-Cola", "Seção": "Seção 3", "Disponivel": True},
+#     {"Nome": "Água Mineral", "Seção": "Seção 3", "Disponivel": True},
+#     {"Nome": "Ovos Brancos", "Seção": "Seção 4", "Disponivel": True},
+#     {"Nome": "Frango Congelado", "Seção": "Seção 4", "Disponivel": True},
+#     {"Nome": "Banana Nanica", "Seção": "Seção 5", "Disponivel": True},
+#     {"Nome": "Maçã Gala", "Seção": "Seção 5", "Disponivel": True},
+#     {"Nome": "Tomate", "Seção": "Seção 5", "Disponivel": False},
+#     {"Nome": "Cebola", "Seção": "Seção 5", "Disponivel": True},
+#     {"Nome": "Sabão em Pó Omo", "Seção": "Seção 6", "Disponivel": True},
+#     {"Nome": "Detergente Limpol", "Seção": "Seção 6", "Disponivel": False},
+#     {"Nome": "Papel Higiênico", "Seção": "Seção 7", "Disponivel": True},
+#     {"Nome": "Shampoo Head & Shoulders", "Seção": "Seção 8", "Disponivel": True},
+#     {"Nome": "Pasta de Dente Colgate", "Seção": "Seção 8", "Disponivel": True},
+#     {"Nome": "Biscoito Negresco", "Seção": "Seção 9", "Disponivel": True},
+# ]
+
+# products_df = pd.DataFrame(products_list)
+
+# # print(products_df)
 
 
-products_df = pd.DataFrame(products)
+# df = pd.DataFrame(products_df)
+# # df.columns = ['Nome', 'Secao', 'Disponivel']
+# df.columns = ['Nome', 'Secao', 'PrecoVenda', 'UnidadeMedida', 'Disponivel']
+
+# # print(df)
+
+model = 'models/embedding-001'
+
+#    content=f'O produto {title} é encontrado na {secao} com o preço de {preco_venda} reais possuindo a unidade de medida {unidade_medida}',  # Include the type of the product
+
+def embed_fn(title, secao="", preco_venda=0, unidade_medida=""):
+    return genai.embed_content(model=model,
+                               content=f'O produto {title}',  # I understood that this have to be the most alike the userp prompt
+                               title=title,
+                               task_type="RETRIEVAL_DOCUMENT")["embedding"]
+
+#df["Embeddings"] = df.apply(lambda row: embed_fn(row["Nome"], row["Secao"], row["PrecoVenda"], row['UnidadeMedida']), axis=1)
+# df["Embeddings"] = df.apply(lambda row: embed_fn(row["Nome"]), axis=1)
+
+# print(df)
+
+# Transformar DataFrame em uma lista de tuplas
+# data_tuples = [tuple(x) for x in df.to_numpy()]
+
+# # print(data_tuples)
+
+# sql = """INSERT INTO products_with_embeddings(
+#     nome,
+#     secao_produto,
+#     preco_venda,
+#     unidade_medida,
+#     disponivel,
+#     embeddings
+# ) 
+# values(%s, %s, %s, %s, %s, %s) RETURNING *"""
+
+# try:
+#     with conn.cursor() as cur:
+#         for record in data_tuples:
+#             cur.execute(cur.mogrify(sql, record))
+
+#     conn.commit()
+# except (Exception, psycopg2.DatabaseError) as error:
+#     print(error)
+# finally:
+#     conn.close()
+
+## NOW I HAVE THE DF IN MY DATABASE
+
+sql = "SELECT * FROM products_with_embeddings"
+
+cur = conn.cursor()
+
+cur.execute(sql)
+
+rows = cur.fetchall()
+
+conn.commit()
+
+conn.close()
+
+products_list = []
+
+# 205	"SAB.PROTEX ERVA DOCE EMB 1 X 12 90G"	"Seção 2"	
+# 2.0	"PC"	true	{-0.0068901023,-0.017110113,-0.04398383,-0.019743577,0.038723197,0.0059666275,-0.026354691,-0.010065305,-0.008089105,0.05907605,0.0034906971,-0.0032800054,0.01664473,-0.01100858,-0.032542452,-0.024404066,0.02496846,0.031474207,-0.022154966,-0.047623083,0.009256254,0.018447643,0.0070926216,0.009886847,-0.01581496,-0.006393073,0.035618663,-0.056431677,-0.034084078,0.0153410295,-0.0874218,0.068573475,-0.0711557,-0.044712923,-0.05187479,-0.006223573,-0.025455125,-0.004621894,-0.027902637,0.023120308,0.0030681025,0.0029099355,0.0054100836,-0.037552994,0.02561197,0.024048232,0.0076997364,-0.024422921,0.021032508,-0.07029078,0.0342872,-0.00075353414,0.054282833,0.014486551,-0.016163412,-0.036995027,0.008775744,-0.018168617,0.019449182,-0.011274251,-0.03281642,0.019826185,0.040396605,0.054529514,-0.022716627,-0.04045984,-0.031299558,0.012925805,0.06933866,-0.024309542,0.007416687,-0.015563377,0.024038836,-0.015188449,-0.0050065126,-0.038519662,-0.03186893,0.097649105,0.04311643,0.043365747,0.012323822,-0.028255459,-0.04534822,-0.046334583,0.0015166552,0.046734765,-0.04296521,-0.054640185,0.007004131,0.047138255,0.028350465,-0.059278913,0.012525092,-0.060510036,0.012723434,0.07966275,-0.035475496,-0.053003635,-0.012922144,-0.07064509,-0.029028114,-0.002136717,-0.037108675,-0.022945497,-0.018494166,-0.034813542,-0.017104164,0.033728227,-0.043474164,0.04273438,-0.020207595,-0.024624173,0.03435385,0.002797935,0.022001414,-0.01860624,0.02521641,0.050557002,0.07429551,0.040560704,0.025019515,-0.005631261,0.03583172,0.040830955,0.021474002,-0.019694611,-0.007966408,0.054567456,0.045272112,-0.00023993853,-0.021013565,0.018896857,0.0032448154,0.024153566,0.05847691,0.074323796,0.046152443,0.038300924,-0.016214319,0.028515749,-0.00234592,0.06029181,0.011173096,0.0025296675,-0.017160915,0.029064033,0.008516131,0.0508219,0.045304593,-0.009537978,0.0036333883,-0.006842084,-0.07063358,0.04460528,0.07200772,0.011467511,-0.0023403757,-0.022922864,0.008469214,0.0137980245,0.07707153,-0.016193608,-0.019483523,0.012631832,-0.009324361,-0.06274002,0.00010001747,0.02120844,0.01109925,0.009890586,0.03540926,0.0126273865,-0.046941776,-0.0328562,-0.04063749,-0.059650183,-0.01916512,-0.015786037,-0.06456854,-0.010441197,-0.03969247,-0.055640016,0.021796392,0.028445158,0.008600869,0.0017804515,0.080680475,-0.043215036,0.0016222637,0.013587025,-0.0060471524,-0.032888535,-0.08759772,0.039177816,0.010283359,0.02481573,-3.0994983e-05,0.006613448,0.019050987,-0.025407178,-0.036984924,0.030352226,-0.0076094475,0.014928605,8.713977e-05,-0.038096484,0.023603082,-0.039640985,-0.026583081,0.029287105,-0.04305839,0.0030001746,0.013633362,-0.010077867,0.051654566,-0.0047395136,0.029988073,-0.02059836,-0.035130233,-0.010733176,-0.021058114,-0.03674546,-0.016719684,0.021591373,-0.058107592,0.05467076,-0.063229255,0.013544913,0.023141867,-0.069302715,-0.027010685,0.06130083,0.028064672,-0.0031814915,0.05441555,-0.03250148,0.055368975,0.051454403,0.028632095,0.020543886,0.007422717,0.055679917,-0.026338026,0.033912078,-0.03662622,-0.029654041,-0.029974418,0.07534687,0.0021882828,0.06287127,-0.006224373,-0.04251881,-0.010882219,-0.0175953,-0.06939704,-0.004320797,-0.080255635,0.0051224898,0.036000483,0.00064698665,0.07778502,-0.00026889183,-0.0011103213,-0.02921944,-0.01430382,-0.0121785635,0.040554978,-0.031660393,-0.028372694,0.04767138,0.010363762,-0.0037805191,0.05085381,0.026511272,0.027814321,-0.003162316,-0.029558552,0.08522062,0.027492581,-0.072494425,-0.0008790665,0.013428953,0.013328018,-0.042419028,-0.018424068,-0.0075674606,-0.038437758,-0.065055996,0.04592963,-0.0031968236,-0.02156277,-0.032736547,-0.033172715,0.004969252,0.0032323068,-0.00058135943,-0.018817445,0.045015734,0.018790705,-0.007868373,0.041108076,-0.05547537,0.019731883,-0.060015798,0.031261567,0.0022004615,0.013123242,-0.03353897,0.014208934,0.018529871,0.026389424,-0.023826541,-0.033223733,0.026245514,0.033224776,0.0010385073,-0.030177385,0.024835743,-0.029030243,0.039087843,0.007907275,0.113444395,0.047353618,0.022472437,-0.005092387,0.017935636,-0.04765569,0.05553472,-0.033002853,0.014157902,-0.021556105,0.0025807875,-0.015075465,0.06254213,-0.013185628,-0.026598796,-0.06698265,-0.013689384,0.00028969932,0.002891159,0.010998672,0.028213426,-0.038055286,-0.030936195,0.044435583,0.030971242,-0.039587412,0.032047722,0.0014350354,0.052762695,0.027921557,0.030869428,-0.0015409018,0.019527046,0.019008083,-0.038919277,0.03787943,-0.016027793,-0.007839852,-0.0237089,-0.085783854,0.032306176,-0.042824384,-0.006464784,0.013920692,0.028777761,0.021475105,0.02464172,-0.03658259,0.064592935,0.025575636,-0.019270748,0.06099152,0.02278317,-0.007005583,-0.0070437808,0.0042988583,-0.0121412305,0.011709634,0.025521364,-0.042219892,-0.07180534,0.035863917,-0.015476906,-0.005156069,0.0071871397,0.058992576,0.023095695,0.035260726,0.027871622,-0.010307579,0.0011459253,0.08923387,0.039672088,-0.008752804,-0.0050207954,-0.07203241,-0.03928028,0.033774137,-0.0077734776,-0.016135668,-0.027514836,-0.032666784,-0.005059445,-0.07975377,0.002535732,0.0005188402,-0.087696865,-0.058101017,-0.020956254,-0.01006966,0.030014237,0.02294807,-0.044227347,-0.058195617,-0.022685854,0.066295326,-0.02425535,0.006694341,0.019963387,0.007419015,0.01564112,-0.005974731,-0.009422186,-0.06750804,-0.0037738862,0.051998336,-0.03720036,0.013552176,0.022472434,0.041915216,-0.04580574,0.07453997,-0.04551681,-0.007835532,-0.029369468,0.026948694,0.02643494,-4.0998024e-05,-0.008016646,0.0042766426,0.03834745,0.022449395,0.005899985,-0.04569184,-0.0030291216,0.0053872955,0.0192113,0.024949914,-0.08734741,0.009815149,-0.06667957,0.0064982753,-0.05372912,0.0093537485,0.01830826,0.0040839566,0.05888066,0.01972405,0.017985394,-0.016488558,-0.02103893,-0.007163879,-0.05674633,0.045777895,0.0072280057,0.009957965,0.018332027,0.016361112,0.04890819,0.016135208,-0.052089844,0.020017771,0.00564552,-0.02062612,-0.008045862,-0.06625649,0.021861635,-0.021348206,-0.036585156,-0.046021633,-0.032877527,0.0048297164,-0.011350187,0.014378888,0.01946808,-0.026161656,0.047111087,0.053959385,0.0470423,-0.049267195,-0.026195027,-0.06979532,-0.08138142,0.02214683,0.033137687,-0.07896152,0.0033881704,-0.041859474,0.037162814,-0.009467815,0.024729319,-0.0038370646,0.043933615,-0.013555603,-0.049048834,0.070332415,0.06801688,-0.0083442945,-0.0027902045,0.027513348,0.0026978946,-0.05008742,0.057609066,0.034506217,-0.020999506,-0.022601066,-0.016484369,0.018100647,-0.040746458,-0.008121214,0.004383581,-0.07589758,-0.012050501,0.04480719,-0.05304751,-0.013690901,0.038829423,-0.078854874,0.07949355,-0.021344716,0.08041059,-0.060053382,0.0051456452,-0.0027721126,0.0068186535,0.024351185,0.057489906,0.03767477,-0.005147226,0.0024537165,-0.04167769,0.014959994,0.04152857,-0.049202163,-0.02185216,0.022262184,-0.0526753,0.018319631,-0.004930662,0.0049799373,0.04044112,0.014398871,-0.063585944,0.009708782,-0.025556168,-0.0406501,0.0035988865,0.02574285,-0.05654094,0.00032588528,-0.031255685,-0.018485311,-0.017045714,0.0629155,0.007378451,-0.013917539,-0.016934963,0.030927934,-0.028127726,0.039349977,0.04291419,0.017114747,-0.010473358,-0.014307922,-0.013648086,-0.03870527,0.0017305054,-0.046343345,-0.050375305,0.055358414,-0.033092923,0.034786154,0.039539088,-0.0005971536,0.0068878215,0.012631144,0.031436216,-0.013454105,0.034155447,-0.008708155,0.060785566,-0.032157708,0.022649068,-0.026518062,-0.03332039,-0.018273076,-0.043418877,0.012099797,-0.08159079,0.017102636,-0.026242053,0.0694269,0.011372458,0.040214416,0.0039879344,0.0009584602,-0.003705355,-0.01355495,0.026294751,-0.019167572,-0.05169133,0.0050167493,0.006931846,-0.040880375,-0.01570934,0.033269055,-0.0053437506,-0.02120884,-0.028605316,-0.005681296,0.014233413,-0.012084472,0.014398712,-0.006100458,0.0031594664,-0.008224307,-0.09771763,0.059706792,-0.009810868,0.040582385,0.05892565,-0.038271997,0.036377307,-0.0076692738,0.02643679,-0.015749808,0.015358362,0.011385062,0.010645426,-0.07730976,-0.022527937,0.032514744,0.02973783,-0.05439423,0.08050984,0.006747693,-0.08386579,-0.105559774,0.00371902,0.027535135,-0.03323133,0.019598199,0.021959908,0.018142885,-0.0062465817,-0.032821033,0.0044373074,0.006653121,-0.049082763,-0.054879345,0.038442563,0.011343819,0.037066147,-0.01630943,-0.00019665304,-0.033951353,-0.06311724,-0.008253971,0.04531699,-0.06266875,0.014882386,0.08993492,-0.007617792,0.06489596,0.020573858,-0.07149441,0.021619506,-0.032685746,0.015063036,-0.013628743,-0.016095899,-0.031375688,-0.006214086,-0.06531222,0.03806269,0.039781965,-0.024895867,-0.032784887,-0.0030122967,0.006966487,-0.021398194,0.0023490994,0.019846719,0.037059497,0.017099291,0.026226927,0.013568375,-0.044594254,0.034976944,-0.018595597,0.0062386105,0.022447603,0.004695133,-0.0367035,-0.03207425,-0.009584113,0.0054462967,0.016598439,0.008393014,0.016650172,-0.055286463,-0.05693451,0.06550256,0.037636433,-0.08449789,0.039674863,0.013158433,-0.035836704,0.029676555,0.031551186,0.020272214,0.0021283668,-0.0057775085,-0.012030719,-0.02279491,-0.008728122,-0.013957174,-0.041581154,0.019986734,0.08891604,0.025756853,-0.02714344,-0.013661843,-0.042035628,0.03641661,-0.03606498,0.018397596,-0.016161961,-0.043704353,-0.0973365,-0.008373395,-0.0076079126,0.05033822,0.031660218,-0.0112589765,-0.027697546,-0.047674447,-0.022257691,-0.050725274,-0.016216947,0.0068274955,0.016117826,0.030916812,0.06056305,0.026924703,0.017211309,-0.005477697,0.0034638282,0.052799866,0.01697508,0.03388141,-0.009928845,-0.005880076,-0.0034014771,0.04829151,-0.014804046,-0.0075884615}
+
+
+for row in rows:
+    products = {
+        "Nome": row[1],
+        "Secao": row[2],
+        "PrecoVenda": float(row[3]),
+        "UnidadeMedida": row[4],
+        "Disponivel": row[5],
+        "Embeddings": row[6]
+    }
+    products_list.append(products)
+
+products_df = pd.DataFrame(products_list)
+
+print(products_df)
 
 # List of available products
 products_available = [p["Nome"] for p in products_df.to_dict(orient='records') if p['Disponivel']]
 
-df = pd.DataFrame(products_df)
-df.columns = ['Nome', 'Secao', 'Disponivel']
 
-# print(df)
+# Process the prompt using NLTK 
+def process_prompt(prompt):
 
-model = 'models/embedding-001'
+    # return prompt_representation
+    if fuzz.token_set_ratio(prompt.lower(), "quero sair") >= 80:
+        # print(process_prompt(user_prompt.lower()))  # Processa antes de sair
+        print(f'Obrigado por vir ao nosso {supermarket_name}. Volte sempre!')
+        return True  # Sinaliza para sair do loop
 
-def embed_fn(title, text):
-    return genai.embed_content(model=model,
-                               content=f'O produto {title} é encontrado na {text}',  # Include the type of the product
-                               title=title,
-                               task_type="RETRIEVAL_DOCUMENT")["embedding"]
-
-df["Embeddings"] = df.apply(lambda row: embed_fn(row["Nome"], row["Secao"]), axis=1)
-
-# print(df)
-
-def pre_process_prompt(prompt):
+def pre_process_prompt_grammatical(prompt):
     fix_prompt = f"""
         Corrija os erros gramaticais e ortográficos no seguinte texto para que ele seja compreensível para um leitor 
-        humano e normalize os nomes dos produtos para a forma padrão, conforme encontrado na lista de produtos abaixo:
+        humano e normalize os nomes dos produtos para a forma padrão, segue uma lista de produtos exemplo:
 
         Lista de produtos:
 
-        Café Ouro Verde
-        Leite Camponesa
-        Arroz Caçarola
-        Feijão Carioca
-        Macarrão Barilla
-        Suco de Laranja Natural
-        Refrigerante Coca-Cola
-        Água Mineral
-        Ovos Brancos
-        Frango Congelado
-        Banana Nanica
-        Maçã Gala
-        Tomate
-        Cebola
-        Sabão em Pó Omo
-        Detergente Limpol
-        Papel Higiênico
-        Shampoo Head & Shoulders
-        Pasta de Dente Colgate
-        Biscoito Negresco
+        REFRIG. GUARANA ANTARCT PET CACULINHA
+        REFRIG. GUARANA ANTARCT PET
+        REFRIG. SODA LIMONADA PET CACULINHA
+        REFRIG. SODA LIMONADA ANTARC PET
+        GOMA DE MANDIOCA LOPES
+        MILHO VERDE FUGINI AO VAPOR LATA
+        REFRESCO FRUCTUS PLUS LARANJA
+        ACETONA FARMAX
+        MAC. VITARELLA SPECIALE PARAFUSO
+        CAMIL SARD COQ OLEO 54X125
+        CAMIL SARD COQ M TOMATE 54X125
+        FRALDA DESC.BABY ROGER G CXA 1 X 12 18UND
+        FRALDA DESC.BABY ROGER XG CXA 1 X 12 16UND
+        LAMP. 15W220V OUROLUX ELETR.3U UND 1 X 1 1UND
+        LAMP. 20W220V OUROLUX ELETR.3U UND 1 X 1 1UND
+        LAMP. 25W220V OUROLUX ELETR.3U UND 1 X 1 1UND
+        MASSA P/ TAPIOCA AMAFIL
+        PROTEINA DE SOJA SORA ESCURA T.A.M.
+        SABAO YPE BARRA AZUL MULTIATIVO
+        CHARQUE FRINENSE J.BEEF PONTA AGULHA
+        AGUA SANITARIA BRILUX MULTIPLO USO
+        AGUA SANITARIA BRILUX 2lt
+        CAFE PILAO DESCAFEINADO VACUO CXA 1 X 20 250G
+        DET.PO BEM TE VI SUP.BRANCO S.PLAST FDO 1 X 26 500G
+        MARG.PURO SABOR POTE PTE 1 X 1 3KG
+        ACUCAR DEMERARA PETRIBU FDO 1 X 10 1KG
+        BOMBOM GAROTO SORTIDO UND 1 X 1 300G
+        INSET.BAYGON AERO A.TOTAL CXA 1 X 12 395ML
+        MAION.HELLMANNS PET CXA 1 X 24 250G
+        SABAO PASTA ATOL/ASSOLAN CXA 1 X 12 500G
+        BISC. MARIA DOCE DE LEITE 20X400G
+        BISC. CIPANDOCE 20X400G
+        BISC. ROSQ. LEITE 10X400G
+        CAFE PALACIO MOIDO 250G
+        SALG. TOBOGA CEBOLA E SALSA 50X25G
+        SALG. TOBOGA PICANHA 50X50G
+        COND.PALMOLIVE ILUMINADOR CAB.PR CXA 1 X 6 350ML
+        SABAO PDC YPE AZUL PERFUMADO CXA 1 X 10 5X200G
+        SABAO PDC YPE NEUTRO CXA 1 X 10 5X200G
+        SABAO PDC YPE VERMELHO CXA 1 X 10 5X200G
+        SARDINHA COQUEIRO PQ OLEO CXA 9 X 6 83G
+        SHAMP.PALMOLIVE NAT.NEUTRO CXA 1 X 6 350ML
+        SHAMP.PALMOLIVE ILUMINADOR CAB.PR CXA 1 X 6 350ML
+        BISC. POPULAR COQUINHO 10X400G
+        BISC. POPULAR TOP DOCE 10X400G
+        BISC. POPULAR TOP SAL 10X400G
+        BISC. CREAM CRACKER 20X400G
+        BISC. ROSQ. CHOCOLATE 10X400G
+        BISC. MINI CRACKER 10X400G
+        BISC. MINI MAISENA 10X400G
+        BISC. MINI MARIA 10X400G
+        MACARRAO PARAFUSO VITAMASSA 12 X 500G
+        SALG. TOBOGA QUEIJO 50X30G
+        START LIMPA CER. AZULEJOS AZULIM LAVAND
+        ALVEJANTE BRILUX MULTI 3X1
+        LEITE EM PO NINHO INSTANTANEO
+        ACHOC. TODDYNHO CHOC. UHT
+        CREME DENTAL COLGATE M.P.A
+        AGUA SANITARIA IGUAL
+        SABAO LIQ. OMO MULTIACAO DOYP
+        SABAO LIQ. BRILUX T.ACAO
+        CERA POLITRIZ INCOLOR EMULSIONADA
+        SABAO ARCOVERDE GLICERINADO LIMAO
+        LEITE UHT BETANIA DESNATADO
+        LEITE EM PO CAMPONESA INTEGRAL
+        NESCAU 2.0 ACTIGEN-E NESTLE
+        PAPEL HIGIENICO LEVE NEUTRO 60MT
+        PAPEL HIGIENICO LEVE NEUTRO 30MT
+        BISC VITARELLA C.CRACKER TRADICIONAL
+        MARGARINA VEG. PRIMOR COMUM
+        MARGARINA VEG. DELICIA CREMOSA LIGHT
+        BISC.FORTALEZA MARIA CXA 1 X 20 400G
+        BISC.FORTALEZA CREAM CRACKER CXA 1 X 20 400G
+        SAB.EVEN CHA VERDE/LIMAO EMB 1 X 12 90G
+        SAB.EVEN EXTRATO FLORES PCT 1 X 12 90G
+        SAB.EVEN PITANGA/ACEROLA EMB 1 X 12 90G
+        SAB.LUX BUQUE DOS SONHOS EMB 1 X 12 85G
+        SAB.PALMOLIVE SUAVE MANT.KARITE PCT 1 X 12 90G
+        SAB.PALMOLIVE SUAVE LEITE/ROSAS EMB 1 X 12 90G
+        SAB.PHEBO ODOR ROSAS PCT 1 X 12 90G
+        AMAC.ROUPA SONHO MAGIC CXA 1 X 6 2L
+        AMAC.ROUPA SONHO MAGIC CXA 1 X 12 500ML
+        DESINF.PINHO SOL CXA 4 X 3 500ML
+        REFR.PO TANG ABACAXI CXT 1 X 15 25G
+        REFR.PO TANG LARANJA CXT 1 X 15 25G
+        REFR.PO TANG MANGA CXT 1 X 15 25G
+        CR.DENTAL COLGATE TRIPLA A.ORIGINAL PCT 1 X 12 90G
+        REFR.PO TANG MARACUJA CXT 1 X 15 25G
+        REFR.PO TANG TANGERINA CXT 1 X 15 25G
+        REFR.PO TANG UVA CXT 1 X 15 25G
+        DET.LIQ.YPE MACA CXA 1 X 24 500ML
+        DET.LIQ.YPE NEUTRO CXA 1 X 24 500ML
+        DET.PO BEM TE VI TRAD.S.PLAST. FDO 1 X 26 500G
+        DES.ALMA FLORES SPRAY PCT 1 X 12 90ML
+        DES.ALMA FLORES SPRAY C.BRANCAS CXA 1 X 12 90ML
+        DES.SENADOR SPRAY SEDUCTION CXA 1 X 12 90ML
+        DES.SENADOR SPRAY CLASSIC CXA 1 X 12 90ML
+        FARINHA TRIGO ROSA BRANCA C/FERM. FDO 1 X 10 1KG
+        FARINHA TRIGO ROSA BRANCA TIPO 1 FDO 1 X 10 1KG
+        SHAMP.SEDA BRILHO E MOVIMENTO UND 1 X 1 325ML
+        SHAMP.SEDA HIDRATACAO E LEVEZA UND 1 X 1 325ML
+        SHAMP.SEDA PRETOS LUMINOSOS EMB 1 X 3 325ML
+        CAFE STA.CLARA DESCAFEINADO VACUO FDO 1 X 20 250G
+        LEITE EM PO INTEGRAL CAMPONESA 200 GRS CXA.C/50X1
+        SUCO DAFRUTA CONCENT.CAJU PET CXA 1 X 12 500ML
+        DETERGENTE YPE COCO
+
 
         Texto:
 
         "{prompt}"
 
         Mantenha o significado original do texto e corrija apenas os erros de escrita e gramática. Por exemplo, "quero um cafezinho" 
-        deve ser corrigido para "Quero um Café Ouro Verde", "Tem leitinho" para "Tem Leite Camponesa", "Quero pasta" para "Quero Pasta de Dente Colgate" e assim por diante. 
-        Seja o mais direto possível, sem acrescentar informações adicionais.
+        deve ser corrigido para "Quero um CAFE STA.CLARA DESCAFEINADO VACUO FDO 1 X 20 250G", "Tem leitinho" para "Tem LEITE EM PO INTEGRAL CAMPONESA 200 GRS CXA.C/50X1 PCT",
+        "Refrigerante" para "REFRIG. GUARANA ANTARCT PET", "Quero pasta" para "Quero CR.DENTAL COLGATE TRIPLA A.ORIGINAL PCT 1 X 12 90G", 
+        "Quanto custa o biscoito e o sabao" para "Quanto custa o BISCOITO POPULAR MAIZENA DOCE 10X400G e o SABAO EM PO BRILHANTE MULTI TECIDOS"
+        "Aendo figa localezado os tomate e a cebole" para "Aonde fica localizado os Tomates e a Cebola", "Vocês te jel, deterge e saco" para "Vocês têm GEL FIXADOR STYLO VITAL AMARELO, DETERGENTE YPE COCO e SUCO DAFRUTA CONCENT.CAJU PET CXA 1 X 12 500ML"
+        Preste bastante atenção na lista e aos minimos detalhes dela e do texto, perceba que alguns produtos estão abrevidados como "REFRIG." leve isso em consideração
+        antes de fazer a correção modificação do prompt. Faça isso para qualquer palavra minimamente parecida com as da lista acima.
+        Seja o mais direto possível, sem acrescentar informações adicionais. 
 
         Regras de Retorno:
 
-        Caso o texto não contenha nenhum produto ou seja algo totalmente não relacionado aos produtos, como 
-        "Olá, como você está?" ou "Queria saber que horas o mercado abre?", "Como é o seu nome" retorne "Texto RA".
+        Caso o texto não contenha nenhum produto ou seja, o texto disponibilizado é algo totalmente diferente aos produtos acima, como por exemplo,
+        "Ole, como você está?", "Quera saber que horas o mercado abre?", "Como é o seu nome", "Qual o estado do mercado" ou "Como funciona o mercado" 
+        corrija apenas os erros gramaticais e retorne o texto.
     """
     # In case the product is not in the list, show the message "Produto não está disponível!"
     
@@ -139,13 +360,219 @@ def pre_process_prompt(prompt):
 
     return pre_processed_prompt.text
 
-def find_similarity_products(prompt, embeddings_products):
+def pre_process_prompt(prompt):
+    fix_prompt = f"""
+        Corrija os erros gramaticais e ortográficos no seguinte texto para que ele seja compreensível para um leitor 
+        humano e normalize os nomes dos produtos para a forma padrão, segue uma lista de produtos exemplo:
+
+        Lista de produtos:
+
+        REFRIG. GUARANA ANTARCT PET CACULINHA
+        REFRIG. GUARANA ANTARCT PET
+        REFRIG. SODA LIMONADA PET CACULINHA
+        REFRIG. SODA LIMONADA ANTARC PET
+        GOMA DE MANDIOCA LOPES
+        MILHO VERDE FUGINI AO VAPOR LATA
+        REFRESCO FRUCTUS PLUS LARANJA
+        ACETONA FARMAX
+        MAC. VITARELLA SPECIALE PARAFUSO
+        CAMIL SARD COQ OLEO 54X125
+        CAMIL SARD COQ M TOMATE 54X125
+        FRALDA DESC.BABY ROGER G CXA 1 X 12 18UND
+        FRALDA DESC.BABY ROGER XG CXA 1 X 12 16UND
+        LAMP. 15W220V OUROLUX ELETR.3U UND 1 X 1 1UND
+        LAMP. 20W220V OUROLUX ELETR.3U UND 1 X 1 1UND
+        LAMP. 25W220V OUROLUX ELETR.3U UND 1 X 1 1UND
+        MASSA P/ TAPIOCA AMAFIL
+        PROTEINA DE SOJA SORA ESCURA T.A.M.
+        SABAO YPE BARRA AZUL MULTIATIVO
+        CHARQUE FRINENSE J.BEEF PONTA AGULHA
+        AGUA SANITARIA BRILUX MULTIPLO USO
+        AGUA SANITARIA BRILUX 2lt
+        CAFE PILAO DESCAFEINADO VACUO CXA 1 X 20 250G
+        DET.PO BEM TE VI SUP.BRANCO S.PLAST FDO 1 X 26 500G
+        MARG.PURO SABOR POTE PTE 1 X 1 3KG
+        ACUCAR DEMERARA PETRIBU FDO 1 X 10 1KG
+        BOMBOM GAROTO SORTIDO UND 1 X 1 300G
+        INSET.BAYGON AERO A.TOTAL CXA 1 X 12 395ML
+        MAION.HELLMANNS PET CXA 1 X 24 250G
+        SABAO PASTA ATOL/ASSOLAN CXA 1 X 12 500G
+        BISC. MARIA DOCE DE LEITE 20X400G
+        BISC. CIPANDOCE 20X400G
+        BISC. ROSQ. LEITE 10X400G
+        CAFE PALACIO MOIDO 250G
+        SALG. TOBOGA CEBOLA E SALSA 50X25G
+        SALG. TOBOGA PICANHA 50X50G
+        COND.PALMOLIVE ILUMINADOR CAB.PR CXA 1 X 6 350ML
+        SABAO PDC YPE AZUL PERFUMADO CXA 1 X 10 5X200G
+        SABAO PDC YPE NEUTRO CXA 1 X 10 5X200G
+        SABAO PDC YPE VERMELHO CXA 1 X 10 5X200G
+        SARDINHA COQUEIRO PQ OLEO CXA 9 X 6 83G
+        SHAMP.PALMOLIVE NAT.NEUTRO CXA 1 X 6 350ML
+        SHAMP.PALMOLIVE ILUMINADOR CAB.PR CXA 1 X 6 350ML
+        BISC. POPULAR COQUINHO 10X400G
+        BISC. POPULAR TOP DOCE 10X400G
+        BISC. POPULAR TOP SAL 10X400G
+        BISC. CREAM CRACKER 20X400G
+        BISC. ROSQ. CHOCOLATE 10X400G
+        BISC. MINI CRACKER 10X400G
+        BISC. MINI MAISENA 10X400G
+        BISC. MINI MARIA 10X400G
+        MACARRAO PARAFUSO VITAMASSA 12 X 500G
+        SALG. TOBOGA QUEIJO 50X30G
+        START LIMPA CER. AZULEJOS AZULIM LAVAND
+        ALVEJANTE BRILUX MULTI 3X1
+        LEITE EM PO NINHO INSTANTANEO
+        ACHOC. TODDYNHO CHOC. UHT
+        CREME DENTAL COLGATE M.P.A
+        AGUA SANITARIA IGUAL
+        SABAO LIQ. OMO MULTIACAO DOYP
+        SABAO LIQ. BRILUX T.ACAO
+        CERA POLITRIZ INCOLOR EMULSIONADA
+        SABAO ARCOVERDE GLICERINADO LIMAO
+        LEITE UHT BETANIA DESNATADO
+        LEITE EM PO CAMPONESA INTEGRAL
+        NESCAU 2.0 ACTIGEN-E NESTLE
+        PAPEL HIGIENICO LEVE NEUTRO 60MT
+        PAPEL HIGIENICO LEVE NEUTRO 30MT
+        BISC VITARELLA C.CRACKER TRADICIONAL
+        MARGARINA VEG. PRIMOR COMUM
+        MARGARINA VEG. DELICIA CREMOSA LIGHT
+        BISC.FORTALEZA MARIA CXA 1 X 20 400G
+        BISC.FORTALEZA CREAM CRACKER CXA 1 X 20 400G
+        SAB.EVEN CHA VERDE/LIMAO EMB 1 X 12 90G
+        SAB.EVEN EXTRATO FLORES PCT 1 X 12 90G
+        SAB.EVEN PITANGA/ACEROLA EMB 1 X 12 90G
+        SAB.LUX BUQUE DOS SONHOS EMB 1 X 12 85G
+        SAB.PALMOLIVE SUAVE MANT.KARITE PCT 1 X 12 90G
+        SAB.PALMOLIVE SUAVE LEITE/ROSAS EMB 1 X 12 90G
+        SAB.PHEBO ODOR ROSAS PCT 1 X 12 90G
+        AMAC.ROUPA SONHO MAGIC CXA 1 X 6 2L
+        AMAC.ROUPA SONHO MAGIC CXA 1 X 12 500ML
+        DESINF.PINHO SOL CXA 4 X 3 500ML
+        REFR.PO TANG ABACAXI CXT 1 X 15 25G
+        REFR.PO TANG LARANJA CXT 1 X 15 25G
+        REFR.PO TANG MANGA CXT 1 X 15 25G
+        CR.DENTAL COLGATE TRIPLA A.ORIGINAL PCT 1 X 12 90G
+        REFR.PO TANG MARACUJA CXT 1 X 15 25G
+        REFR.PO TANG TANGERINA CXT 1 X 15 25G
+        REFR.PO TANG UVA CXT 1 X 15 25G
+        DET.LIQ.YPE MACA CXA 1 X 24 500ML
+        DET.LIQ.YPE NEUTRO CXA 1 X 24 500ML
+        DET.PO BEM TE VI TRAD.S.PLAST. FDO 1 X 26 500G
+        DES.ALMA FLORES SPRAY PCT 1 X 12 90ML
+        DES.ALMA FLORES SPRAY C.BRANCAS CXA 1 X 12 90ML
+        DES.SENADOR SPRAY SEDUCTION CXA 1 X 12 90ML
+        DES.SENADOR SPRAY CLASSIC CXA 1 X 12 90ML
+        FARINHA TRIGO ROSA BRANCA C/FERM. FDO 1 X 10 1KG
+        FARINHA TRIGO ROSA BRANCA TIPO 1 FDO 1 X 10 1KG
+        SHAMP.SEDA BRILHO E MOVIMENTO UND 1 X 1 325ML
+        SHAMP.SEDA HIDRATACAO E LEVEZA UND 1 X 1 325ML
+        SHAMP.SEDA PRETOS LUMINOSOS EMB 1 X 3 325ML
+        CAFE STA.CLARA DESCAFEINADO VACUO FDO 1 X 20 250G
+        LEITE EM PO INTEGRAL CAMPONESA 200 GRS CXA.C/50X1
+        SUCO DAFRUTA CONCENT.CAJU PET CXA 1 X 12 500ML
+        DETERGENTE YPE COCO
+
+        Texto:
+
+        "{prompt}"
+
+        Mantenha o significado original do texto e corrija apenas os erros de escrita e gramática. Por exemplo, "quero um cafezinho" 
+        deve ser corrigido para "Quero um CAFE STA.CLARA DESCAFEINADO VACUO FDO 1 X 20 250G", "Tem leitinho" para "Tem LEITE EM PO INTEGRAL CAMPONESA 200 GRS CXA.C/50X1 PCT",
+        "Refrigerante" para "REFRIG. GUARANA ANTARCT PET", "Quero pasta" para "Quero CR.DENTAL COLGATE TRIPLA A.ORIGINAL PCT 1 X 12 90G", 
+        "Quanto custa o biscoito e o sabao" para "Quanto custa o [BISCOITO POPULAR MAIZENA DOCE 10X400G, SABAO EM PO BRILHANTE MULTI TECIDOS]"
+        "Aendo figa localezado os tomate e a cebole" para "Aonde fica localizado os [Tomates, Cebola]", "Vocês te jel, deterge e saco" para "Vocês têm [GEL FIXADOR STYLO VITAL AMARELO, DETERGENTE YPE COCO, SUCO DAFRUTA CONCENT.CAJU PET CXA 1 X 12 500ML]"
+        Preste bastante atenção na lista e aos minimos detalhes dela e do texto, perceba que alguns produtos estão abrevidados como "REFRIG." leve isso em consideração
+        antes de fazer a correção modificação do prompt. Faça isso para qualquer palavra minimamente parecida com as da lista acima.
+        Seja o mais direto possível, sem acrescentar informações adicionais. Coloque os produtos separados por virgula e dentro de colchetes independete da forma que eles estão
+        por exemplo, "Quanto é o [AMAC.ROUPA SONHO MAGIC CXA 1 X 12 500ML, DESINF.PINHO SOL CXA 4 X 3 500ML]", 
+        "Quais desses produtos vocês tem disponível? [REFR.PO TANG UVA CXT 1 X 15 25G, DET.LIQ.YPE MACA CXA 1 X 24 500ML, DET.LIQ.YPE NEUTRO CXA 1 X 24 500ML, DET.PO BEM TE VI TRAD.S.PLAST. FDO 1 X 26 500, DES.ALMA FLORES SPRAY PCT 1 X 12 90ML]" coloque exatamente dessa forma o texto. 
+        Não precisa colocar nenhuma pontuação o texto sempre será nesse formato, quando tiver mais de um produto separe eles com virgulas e os coloque dentro de colchetes.
+
+        Regras de Retorno:
+
+        Caso o texto não contenha nenhum produto ou seja, o texto disponibilizado é algo totalmente diferente aos produtos acima ou a de produtos existentes normalmente no mundo, como por exemplo,
+        "Olá, como você está?", "Queria saber que horas o mercado abre?", "Como é o seu nome", "Qual o estado do mercado" ou "Como funciona o mercado"
+        "Onde está locaslzi o mercado", "Quantos funcionarsio vocês tema" ou qualquer coisa que NÃO contenha algum nome parecido com algum produto 
+        preste bastante atenção ao texto recebido pelo usuário, conforme disse caso o texto seja aleátorio ou seja, não tenha o nome de algum produto ou
+        algo parecido nele retorne apenas "Texto RA"
+    """
+
+    # Caso tenho um nome que não pareça com algo da lista, por exemplo, "Sandália", "Ração" ou algo do tipo, corrija o texto para o mais proximo possível de um produto normal
+    # exemplo, "Raceo de cachorro" para "Ração de cachorro" ou "Pipoeq" para "Pipoca" são alguns exemplos que quero que você corrija quando aparecer
+
+    # CHECK IF IT'S USEFUL PUT THE TEXT ABOVE ON THE PROMPT
+
+    # In case the product is not in the list, show the message "Produto não está disponível!"
+    
+    pre_processed_prompt = model_2.generate_content(fix_prompt)
+
+    # Problema agora é identificar mais de um produto :)
+
+    return pre_processed_prompt.text
+
+def create_semantic_dictionary(user_input, product_df):
+    """
+    Creaates a semantic dictionary based on embeddings.
+
+    Args:
+        df (DataFrame): DataFrame with the products
+
+    Returns:
+        A dictionary where the keys are the products and the values are similar products lists
+    """
+    semantic_dictonary = {}
+    # "REFRIG. GUARANA ANTARCT PET"	"Seção 3"	6	"PC"	"22021000"	4.89	4.89	6	true
+
+    embeddings_consulta = np.array(embed_fn(user_input)).reshape(1, -1) # Reshape to 2D array for cosine similarity
+
+    # print(f"Embed of products: {embeddings_consulta}")
+
+    for i, row in products_df.iterrows():
+        # print(f"ROW EMBED{row['Embeddings']}")
+        product_embedding = np.array(row['Embeddings']).reshape(1, -1) # Ensure the product embedding is in the right shape
+        
+        similarity = cosine_similarity(embeddings_consulta, product_embedding)[0][0]
+        
+        semantic_dictonary[row["Nome"]] = similarity
+
+    return semantic_dictonary
+
+def encontrar_produtos_similares(semantic_dictionary, threshold=0.7):
+    """
+    Encontra produtos similares à consulta do usuário com base em embeddings.
+
+    Args:
+        consulta: A consulta do usuário como texto.
+        threshold: O limiar de similaridade (0.0 a 1.0).
+
+    Returns:
+        Uma lista de nomes de produtos similares.
+    """
+
+    # doc_consulta = nlp(consulta)
+    # embeddings_consulta = doc_consulta.vector
+
+
+    similar_products = [product for product, similarity in semantic_dictionary.items() if similarity > threshold]
+
+    return similar_products
+
+# Função para identificar produtos na consulta do usuário
+
+def find_similarity_products(prompt, embeddings_products=None):
     # in teh answer I have to distinguish between the answers with products and the answerrs without products (Olá, quero saber onde fica a seção 2)
 
     # avatar 
     # prompt_for_detail = "Gerar uma descrição detalhada do produto [nome do produto] para um chatbot de e-commerce"
  
     # fix_response = model_2.generate_content(pre_process_prompt(prompt))
+
+    global pre_processed_prompt_products_list
+    global pattern
+    global contains_a_product
+
 
     if not process_prompt(prompt):
         
@@ -162,91 +589,86 @@ def find_similarity_products(prompt, embeddings_products):
         conversation_history[name] = prompt
         
         new_prompt = prompt.lower()
+
+        # new_prompt = prompt.strip()
         
         new_prompt = unicodedata.normalize('NFKD', prompt).encode('ascii', 'ignore').decode('ascii')
         
         products_df['Nome'] = products_df['Nome'].str.lower()
         products_df['Nome'] = products_df['Nome'].apply(lambda x: unicodedata.normalize('NFKD', x).encode('ascii', 'ignore').decode('ascii'))
         
-        if (prompt not in ['Produto NA', 'Texto RA']):
+        # print("ULTIMO CHARACTER " + new_prompt.strip()[-1])
 
-            # print("NOT IN NA")
+        match = re.search(pattern, new_prompt)
 
-            # products_df['Nome'] = products_df['Nome'].str.lower().str.replace('ã', 'a').str.replace('é', 'e').str.replace('õ', 'o')
-            
+        if match:
+            # extracting the correspondent group to the pattern
+            product_string = match.group(1)
+
+            pre_processed_prompt_products_list = [product.strip() for product in product_string.split(',')]
+
+            print(pre_processed_prompt_products_list)
+
+        if (new_prompt not in ['Produto NA \n', 'Texto RA \n']):
+
+            contains_a_product = True
 
             # Using TF-IDF to text comparation
             tfidf_vectorizer = TfidfVectorizer()
             tfidf_matrix = tfidf_vectorizer.fit_transform([new_prompt] + products_df['Nome'].tolist())  
 
-            similarities = cosine_similarity(tfidf_matrix[0], tfidf_matrix[1:])
-            index = np.argsort(similarities)[0][::-1]
+            similarities = cosine_similarity(tfidf_matrix[0], tfidf_matrix[1:]).flatten()
 
-            return index[0]
+            # Getting the products index with similarity above the threshold
 
-        else: 
+            threshold = 0.3
+            similar_index = np.where(similarities > threshold)[0]
+            sorted_index = similar_index[np.argsort(-similarities[similar_index])]
+            # index = np.argsort(similarities)[0][::-1]
 
-            return prompt
+            similar_products = sorted_index.tolist()
+
+            # return index[0]
+            # return index[:5].tolist()
+            # return index[:quantity_products].tolist()
+            # print(f"INDEX LIST {index[:5].tolist()}")
+            return similar_products
+
+        # else: 
+
+    contains_a_product = False
     return prompt
 
+
+
 def generate_and_search(prompt):
-    # processed_prompt = process_prompt(prompt) # vamos ignorar por enquanto, porque não está puxando porque no nltk está errado
+   
+    similarities = find_similarity_products(prompt, np.stack(products_df["Embeddings"]))
 
-    # embedding_prompt = genai.embed_content(model=model,
-    #                                        content=processed_prompt,
-    #                                        task_type="RETRIEVAL_DOCUMENT")["embedding"]
+    if isinstance(similarities, list):  
 
-    # similarities = find_similarity_products(embedding_prompt, np.stack(df["Embeddings"]))
-    # similarities = find_similarity_products(processed_prompt, np.stack(df["Embeddings"]))
-    
-    # new_prompt = prompt.lower().replace('ã', 'a').replace('é', 'e').replace('õ', 'o')
-    # similarities = find_similarity_products(prompt, np.stack(df["Embeddings"]))
-
-    similarities = find_similarity_products(prompt, np.stack(df["Embeddings"]))
-
-    # if similarities not in ['Produto NA', 'Texto RA']:        
-
-    #     # return df.iloc[similarities]
-    #     return df.iloc[[similarities]]
-
-    if isinstance(similarities, np.int64):  
-
-        return df.iloc[[similarities]]
+        return products_df.iloc[similarities]
 
     return similarities
 
-# Process the prompt using NLTK 
-def process_prompt(prompt):
-    # nltk.download('punkt')
-    # nltk.download('averaged_perceptron_tagger')
-    # nltk.download('maxent_ne_chunker')
-    # nltk.download('words')
-    # nltk.download('maxent_ne_chunker')
-    # nltk.download('wordnet')
+# user_input = "Onde fica o Refrigerante e Detergente e suco"
 
-    # lemmatizer = WordNetLemmatizer()
+# user_input_processed = pre_process_prompt(user_input)
 
-    # tokens = word_tokenize(prompt)
-    # pos_tags = pos_tag(tokens)
-    
-    # # Extract the named entities (people, place, things)
-    # nouns = [lemmatizer.lemmatize(token) for token, tag in pos_tags if tag == 'NN']
+# print(user_input_processed)
 
-    # # Extract the verbs (to identify the wished action)
-    # verbs = [lemmatizer.lemmatize(token) for token, tag in pos_tags if tag.endswith('VB')]
+# sematic_dict = create_semantic_dictionary(user_input_processed, products_df)
 
-    # # Create a representation of the prompt based on the entities and verbs
-    # prompt_representation = " ".join(nouns) + " " + " ".join(verbs)
-    
-    # return prompt_representation
-    if fuzz.token_set_ratio(prompt.lower(), "quero sair") >= 80:
-        # print(process_prompt(user_prompt.lower()))  # Processa antes de sair
-        print('Até logo!')
-        return True  # Sinaliza para sair do loop
+# # similarities = encontrar_produtos_similares(sematic_dict, 0.5)
 
-    return False  # Continua a conversa
+# similarities = generate_and_search(user_input_processed)
+
+# print(f"Produtos similares a '{similarities['Nome']}")
 
 def user_interaction():
+
+    global dict_of_client_products
+    global products_list_after_user_input
     
     user_prompt = str(input("Olá, em que posso lhe ajudar hoje? "))
 
@@ -258,37 +680,85 @@ def user_interaction():
 
     # print(f"TYPE: {type(find_product)}")
 
+    # print(find_product.iloc[0])
+
     # Verificar se é um produto
     is_product = isinstance(find_product, pd.DataFrame)
 
-    if is_product:       
-        detailed_prompt = f"""
-        Gerar uma descrição detalhada do produto {find_product['Nome']} para um chatbot de e-commerce
-        """
+    if is_product:
+        count_row = find_product.shape[0]
+        print(count_row)
+        # if count_row > 1:
+        if contains_a_product:
+            # for index, row in find_product.iteritems():
+            for index, row in find_product.iterrows():
+                # print(f"ID: {index}, Nome: {row['Nome']}, Secao: {row['Secao']}, Disponivel: {row['Disponivel']}")
+                dict_of_client_products = {
+                    "Name": row['Nome'],
+                    "Section": row['Secao'],
+                    "Price": row['PrecoVenda'],
+                    "Available": row['Disponivel'],
+                }            
+                products_list_after_user_input.append(dict_of_client_products)
+                
 
+
+            detailed_prompt = detailed_prompt = "Gerar uma descrição detalhada para um chatbot de e-commerce dos produtos que se encontram nessa lista: "
+            
+            for product in products_list_after_user_input: 
+                detailed_prompt += f"Nome do produto: {product['Name']}\n"
+                detailed_prompt += f"Preço do produto: {product['Price']}\n"
+                detailed_prompt += f"Produto está disponível (False=Não, True=Sim): {product['Available']}\n\n"
+            
+            # detailed_prompt += ""
+            
+        # print(f"DICT OF PRODUCT {dict_of_client_products}")
+        # else:
+            
+        #     ## I'M REWRINTING THE PRODUCT ON THE Name_1 space...
+        #     dict_of_client_products["Name_1"] = find_product.iloc[0]['Nome']
+        #     dict_of_client_products["Section_1"] = find_product.iloc[0]['Secao']
+        #     dict_of_client_products["Available_1"] = find_product.iloc[0]['Disponivel']
+            
+        #     detailed_prompt = f"""
+        #     Gerar uma descrição detalhada do produto {find_product['Nome']} para um chatbot de e-commerce
+        #     """
+        print(f"LIST OF PRODUCTS {dict_of_client_products}")
         generated_detailed_prompt = model_2.generate_content(detailed_prompt)
 
-        print('DETAILED PROMPT: ' + generated_detailed_prompt.text)
+        # print('DETAILED PROMPT: ' + generated_detailed_prompt.text)
     
 
-        if find_product['Disponivel'].item():
+        # if find_product['Disponivel'].item():
+        if find_product['Disponivel'].any():
             answer_prompt = f"""Considerando que o cliente do nosso
             mercado {supermarket_name} enviou a mensagem:
 
-            {pre_process_prompt(user_prompt)} 
+            {pre_process_prompt_grammatical(user_prompt)} 
 
-            e o possível produto que ele deseja se encontra na seção {find_product['Secao'].item()}, 
-            Considere essa descrição detalhada desse produto: 
+            e os possíveis produtos que ele deseja são esses 
+            
+            """
+            # for product in pre_processed_prompt_products_list: 
+            for product in products_list_after_user_input: 
+                answer_prompt += f"Nome do produto: {product['Name']}\n"
+                answer_prompt += f"Preço do produto: {product['Price']}\n"
+                answer_prompt += f"Seção do produto: {product['Section']}\n"
+                answer_prompt += f"Produto está disponível (False=Não, True=Sim): {product['Available']}\n\n"
+
+            # {pre_processed_prompt_products_list}.
+            answer_prompt += f"""
+            Considere também essa descrição detalhada dos produtos: 
 
             {generated_detailed_prompt.text} 
 
             utilize-la como um guia para melhorar a resposta para o cliente
-            e responda com uma frase simples e útil. Não acrescente mais nenhum texto ou caracter desnecessário 
+            e responda com uma frase simples e útil levando em conta todos os produtos e informações disponibilizadas. Não acrescente mais nenhum texto ou caracter desnecessário 
             apenas a mensagem informando envolvendo algum detalhe do produto usando a descrição acima como guia e a seção que o
             mesmo se encontra.
             E por fim caso a mensagem do usuário: 
             
-            {pre_process_prompt(user_prompt)} 
+            {pre_process_prompt_grammatical(user_prompt)} 
             
             tenha alguma palavra que pareça com lista, por exemplo,
             'list', liste, listo, listw, gere uma possível lista de compras de acordo 
@@ -300,13 +770,13 @@ def user_interaction():
             
         else:
             answer_prompt = f"""Considerando que o cliente do nosso 
-            mercado {supermarket_name} quer saber {user_prompt} 
+            mercado {supermarket_name} quer saber {pre_process_prompt_grammatical(user_prompt)} 
             que o produto que ele deseja está atualmente indisponível, 
             responda com uma frase simples e útil ao cliente.
             Considere esse texto {generated_detailed_prompt.text} como exemplo e melhore a sua resposta.
-        E por fim caso a mensagem do usuário: 
+            E por fim caso a mensagem do usuário: 
             
-            {pre_process_prompt(user_prompt)} 
+            {pre_process_prompt_grammatical(user_prompt)} 
             
             tenha alguma palavra que pareça com lista, por exemplo,
             'list', liste, listo, listw, gere uma possível lista de compras de acordo 
@@ -318,7 +788,7 @@ def user_interaction():
 
     else:
         answer_prompt = f"""Considerando que o cliente do nosso 
-            mercado {supermarket_name} quer saber {user_prompt} 
+            mercado {supermarket_name} quer saber {pre_process_prompt_grammatical(user_prompt)} 
             responda com uma frase simples e útil ao cliente. 
             E por fim gere alguma evento ou ação para o cliente fazer
             no mercado se vier a o caso, por exemplo, "Queria saber que horas o
@@ -339,52 +809,73 @@ def user_interaction():
 
     while True:
         user_prompt = str(input("Posso ajudar em algo mais? "))
-        
 
-        # print(find_product)
-
-        # # if find_product['Disponivel'].bool(): 
-        # if find_product['Disponivel'].item(): 
-        #     print(True)
-        
-        # if(user_prompt.lower() in ['sair', 'exit','no', 'nao']):
-            # print(process_prompt(user_prompt.lower()))
-        #     print('Até logo!')
-        #     break
-
-        if process_prompt(user_prompt):
+        if process_prompt(pre_process_prompt_grammatical(user_prompt)):
             break
 
         find_product = generate_and_search(user_prompt)
     
         is_product = isinstance(find_product, pd.DataFrame)
 
-        if is_product:   
+    
+        if is_product:
+            count_row = find_product.shape[0]
+            print(count_row)
+            # if count_row > 1:
+            if contains_a_product:
+                # for index, row in find_product.iteritems():
+                for index, row in find_product.iterrows():
+                    # print(f"ID: {index}, Nome: {row['Nome']}, Secao: {row['Secao']}, Disponivel: {row['Disponivel']}")
+                    dict_of_client_products = {
+                        "Name": row['Nome'],
+                        "Section": row['Secao'],
+                        "Price": row['PrecoVenda'],
+                        "Available": row['Disponivel'],
+                    }            
+                    products_list_after_user_input.append(dict_of_client_products)
+                    
 
-            detailed_prompt = f"""
-            Gerar uma descrição detalhada do produto {find_product['Nome']} para um chatbot de e-commerce
-            """
+
+                detailed_prompt = detailed_prompt = "Gerar uma descrição detalhada para um chatbot de e-commerce dos produtos que se encontram nessa lista: "
+                    
+                for product in products_list_after_user_input: 
+                    detailed_prompt += f"Nome do produto: {product['Name']}\n"
+                    detailed_prompt += f"Preço do produto: {product['Price']}\n"
+                    detailed_prompt += f"Produto está disponível (False=Não, True=Sim): {product['Available']}\n\n"
+             
 
             generated_detailed_prompt = model_2.generate_content(detailed_prompt)
 
-            if find_product['Disponivel'].item():
+            # if find_product['Disponivel'].item():
+            if find_product['Disponivel'].any():
                 answer_prompt = f"""Considerando que o cliente do nosso
                 mercado {supermarket_name} enviou a mensagem:
 
-                {pre_process_prompt(user_prompt)} 
+                {pre_process_prompt_grammatical(user_prompt)} 
 
-                e o possível produto que ele deseja se encontra na seção {find_product['Secao'].item()}, 
-                Considere essa descrição detalhada desse produto: 
+                e os possíveis produtos que ele deseja são esses 
+                
+                """
+                # for product in pre_processed_prompt_products_list: 
+                for product in products_list_after_user_input: 
+                    answer_prompt += f"Nome do produto: {product['Name']}\n"
+                    answer_prompt += f"Preço do produto: {product['Price']}\n"
+                    answer_prompt += f"Seção do produto: {product['Section']}\n"
+                    answer_prompt += f"Produto está disponível (False=Não, True=Sim): {product['Available']}\n\n"
+
+                # {pre_processed_prompt_products_list}.
+                answer_prompt += f"""
+                Considere também essa descrição detalhada dos produtos: 
 
                 {generated_detailed_prompt.text} 
 
                 utilize-la como um guia para melhorar a resposta para o cliente
-                e responda com uma frase simples e útil. Não acrescente mais nenhum texto ou caracter desnecessário 
+                e responda com uma frase simples e útil levando em conta todos os produtos e informações disponibilizadas. Não acrescente mais nenhum texto ou caracter desnecessário 
                 apenas a mensagem informando envolvendo algum detalhe do produto usando a descrição acima como guia e a seção que o
                 mesmo se encontra.
                 E por fim caso a mensagem do usuário: 
                 
-                {pre_process_prompt(user_prompt)} 
+                {pre_process_prompt_grammatical(user_prompt)} 
                 
                 tenha alguma palavra que pareça com lista, por exemplo,
                 'list', liste, listo, listw, gere uma possível lista de compras de acordo 
@@ -393,16 +884,16 @@ def user_interaction():
                 não gere nenhuma lista apenas a mensagem principal.
 
                 """
-            
+                
             else:
                 answer_prompt = f"""Considerando que o cliente do nosso 
-                mercado {supermarket_name} quer saber {user_prompt} 
+                mercado {supermarket_name} quer saber {pre_process_prompt_grammatical(user_prompt)} 
                 que o produto que ele deseja está atualmente indisponível, 
                 responda com uma frase simples e útil ao cliente.
                 Considere esse texto {generated_detailed_prompt.text} como exemplo e melhore a sua resposta.
                 E por fim caso a mensagem do usuário: 
                 
-                {pre_process_prompt(user_prompt)} 
+                {pre_process_prompt_grammatical(user_prompt)} 
                 
                 tenha alguma palavra que pareça com lista, por exemplo,
                 'list', liste, listo, listw, gere uma possível lista de compras de acordo 
@@ -414,14 +905,17 @@ def user_interaction():
 
         else:
             answer_prompt = f"""Considerando que o cliente do nosso 
-                mercado {supermarket_name} quer saber {user_prompt} 
+                mercado {supermarket_name} quer saber {pre_process_prompt_grammatical(user_prompt)} 
                 responda com uma frase simples e útil ao cliente. 
                 E por fim gere alguma evento ou ação para o cliente fazer
                 no mercado se vier a o caso, por exemplo, "Queria saber que horas o
                 mercado abre?", resposta, "O mercado abre as 7h e hoje temos uma grande promoção"
                 """
+        
 
         response = model_2.generate_content(answer_prompt)
+
+        print(f"ANSWER PROMPT {answer_prompt}")
 
         print(response.text)
 

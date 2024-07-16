@@ -1,4 +1,5 @@
 config.py
-venv/
+database_connection.py
 melhorias.md
+venv/
 TCC-project/

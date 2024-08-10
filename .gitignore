@@ -1,5 +1,9 @@
 config.py
 database_connection.py
 melhorias.md
+synonimus_test.py
 venv/
 TCC-project/
+chabot_project/chatbot_project/settings.py
+chabot_project/config.py
+chabot_project/database_connection.py

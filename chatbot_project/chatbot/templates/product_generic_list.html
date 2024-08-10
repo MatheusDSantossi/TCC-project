@@ -1,0 +1,26 @@
+{% extends "base/base.html" %}
+
+{% block title %}
+    Product List
+{% endblock %}
+
+{% block content %}
+    <h1>Product List</h1>
+    {% if product_list %}
+        <ul> 
+            {% for product in product_list %}
+                <li>
+                    {% comment %} <a href="{{% product.get_absolute_url %}}">{{ product.name }}</a> {% endcomment %}
+                    <a>{{ product.nome }}</a>
+                    ({{product.secao_produto}})
+                    ({{product.preco_venda}})
+                    ({{product.unidade_medida}})
+                    ({{product.disponivel}})
+                    ({{product.embeddings}})
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No products are available.</p>
+    {% endif %}
+{% endblock %}

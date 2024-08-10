@@ -24,10 +24,26 @@ import psycopg2
 import spacy
 import re
 
+import json
+import ast
+
+import tkinter as tk
+from tkinter import scrolledtext
+
+# Você: quero um refrige
+
+
+# Hecate: 'Temos refrigerantes Guaraná Antárctica e Soda Limonada, em tamanhos tradicionais e mini, na Seção 3. 😉
+# '
+
+# retornar mais produtos quando for generico
+
 # Configurando a API do Gemini
 GOOGLE_API_KEY = SECRET_KEY
 genai.configure(api_key=GOOGLE_API_KEY)
 
+# Generate a text stream
+# response = model.generate_content(prompt, stream=True)
 generation_config = {
     "temperature": 0.4,
     "candidate_count": 1,
@@ -43,21 +59,34 @@ model_2 = genai.GenerativeModel("gemini-1.5-flash",
 
 supermarket_name = "Supermercado Santos"
 
-conversation_history = {}
+# According to Greek mythology, Hecate, the goddess 
+# of magic, crossroads, and the night, is often depicted 
+# as a benevolent deity who helps lost people find 
+# their way
 
-index_dict = 0
+chatbot_name = "Hecate"
 
-global index_dict_answer
+# My plan is to give the opportunity and way to the client put some information like the ones bellow
+info_about_the_business = ["Nosso mercado abre as 7h e fecha as 22h", 
+                           "Nosso mercado tem o valor de sempre atender os clientes com o melhor atendimento possível",
+                           "O nome do nosso gerente é Fulano"
+                           ]
 
-index_dict_answer = 0
+# conversation_history = {}
+
+# index_dict = 0
+
+# index_dict_answer = 0
+
+# dict_of_client_products = {}
 
 pre_processed_prompt_products_list = []
-
-dict_of_client_products = {}
 
 nlp = spacy.load("pt_core_news_lg")
 
 pattern = r"\[(.*?)\]"
+# pattern_for_syn = r"\{.*?\}"
+pattern_for_syn = r"\{(.+?)\}"
 
 contains_a_product = True
 products_list_after_user_input = []
@@ -139,6 +168,9 @@ def embed_fn(title, secao="", preco_venda=0, unidade_medida=""):
                                title=title,
                                task_type="RETRIEVAL_DOCUMENT")["embedding"]
 
+# print(embed_fn("Arroz"))
+
+
 #df["Embeddings"] = df.apply(lambda row: embed_fn(row["Nome"], row["Secao"], row["PrecoVenda"], row['UnidadeMedida']), axis=1)
 # df["Embeddings"] = df.apply(lambda row: embed_fn(row["Nome"]), axis=1)
 
@@ -182,7 +214,7 @@ rows = cur.fetchall()
 
 conn.commit()
 
-conn.close()
+# conn.close()
 
 products_list = []
 
@@ -208,6 +240,96 @@ print(products_df)
 # List of available products
 products_available = [p["Nome"] for p in products_df.to_dict(orient='records') if p['Disponivel']]
 
+def for_dividing_prompt_limit():
+    products_list_2 = []
+    
+    for p in products_df.to_dict(orient='records'):
+        # prompt += p['Nome']
+        products_list_2.append(p['Nome'])
+        
+    max_prompt_size = 425
+    
+    for i in range(0, max_prompt_size):
+        prompt+= products_list_2[i]
+
+# Generating synonymus using Gemini
+def generate_synonymus(product=None, product_list=None):
+    # global pre_processed_prompt_products_list
+    
+    if not product_list:
+    
+        new_product = pre_process_prompt_grammatical(product)
+        
+        prompt = "Coloque todos os sinônimos possíveis para as palavras abaixo.\n"
+        
+        prompt+=new_product
+        # products_list_2 = []
+        
+        # for p in products_df.to_dict(orient='records'):
+        #     # prompt += p['Nome']
+        #     products_list_2.append(p['Nome'])
+            
+        # max_prompt_size = 425 # this one is the maximum for the prompt input
+        # max_prompt_size = 140 # this one is the maxium for the prompt output, more than that and the answer is cut off
+        
+        # for i in range(0, max_prompt_size):
+        #     prompt+= products_list_2[i]
+        
+        # for i in range(max_prompt_size, len(products_list):
+        
+        prompt += """\n\nRetorne como um dicionário, por exemplo: {'CAFE PILAO ALMOFADA': ['Expresso', 'Cappuccino', 'Mocha', 'Latte', 'Café da Manhã', 'Café Coado', 'Café em Grãos']}
+        lembre-se de abrir a chave { e fechar a mesma chave }
+        retorne apenas o diciónario sem nenhum texto adicional, ou seja, a sua resposta deve começar com uma { e terminar com o fechamento dela }. Adicione todos os possíveis sinônimos de cada palavra
+        """ 
+    else:
+        prompt = "Coloque todos os sinônimos possíveis para as palavras abaixo.\n"
+        
+        for product in products_list:
+            prompt+=product
+        
+        prompt += """\n\nRetorne como um dicionário, por exemplo: {'CAFE PILAO ALMOFADA': ['Expresso', 'Cappuccino', 'Mocha', 'Latte', 'Café da Manhã', 'Café Coado', 'Café em Grãos']}
+        lembre-se de abrir a chave { e fechar a mesma chave }
+        retorne apenas o diciónario sem nenhum texto adicional, ou seja, a sua resposta deve começar com uma { e terminar com o fechamento dela }. Adicione todos os possíveis sinônimos de cada palavra
+        """ 
+        
+    print(prompt)
+    print("==========================================")
+    
+    # print("PROMPT:", prompt)   
+    response = model_2.generate_content(prompt)
+    print(response.text)
+    
+    # text = response.text
+    
+    # regex = re.compile(pattern_for_syn, text, re.DOTALL)
+    
+    # matches = re.findall(pattern_for_syn, text, re.DOTALL)
+    
+    # for match in matches:
+    #     print("MATCH: ", match)
+    
+    # match = re.search(pattern_for_syn, text)
+
+    # if match:
+    #     # extracting the correspondent group to the pattern
+    #     product_string = match.group(1)
+    #     print("PRODUCT STRING: ", product_string)
+
+    #     pre_processed_prompt_products_list = [product.strip() for product in product_string.split(',')]
+    
+    # start = fixed_text.find('{')+1
+    # end =fixed_text.find('}')
+    # json_string = fixed_text[start:end]
+    
+    # dictionary = json.loads(json_string)
+    
+    # print("==========================================")
+    
+    # print(pre_processed_prompt_products_list) 
+
+# generate_synonymus()
+
+
 
 # Process the prompt using NLTK 
 def process_prompt(prompt):
@@ -221,135 +343,28 @@ def process_prompt(prompt):
 def pre_process_prompt_grammatical(prompt):
     fix_prompt = f"""
         Corrija os erros gramaticais e ortográficos no seguinte texto para que ele seja compreensível para um leitor 
-        humano e normalize os nomes dos produtos para a forma padrão, segue uma lista de produtos exemplo:
-
-        Lista de produtos:
-
-        REFRIG. GUARANA ANTARCT PET CACULINHA
-        REFRIG. GUARANA ANTARCT PET
-        REFRIG. SODA LIMONADA PET CACULINHA
-        REFRIG. SODA LIMONADA ANTARC PET
-        GOMA DE MANDIOCA LOPES
-        MILHO VERDE FUGINI AO VAPOR LATA
-        REFRESCO FRUCTUS PLUS LARANJA
-        ACETONA FARMAX
-        MAC. VITARELLA SPECIALE PARAFUSO
-        CAMIL SARD COQ OLEO 54X125
-        CAMIL SARD COQ M TOMATE 54X125
-        FRALDA DESC.BABY ROGER G CXA 1 X 12 18UND
-        FRALDA DESC.BABY ROGER XG CXA 1 X 12 16UND
-        LAMP. 15W220V OUROLUX ELETR.3U UND 1 X 1 1UND
-        LAMP. 20W220V OUROLUX ELETR.3U UND 1 X 1 1UND
-        LAMP. 25W220V OUROLUX ELETR.3U UND 1 X 1 1UND
-        MASSA P/ TAPIOCA AMAFIL
-        PROTEINA DE SOJA SORA ESCURA T.A.M.
-        SABAO YPE BARRA AZUL MULTIATIVO
-        CHARQUE FRINENSE J.BEEF PONTA AGULHA
-        AGUA SANITARIA BRILUX MULTIPLO USO
-        AGUA SANITARIA BRILUX 2lt
-        CAFE PILAO DESCAFEINADO VACUO CXA 1 X 20 250G
-        DET.PO BEM TE VI SUP.BRANCO S.PLAST FDO 1 X 26 500G
-        MARG.PURO SABOR POTE PTE 1 X 1 3KG
-        ACUCAR DEMERARA PETRIBU FDO 1 X 10 1KG
-        BOMBOM GAROTO SORTIDO UND 1 X 1 300G
-        INSET.BAYGON AERO A.TOTAL CXA 1 X 12 395ML
-        MAION.HELLMANNS PET CXA 1 X 24 250G
-        SABAO PASTA ATOL/ASSOLAN CXA 1 X 12 500G
-        BISC. MARIA DOCE DE LEITE 20X400G
-        BISC. CIPANDOCE 20X400G
-        BISC. ROSQ. LEITE 10X400G
-        CAFE PALACIO MOIDO 250G
-        SALG. TOBOGA CEBOLA E SALSA 50X25G
-        SALG. TOBOGA PICANHA 50X50G
-        COND.PALMOLIVE ILUMINADOR CAB.PR CXA 1 X 6 350ML
-        SABAO PDC YPE AZUL PERFUMADO CXA 1 X 10 5X200G
-        SABAO PDC YPE NEUTRO CXA 1 X 10 5X200G
-        SABAO PDC YPE VERMELHO CXA 1 X 10 5X200G
-        SARDINHA COQUEIRO PQ OLEO CXA 9 X 6 83G
-        SHAMP.PALMOLIVE NAT.NEUTRO CXA 1 X 6 350ML
-        SHAMP.PALMOLIVE ILUMINADOR CAB.PR CXA 1 X 6 350ML
-        BISC. POPULAR COQUINHO 10X400G
-        BISC. POPULAR TOP DOCE 10X400G
-        BISC. POPULAR TOP SAL 10X400G
-        BISC. CREAM CRACKER 20X400G
-        BISC. ROSQ. CHOCOLATE 10X400G
-        BISC. MINI CRACKER 10X400G
-        BISC. MINI MAISENA 10X400G
-        BISC. MINI MARIA 10X400G
-        MACARRAO PARAFUSO VITAMASSA 12 X 500G
-        SALG. TOBOGA QUEIJO 50X30G
-        START LIMPA CER. AZULEJOS AZULIM LAVAND
-        ALVEJANTE BRILUX MULTI 3X1
-        LEITE EM PO NINHO INSTANTANEO
-        ACHOC. TODDYNHO CHOC. UHT
-        CREME DENTAL COLGATE M.P.A
-        AGUA SANITARIA IGUAL
-        SABAO LIQ. OMO MULTIACAO DOYP
-        SABAO LIQ. BRILUX T.ACAO
-        CERA POLITRIZ INCOLOR EMULSIONADA
-        SABAO ARCOVERDE GLICERINADO LIMAO
-        LEITE UHT BETANIA DESNATADO
-        LEITE EM PO CAMPONESA INTEGRAL
-        NESCAU 2.0 ACTIGEN-E NESTLE
-        PAPEL HIGIENICO LEVE NEUTRO 60MT
-        PAPEL HIGIENICO LEVE NEUTRO 30MT
-        BISC VITARELLA C.CRACKER TRADICIONAL
-        MARGARINA VEG. PRIMOR COMUM
-        MARGARINA VEG. DELICIA CREMOSA LIGHT
-        BISC.FORTALEZA MARIA CXA 1 X 20 400G
-        BISC.FORTALEZA CREAM CRACKER CXA 1 X 20 400G
-        SAB.EVEN CHA VERDE/LIMAO EMB 1 X 12 90G
-        SAB.EVEN EXTRATO FLORES PCT 1 X 12 90G
-        SAB.EVEN PITANGA/ACEROLA EMB 1 X 12 90G
-        SAB.LUX BUQUE DOS SONHOS EMB 1 X 12 85G
-        SAB.PALMOLIVE SUAVE MANT.KARITE PCT 1 X 12 90G
-        SAB.PALMOLIVE SUAVE LEITE/ROSAS EMB 1 X 12 90G
-        SAB.PHEBO ODOR ROSAS PCT 1 X 12 90G
-        AMAC.ROUPA SONHO MAGIC CXA 1 X 6 2L
-        AMAC.ROUPA SONHO MAGIC CXA 1 X 12 500ML
-        DESINF.PINHO SOL CXA 4 X 3 500ML
-        REFR.PO TANG ABACAXI CXT 1 X 15 25G
-        REFR.PO TANG LARANJA CXT 1 X 15 25G
-        REFR.PO TANG MANGA CXT 1 X 15 25G
-        CR.DENTAL COLGATE TRIPLA A.ORIGINAL PCT 1 X 12 90G
-        REFR.PO TANG MARACUJA CXT 1 X 15 25G
-        REFR.PO TANG TANGERINA CXT 1 X 15 25G
-        REFR.PO TANG UVA CXT 1 X 15 25G
-        DET.LIQ.YPE MACA CXA 1 X 24 500ML
-        DET.LIQ.YPE NEUTRO CXA 1 X 24 500ML
-        DET.PO BEM TE VI TRAD.S.PLAST. FDO 1 X 26 500G
-        DES.ALMA FLORES SPRAY PCT 1 X 12 90ML
-        DES.ALMA FLORES SPRAY C.BRANCAS CXA 1 X 12 90ML
-        DES.SENADOR SPRAY SEDUCTION CXA 1 X 12 90ML
-        DES.SENADOR SPRAY CLASSIC CXA 1 X 12 90ML
-        FARINHA TRIGO ROSA BRANCA C/FERM. FDO 1 X 10 1KG
-        FARINHA TRIGO ROSA BRANCA TIPO 1 FDO 1 X 10 1KG
-        SHAMP.SEDA BRILHO E MOVIMENTO UND 1 X 1 325ML
-        SHAMP.SEDA HIDRATACAO E LEVEZA UND 1 X 1 325ML
-        SHAMP.SEDA PRETOS LUMINOSOS EMB 1 X 3 325ML
-        CAFE STA.CLARA DESCAFEINADO VACUO FDO 1 X 20 250G
-        LEITE EM PO INTEGRAL CAMPONESA 200 GRS CXA.C/50X1
-        SUCO DAFRUTA CONCENT.CAJU PET CXA 1 X 12 500ML
-        DETERGENTE YPE COCO
-
+        humano e normalize os nomes para uma forma padrão, seja eles produtos, utensilíos ou qualquer outra coisa. Leve em consideração que 
+        esse texto está sendo retirado do cliente do estabelecimento {supermarket_name} leve isso em consideração para corrigir da melhor
+        forma possível. Segue o texto para ser corrigido:
 
         Texto:
 
         "{prompt}"
 
         Mantenha o significado original do texto e corrija apenas os erros de escrita e gramática. Por exemplo, "quero um cafezinho" 
-        deve ser corrigido para "Quero um CAFE STA.CLARA DESCAFEINADO VACUO FDO 1 X 20 250G", "Tem leitinho" para "Tem LEITE EM PO INTEGRAL CAMPONESA 200 GRS CXA.C/50X1 PCT",
-        "Refrigerante" para "REFRIG. GUARANA ANTARCT PET", "Quero pasta" para "Quero CR.DENTAL COLGATE TRIPLA A.ORIGINAL PCT 1 X 12 90G", 
-        "Quanto custa o biscoito e o sabao" para "Quanto custa o BISCOITO POPULAR MAIZENA DOCE 10X400G e o SABAO EM PO BRILHANTE MULTI TECIDOS"
-        "Aendo figa localezado os tomate e a cebole" para "Aonde fica localizado os Tomates e a Cebola", "Vocês te jel, deterge e saco" para "Vocês têm GEL FIXADOR STYLO VITAL AMARELO, DETERGENTE YPE COCO e SUCO DAFRUTA CONCENT.CAJU PET CXA 1 X 12 500ML"
-        Preste bastante atenção na lista e aos minimos detalhes dela e do texto, perceba que alguns produtos estão abrevidados como "REFRIG." leve isso em consideração
-        antes de fazer a correção modificação do prompt. Faça isso para qualquer palavra minimamente parecida com as da lista acima.
-        Seja o mais direto possível, sem acrescentar informações adicionais. 
+        deve ser corrigido para "Quero um cafe", "Que dea é heij" para "Que dia é hoje", "Que horas se" para "Que horas são",
+        "Sarveti" para "Sorvete", "Seai" para "Saia", preste bastante atençaão para as nuances do texto, identifique e corrija os erros
+        presente nele. Outros exemplos de possíveis correções: 
+        "Quanto custa o bisc e o sab" para "Quanto custa o biscotio e o sabão" ou "Quanto custa o biscotio e o sabonete"
+        "Aendo figa localezado os tomate e a cebole" para "Aonde fica localizado os Tomates e a Cebola", "Vocês te jel, deterge e saco" para "Vocês têm gel, detergente e suco"
+        Preste bastante atenção aos minimos detalhes do texto, perceba que alguns nomes podem está completamente incorretos, abreviados ou incompletos como "refrig.", "q h o mercado abre" que teria como correção "que horas o mercado abre" 
+        leve isso em consideração antes de fazer a correção do texto. Faça isso para qualquer palavra minimamente errada. Porém, não adicione texto algum ou produtos
+        que não tem no texto. Seja o mais direto possível, sem acrescentar informações adicionais. 
 
         Regras de Retorno:
 
-        Caso o texto não contenha nenhum produto ou seja, o texto disponibilizado é algo totalmente diferente aos produtos acima, como por exemplo,
-        "Ole, como você está?", "Quera saber que horas o mercado abre?", "Como é o seu nome", "Qual o estado do mercado" ou "Como funciona o mercado" 
+        Caso o texto não contenha nenhum produto ou seja, o texto disponibilizado é algo totalmente diferente a produtos que possam ser vendidos no {supermarket_name}, como por exemplo,
+        "Ole, como você está?", "Quera saber que horas o mercado facha?", "Como é o seu nome", "Qual o estado do mercado" ou "Como funciona o mercado" 
         corrija apenas os erros gramaticais e retorne o texto.
     """
     # In case the product is not in the list, show the message "Produto não está disponível!"
@@ -361,7 +376,11 @@ def pre_process_prompt_grammatical(prompt):
     return pre_processed_prompt.text
 
 def pre_process_prompt(prompt):
-    fix_prompt = f"""
+    
+    fix_prompt_v1 = pre_process_prompt_grammatical(prompt)
+    print(f"FIXED 1 {fix_prompt_v1}")
+    
+    fix_prompt_v2 = f"""
         Corrija os erros gramaticais e ortográficos no seguinte texto para que ele seja compreensível para um leitor 
         humano e normalize os nomes dos produtos para a forma padrão, segue uma lista de produtos exemplo:
 
@@ -476,7 +495,7 @@ def pre_process_prompt(prompt):
 
         Texto:
 
-        "{prompt}"
+        "{fix_prompt_v1}"
 
         Mantenha o significado original do texto e corrija apenas os erros de escrita e gramática. Por exemplo, "quero um cafezinho" 
         deve ser corrigido para "Quero um CAFE STA.CLARA DESCAFEINADO VACUO FDO 1 X 20 250G", "Tem leitinho" para "Tem LEITE EM PO INTEGRAL CAMPONESA 200 GRS CXA.C/50X1 PCT",
@@ -486,7 +505,7 @@ def pre_process_prompt(prompt):
         Preste bastante atenção na lista e aos minimos detalhes dela e do texto, perceba que alguns produtos estão abrevidados como "REFRIG." leve isso em consideração
         antes de fazer a correção modificação do prompt. Faça isso para qualquer palavra minimamente parecida com as da lista acima.
         Seja o mais direto possível, sem acrescentar informações adicionais. Coloque os produtos separados por virgula e dentro de colchetes independete da forma que eles estão
-        por exemplo, "Quanto é o [AMAC.ROUPA SONHO MAGIC CXA 1 X 12 500ML, DESINF.PINHO SOL CXA 4 X 3 500ML]", 
+        por exemplo, "Quanto é o [AMAC.ROUPA SONHO MAGIC CXA 1 X 12 500ML, DESINF.PINHO SOL CXA 4 X 3 500ML]",         
         "Quais desses produtos vocês tem disponível? [REFR.PO TANG UVA CXT 1 X 15 25G, DET.LIQ.YPE MACA CXA 1 X 24 500ML, DET.LIQ.YPE NEUTRO CXA 1 X 24 500ML, DET.PO BEM TE VI TRAD.S.PLAST. FDO 1 X 26 500, DES.ALMA FLORES SPRAY PCT 1 X 12 90ML]" coloque exatamente dessa forma o texto. 
         Não precisa colocar nenhuma pontuação o texto sempre será nesse formato, quando tiver mais de um produto separe eles com virgulas e os coloque dentro de colchetes.
 
@@ -498,7 +517,16 @@ def pre_process_prompt(prompt):
         preste bastante atenção ao texto recebido pelo usuário, conforme disse caso o texto seja aleátorio ou seja, não tenha o nome de algum produto ou
         algo parecido nele retorne apenas "Texto RA"
     """
+    
+    ### ELE ESTÁ MUDANDO MUITOS NOMES PARA REFRIG PRO ALGUM MOTIVO
+    #Posso ajudar em algo mais? que hras i mercqwd fecea
+    # FIXED 1 Que horas o mercado fecha? 
 
+    # Que horas o [REFRIG. GUARANA ANTARCT PET] fecha? 
+
+    # ['REFRIG. GUARANA ANTARCT PET']
+    # Considere também que Guaraná é sinônimo de Refrigerante, ou seja, caso o usuário digite que quer Guaraná considere que ele quer refrigerante.
+    
     # Caso tenho um nome que não pareça com algo da lista, por exemplo, "Sandália", "Ração" ou algo do tipo, corrija o texto para o mais proximo possível de um produto normal
     # exemplo, "Raceo de cachorro" para "Ração de cachorro" ou "Pipoeq" para "Pipoca" são alguns exemplos que quero que você corrija quando aparecer
 
@@ -506,7 +534,7 @@ def pre_process_prompt(prompt):
 
     # In case the product is not in the list, show the message "Produto não está disponível!"
     
-    pre_processed_prompt = model_2.generate_content(fix_prompt)
+    pre_processed_prompt = model_2.generate_content(fix_prompt_v2)
 
     # Problema agora é identificar mais de um produto :)
 
@@ -582,11 +610,11 @@ def find_similarity_products(prompt, embeddings_products=None):
         prompt = fix_response
         
         print(prompt)
-        # conversation_history.append(prompt)
-        global index_dict 
-        index_dict += 1
-        name = f"Question_{index_dict}"
-        conversation_history[name] = prompt
+        
+        # global index_dict 
+        # index_dict += 1
+        # name = f"Question_{index_dict}"
+        # conversation_history[name] = prompt
         
         new_prompt = prompt.lower()
 
@@ -607,8 +635,11 @@ def find_similarity_products(prompt, embeddings_products=None):
 
             pre_processed_prompt_products_list = [product.strip() for product in product_string.split(',')]
 
-            print(pre_processed_prompt_products_list)
-
+        print("PRE_PROCESSED_PROMPT_PRODUCT: ", pre_processed_prompt_products_list)
+        # PRE_PROCESSED_PROMPT_PRODUCT:  ['DES.ALMA FLORES SPRAY PCT 1 X 12 90ML', 'DES.ALMA FLORES SPRAY C.BRANCAS CXA 1 X 12 90ML', 'DES.SENADOR SPRAY SEDUCTION CXA 1 X 12 90ML', 'DES.SENADOR SPRAY CLASSIC CXA 1 X 12 90ML']
+        
+        generate_synonymus(pre_processed_prompt_products_list)
+        
         if (new_prompt not in ['Produto NA \n', 'Texto RA \n']):
 
             contains_a_product = True
@@ -665,159 +696,316 @@ def generate_and_search(prompt):
 
 # print(f"Produtos similares a '{similarities['Nome']}")
 
-def user_interaction():
+# def user_interaction():
 
-    global dict_of_client_products
-    global products_list_after_user_input
+    # global dict_of_client_products
+    # global products_list_after_user_input
     
-    user_prompt = str(input("Olá, em que posso lhe ajudar hoje? "))
+    # user_prompt = str(input("Olá, em que posso lhe ajudar hoje? "))
 
-    # falar
+    # # falar
 
-    find_product = generate_and_search(user_prompt)
+    # find_product = generate_and_search(user_prompt)
 
-    # print(process_prompt(user_prompt))
+    # # print(process_prompt(user_prompt))
 
-    # print(f"TYPE: {type(find_product)}")
+    # # print(f"TYPE: {type(find_product)}")
 
-    # print(find_product.iloc[0])
+    # # print(find_product.iloc[0])
 
-    # Verificar se é um produto
-    is_product = isinstance(find_product, pd.DataFrame)
+    # # Verificar se é um produto
+    # is_product = isinstance(find_product, pd.DataFrame)
 
-    if is_product:
-        count_row = find_product.shape[0]
-        print(count_row)
-        # if count_row > 1:
-        if contains_a_product:
-            # for index, row in find_product.iteritems():
-            for index, row in find_product.iterrows():
-                # print(f"ID: {index}, Nome: {row['Nome']}, Secao: {row['Secao']}, Disponivel: {row['Disponivel']}")
-                dict_of_client_products = {
-                    "Name": row['Nome'],
-                    "Section": row['Secao'],
-                    "Price": row['PrecoVenda'],
-                    "Available": row['Disponivel'],
-                }            
-                products_list_after_user_input.append(dict_of_client_products)
+    # if is_product:
+    #     count_row = find_product.shape[0]
+    #     print(count_row)
+    #     # if count_row > 1:
+    #     if contains_a_product:
+    #         # for index, row in find_product.iteritems():
+    #         for index, row in find_product.iterrows():
+    #             # print(f"ID: {index}, Nome: {row['Nome']}, Secao: {row['Secao']}, Disponivel: {row['Disponivel']}")
+    #             dict_of_client_products = {
+    #                 "Name": row['Nome'],
+    #                 "Section": row['Secao'],
+    #                 "Price": row['PrecoVenda'],
+    #                 "Available": row['Disponivel'],
+    #             }            
+    #             products_list_after_user_input.append(dict_of_client_products)
                 
 
 
-            detailed_prompt = detailed_prompt = "Gerar uma descrição detalhada para um chatbot de e-commerce dos produtos que se encontram nessa lista: "
+    #         detailed_prompt = detailed_prompt = "Gerar uma descrição detalhada para um chatbot de e-commerce dos produtos que se encontram nessa lista: "
             
-            for product in products_list_after_user_input: 
-                detailed_prompt += f"Nome do produto: {product['Name']}\n"
-                detailed_prompt += f"Preço do produto: {product['Price']}\n"
-                detailed_prompt += f"Produto está disponível (False=Não, True=Sim): {product['Available']}\n\n"
+    #         for product in products_list_after_user_input: 
+    #             detailed_prompt += f"Nome do produto: {product['Name']}\n"
+    #             detailed_prompt += f"Preço do produto: {product['Price']}\n"
+    #             detailed_prompt += f"Produto está disponível (False=Não, True=Sim): {product['Available']}\n\n"
             
-            # detailed_prompt += ""
+    #         # detailed_prompt += ""
             
-        # print(f"DICT OF PRODUCT {dict_of_client_products}")
-        # else:
+    #     # print(f"DICT OF PRODUCT {dict_of_client_products}")
+    #     # else:
             
-        #     ## I'M REWRINTING THE PRODUCT ON THE Name_1 space...
-        #     dict_of_client_products["Name_1"] = find_product.iloc[0]['Nome']
-        #     dict_of_client_products["Section_1"] = find_product.iloc[0]['Secao']
-        #     dict_of_client_products["Available_1"] = find_product.iloc[0]['Disponivel']
+    #     #     ## I'M REWRINTING THE PRODUCT ON THE Name_1 space...
+    #     #     dict_of_client_products["Name_1"] = find_product.iloc[0]['Nome']
+    #     #     dict_of_client_products["Section_1"] = find_product.iloc[0]['Secao']
+    #     #     dict_of_client_products["Available_1"] = find_product.iloc[0]['Disponivel']
             
-        #     detailed_prompt = f"""
-        #     Gerar uma descrição detalhada do produto {find_product['Nome']} para um chatbot de e-commerce
-        #     """
-        print(f"LIST OF PRODUCTS {dict_of_client_products}")
-        generated_detailed_prompt = model_2.generate_content(detailed_prompt)
+    #     #     detailed_prompt = f"""
+    #     #     Gerar uma descrição detalhada do produto {find_product['Nome']} para um chatbot de e-commerce
+    #     #     """
+    #     print(f"LIST OF PRODUCTS {dict_of_client_products}")
+    #     generated_detailed_prompt = model_2.generate_content(detailed_prompt)
 
-        # print('DETAILED PROMPT: ' + generated_detailed_prompt.text)
+    #     # print('DETAILED PROMPT: ' + generated_detailed_prompt.text)
     
 
-        # if find_product['Disponivel'].item():
-        if find_product['Disponivel'].any():
-            answer_prompt = f"""Considerando que o cliente do nosso
-            mercado {supermarket_name} enviou a mensagem:
+    #     # if find_product['Disponivel'].item():
+    #     if find_product['Disponivel'].any():
+    #         answer_prompt = f"""Considerando que o cliente do nosso
+    #         mercado {supermarket_name} enviou a mensagem:
 
-            {pre_process_prompt_grammatical(user_prompt)} 
+    #         {pre_process_prompt_grammatical(user_prompt)} 
 
-            e os possíveis produtos que ele deseja são esses 
+    #         e os possíveis produtos que ele deseja são esses 
             
-            """
-            # for product in pre_processed_prompt_products_list: 
-            for product in products_list_after_user_input: 
-                answer_prompt += f"Nome do produto: {product['Name']}\n"
-                answer_prompt += f"Preço do produto: {product['Price']}\n"
-                answer_prompt += f"Seção do produto: {product['Section']}\n"
-                answer_prompt += f"Produto está disponível (False=Não, True=Sim): {product['Available']}\n\n"
+    #         """
+    #         # for product in pre_processed_prompt_products_list: 
+    #         for product in products_list_after_user_input: 
+    #             answer_prompt += f"Nome do produto: {product['Name']}\n"
+    #             answer_prompt += f"Preço do produto: {product['Price']}\n"
+    #             answer_prompt += f"Seção do produto: {product['Section']}\n"
+    #             answer_prompt += f"Produto está disponível (False=Não, True=Sim): {product['Available']}\n\n"
 
-            # {pre_processed_prompt_products_list}.
-            answer_prompt += f"""
-            Considere também essa descrição detalhada dos produtos: 
+    #         # {pre_processed_prompt_products_list}.
+    #         answer_prompt += f"""
+    #         Considere também essa descrição detalhada dos produtos: 
 
-            {generated_detailed_prompt.text} 
+    #         {generated_detailed_prompt.text} 
 
-            utilize-la como um guia para melhorar a resposta para o cliente
-            e responda com uma frase simples e útil levando em conta todos os produtos e informações disponibilizadas. Não acrescente mais nenhum texto ou caracter desnecessário 
-            apenas a mensagem informando envolvendo algum detalhe do produto usando a descrição acima como guia e a seção que o
-            mesmo se encontra.
-            E por fim caso a mensagem do usuário: 
+    #         utilize-la como um guia para melhorar a resposta para o cliente
+    #         e responda com uma frase simples e útil levando em conta todos os produtos e informações disponibilizadas. Não acrescente mais nenhum texto ou caracter desnecessário 
+    #         apenas a mensagem informando envolvendo algum detalhe do produto usando a descrição acima como guia e a seção que o
+    #         mesmo se encontra.
             
-            {pre_process_prompt_grammatical(user_prompt)} 
+    #         E por fim caso a mensagem do usuário: 
             
-            tenha alguma palavra que pareça com lista, por exemplo,
-            'list', liste, listo, listw, gere uma possível lista de compras de acordo 
-            com os produtos disponíveis no mercado que são esses, {products_available}. Repetindo, caso se e somente se
-            a mensagem do usuário contenha alguma palavra que remeta a lista, caso não tenha
-            não gere nenhuma lista apenas a mensagem principal.
+    #         {pre_process_prompt_grammatical(user_prompt)} 
+            
+    #         tenha alguma palavra que pareça com lista, por exemplo,
+    #         'list', liste, listo, listw, gere uma possível lista de compras de acordo 
+    #         com os produtos disponíveis no mercado que são esses, {products_available}. Repetindo, caso se e somente se
+    #         a mensagem do usuário contenha alguma palavra que remeta a lista, caso não tenha
+    #         não gere nenhuma lista apenas a mensagem principal.
 
-            """
+    #         """
             
-        else:
-            answer_prompt = f"""Considerando que o cliente do nosso 
-            mercado {supermarket_name} quer saber {pre_process_prompt_grammatical(user_prompt)} 
-            que o produto que ele deseja está atualmente indisponível, 
-            responda com uma frase simples e útil ao cliente.
-            Considere esse texto {generated_detailed_prompt.text} como exemplo e melhore a sua resposta.
-            E por fim caso a mensagem do usuário: 
+    #     else:
+    #         answer_prompt = f"""Considerando que o cliente do nosso 
+    #         mercado {supermarket_name} quer saber {pre_process_prompt_grammatical(user_prompt)} 
+    #         que o produto que ele deseja está atualmente indisponível, 
+    #         responda com uma frase simples e útil ao cliente.
+    #         Considere esse texto {generated_detailed_prompt.text} como exemplo e melhore a sua resposta.
+    #         E por fim caso a mensagem do usuário: 
             
-            {pre_process_prompt_grammatical(user_prompt)} 
+    #         {pre_process_prompt_grammatical(user_prompt)} 
             
-            tenha alguma palavra que pareça com lista, por exemplo,
-            'list', liste, listo, listw, gere uma possível lista de compras de acordo 
-            com os produtos disponíveis no mercado que são esses, {products_available}. Repetindo, caso se e somente se
-            a mensagem do usuário contenha alguma palavra que remeta a lista, caso não tenha
-            não gere nenhuma lista apenas a mensagem principal,
-            leve em consideração o produto que ele queria que estava indisponível e gere
-            uma lista que substitua o produto da melhor forma possível explicando o porque da lista"""
+    #         tenha alguma palavra que pareça com lista, por exemplo,
+    #         'list', liste, listo, listw, gere uma possível lista de compras de acordo 
+    #         com os produtos disponíveis no mercado que são esses, {products_available}. Repetindo, caso se e somente se
+    #         a mensagem do usuário contenha alguma palavra que remeta a lista, caso não tenha
+    #         não gere nenhuma lista apenas a mensagem principal,
+    #         leve em consideração o produto que ele queria que estava indisponível e gere
+    #         uma lista que substitua o produto da melhor forma possível explicando o porque da lista"""
 
-    else:
-        answer_prompt = f"""Considerando que o cliente do nosso 
-            mercado {supermarket_name} quer saber {pre_process_prompt_grammatical(user_prompt)} 
-            responda com uma frase simples e útil ao cliente. 
-            E por fim gere alguma evento ou ação para o cliente fazer
-            no mercado se vier a o caso, por exemplo, "Queria saber que horas o
-            mercado abre?", resposta, "O mercado abre as 7h e hoje temos uma grande promoção"
-            """
+    # else:
+    #     answer_prompt = f"""Considerando que o cliente do nosso 
+    #         mercado {supermarket_name} quer saber {pre_process_prompt_grammatical(user_prompt)} 
+    #         responda com uma frase simples e útil ao cliente. 
+    #         E por fim gere alguma evento ou ação para o cliente fazer
+    #         no mercado se vier a o caso, por exemplo, "Queria saber que horas o
+    #         mercado abre?", resposta, "O mercado abre as 7h e hoje temos uma grande promoção"
+    #         """
         
-    response = model_2.generate_content(answer_prompt)
+    # response = model_2.generate_content(answer_prompt)
 
-    global index_dict_answer
+    # # global index_dict_answer
 
-    index_dict_answer = index_dict_answer + 1
-    name = f"Answer_{index_dict_answer}"
+    # # index_dict_answer = index_dict_answer + 1
+    # # name = f"Answer_{index_dict_answer}"
 
-    conversation_history[name] = response.text
+    # # conversation_history[name] = response.text
 
+    # sql = """INSERT INTO conversation_history (
+    #         user_input,
+    #         chatbot_response)
+    #         VALUES (%s, %s) RETURNING *"""
+        
+    # try:
+    #     with conn.cursor() as cur:
+    #         cur.execute(sql, (pre_process_prompt_grammatical(user_prompt), response.text))
+    #         conn.commit()
+            
+    # except (Exception, psycopg2.DatabaseError) as error:
+    #     print(error)
+            
+    # # finally:
+    # #     conn.close()
+            
+    # print(response.text)
 
-    print(response.text)
+    # while True:
+    #     # user_prompt = str(input("Posso ajudar em algo mais? "))
 
-    while True:
-        user_prompt = str(input("Posso ajudar em algo mais? "))
+    #     if process_prompt(pre_process_prompt_grammatical(user_prompt)):
+    #         conn.close()
+    #         break
 
-        if process_prompt(pre_process_prompt_grammatical(user_prompt)):
-            break
-
-        find_product = generate_and_search(user_prompt)
+    #     # find_product = generate_and_search(user_prompt)
     
-        is_product = isinstance(find_product, pd.DataFrame)
+    #     is_product = isinstance(find_product, pd.DataFrame)
 
     
+    #     if is_product:
+    #         count_row = find_product.shape[0]
+    #         print(count_row)
+    #         # if count_row > 1:
+    #         if contains_a_product:
+    #             # for index, row in find_product.iteritems():
+    #             for index, row in find_product.iterrows():
+    #                 # print(f"ID: {index}, Nome: {row['Nome']}, Secao: {row['Secao']}, Disponivel: {row['Disponivel']}")
+    #                 dict_of_client_products = {
+    #                     "Name": row['Nome'],
+    #                     "Section": row['Secao'],
+    #                     "Price": row['PrecoVenda'],
+    #                     "Available": row['Disponivel'],
+    #                 }            
+    #                 products_list_after_user_input.append(dict_of_client_products)
+                    
+
+
+    #             detailed_prompt = detailed_prompt = "Gerar uma descrição detalhada para um chatbot de e-commerce dos produtos que se encontram nessa lista: "
+                    
+    #             for product in products_list_after_user_input: 
+    #                 detailed_prompt += f"Nome do produto: {product['Name']}\n"
+    #                 detailed_prompt += f"Preço do produto: {product['Price']}\n"
+    #                 detailed_prompt += f"Produto está disponível (False=Não, True=Sim): {product['Available']}\n\n"
+             
+
+    #         generated_detailed_prompt = model_2.generate_content(detailed_prompt)
+
+    #         # if find_product['Disponivel'].item():
+    #         if find_product['Disponivel'].any():
+    #             answer_prompt = f"""Considerando que o cliente do nosso
+    #             mercado {supermarket_name} enviou a mensagem:
+
+    #             {pre_process_prompt_grammatical(user_prompt)} 
+
+    #             e os possíveis produtos que ele deseja são esses 
+                
+    #             """
+    #             # for product in pre_processed_prompt_products_list: 
+    #             for product in products_list_after_user_input: 
+    #                 answer_prompt += f"Nome do produto: {product['Name']}\n"
+    #                 answer_prompt += f"Preço do produto: {product['Price']}\n"
+    #                 answer_prompt += f"Seção do produto: {product['Section']}\n"
+    #                 answer_prompt += f"Produto está disponível (False=Não, True=Sim): {product['Available']}\n\n"
+
+    #             # {pre_processed_prompt_products_list}.
+    #             answer_prompt += f"""
+    #             Considere também essa descrição detalhada dos produtos: 
+
+    #             {generated_detailed_prompt.text} 
+
+    #             utilize-la como um guia para melhorar a resposta para o cliente
+    #             e responda com uma frase simples e útil levando em conta todos os produtos e informações disponibilizadas. Não acrescente mais nenhum texto ou caracter desnecessário 
+    #             apenas a mensagem informando envolvendo algum detalhe do produto usando a descrição acima como guia e a seção que o
+    #             mesmo se encontra.
+    #             E por fim caso a mensagem do usuário: 
+                
+    #             {pre_process_prompt_grammatical(user_prompt)} 
+                
+    #             tenha alguma palavra que pareça com lista, por exemplo,
+    #             'list', liste, listo, listw, gere uma possível lista de compras de acordo 
+    #             com os produtos disponíveis no mercado que são esses, {products_available}. Repetindo, caso se e somente se
+    #             a mensagem do usuário contenha alguma palavra que remeta a lista, caso não tenha
+    #             não gere nenhuma lista apenas a mensagem principal.
+
+    #             """
+                
+    #         else:
+    #             answer_prompt = f"""Considerando que o cliente do nosso 
+    #             mercado {supermarket_name} quer saber {pre_process_prompt_grammatical(user_prompt)} 
+    #             que o produto que ele deseja está atualmente indisponível, 
+    #             responda com uma frase simples e útil ao cliente.
+    #             Considere esse texto {generated_detailed_prompt.text} como exemplo e melhore a sua resposta.
+    #             E por fim caso a mensagem do usuário: 
+                
+    #             {pre_process_prompt_grammatical(user_prompt)} 
+                
+    #             tenha alguma palavra que pareça com lista, por exemplo,
+    #             'list', liste, listo, listw, gere uma possível lista de compras de acordo 
+    #             com os produtos disponíveis no mercado que são esses, {products_available}. Repetindo, caso se e somente se
+    #             a mensagem do usuário contenha alguma palavra que remeta a lista, caso não tenha
+    #             não gere nenhuma lista apenas a mensagem principal,
+    #             leve em consideração o produto que ele queria que estava indisponível e gere
+    #             uma lista que substitua o produto da melhor forma possível explicando o porque da lista"""
+
+    #     else:
+    #         answer_prompt = f"""Considerando que o cliente do nosso 
+    #             mercado {supermarket_name} quer saber {pre_process_prompt_grammatical(user_prompt)} 
+    #             responda com uma frase simples e útil ao cliente. 
+    #             E por fim gere alguma evento ou ação para o cliente fazer
+    #             no mercado se vier a o caso, por exemplo, "Queria saber que horas o
+    #             mercado abre?", resposta, "O mercado abre as 7h e hoje temos uma grande promoção"
+    #             """
+        
+
+    #     response = model_2.generate_content(answer_prompt)
+
+    #     # print(f"ANSWER PROMPT {answer_prompt}")
+
+    #     # print(response.text)
+
+    #     # index_dict_answer = index_dict_answer + 1
+    #     # name = f"Answer_{index_dict_answer}"
+
+    #     # conversation_history[name] = response.text
+    #     # print(f"\nCONVERSATION HISTORY - {conversation_history}\n")
+        
+    #     sql = """INSERT INTO conversation_history (
+    #         user_input,
+    #         chatbot_response)
+    #         VALUES (%s, %s) RETURNING *"""
+        
+    #     try:
+    #         with conn.cursor() as cur:
+    #             cur.execute(sql, (pre_process_prompt_grammatical(user_prompt), response.text))
+    #         conn.commit()
+            
+    #     except (Exception, psycopg2.DatabaseError) as error:
+    #         print(error)
+            
+    #     # finally:
+    #     #     conn.close()           
+            
+
+# user_interaction()
+
+def chatbot_response(user_prompt):
+    
+    global dict_of_client_products
+    global products_list_after_user_input
+
+    find_product = generate_and_search(user_prompt)
+
+    is_product = isinstance(find_product, pd.DataFrame)
+    
+    if process_prompt(user_prompt):
+        return
+
+
+    else: 
         if is_product:
             count_row = find_product.shape[0]
             print(count_row)
@@ -842,9 +1030,18 @@ def user_interaction():
                     detailed_prompt += f"Nome do produto: {product['Name']}\n"
                     detailed_prompt += f"Preço do produto: {product['Price']}\n"
                     detailed_prompt += f"Produto está disponível (False=Não, True=Sim): {product['Available']}\n\n"
-             
+                
+            # Generate a text stream
+            # By default, the model returns a response after 
+            # completing the entire text generation process. 
+            # You can achieve faster interactions by not 
+            # waiting for the entire result, and instead 
+            # use streaming to handle partial results.
 
-            generated_detailed_prompt = model_2.generate_content(detailed_prompt)
+            # The following example shows how to implement streaming 
+            # using the streamGenerateContent method to 
+            # generate text from a text-only input prompt.
+            generated_detailed_prompt = model_2.generate_content(detailed_prompt, stream=True)
 
             # if find_product['Disponivel'].item():
             if find_product['Disponivel'].any():
@@ -873,6 +1070,15 @@ def user_interaction():
                 e responda com uma frase simples e útil levando em conta todos os produtos e informações disponibilizadas. Não acrescente mais nenhum texto ou caracter desnecessário 
                 apenas a mensagem informando envolvendo algum detalhe do produto usando a descrição acima como guia e a seção que o
                 mesmo se encontra.
+                
+                Além dessas informações sobre o {supermarket_name}:
+                """
+                
+                for info in info_about_the_business:
+                    print(f"INFO: {info}")
+                    answer_prompt+=f"{info}\n"
+                
+                answer_prompt+=f"""
                 E por fim caso a mensagem do usuário: 
                 
                 {pre_process_prompt_grammatical(user_prompt)} 
@@ -910,19 +1116,109 @@ def user_interaction():
                 E por fim gere alguma evento ou ação para o cliente fazer
                 no mercado se vier a o caso, por exemplo, "Queria saber que horas o
                 mercado abre?", resposta, "O mercado abre as 7h e hoje temos uma grande promoção"
+                
+                Leve em consideração essas informações sobre o {supermarket_name}:
                 """
-        
+             
+            for info in info_about_the_business:
+                answer_prompt+=f"{info}\n"
+            
 
         response = model_2.generate_content(answer_prompt)
 
         print(f"ANSWER PROMPT {answer_prompt}")
 
-        print(response.text)
+        # print(response.text)
 
-        index_dict_answer = index_dict_answer + 1
-        name = f"Answer_{index_dict_answer}"
+        # index_dict_answer = index_dict_answer + 1
+        # name = f"Answer_{index_dict_answer}"
 
-        conversation_history[name] = response.text
-        print(f"\nCONVERSATION HISTORY - {conversation_history}\n")
+        # conversation_history[name] = response.text
+        # print(f"\nCONVERSATION HISTORY - {conversation_history}\n")
+        
+        sql = """INSERT INTO conversation_history (
+            user_input,
+            chatbot_response)
+            VALUES (%s, %s) RETURNING *"""
+        
+        try:
+            with conn.cursor() as cur:
+                cur.execute(sql, (pre_process_prompt_grammatical(user_prompt), response.text))
+            conn.commit()
+            
+        except (Exception, psycopg2.DatabaseError) as error:
+            print(error)
+            
+        return f"'{response.text}'"
 
-user_interaction()
+
+# def send_message():
+#     # user_input = user_entry.get()
+#     # chat_window.insert(tk.END, f"Você: {user_input}\n")
+#     # user_entry.delete(0, tk.END)
+    
+#     # # Get answer from chatbot
+#     # response = chatbot_response(user_input)
+#     # chat_window.insert(tk.END, f"{response}\n")
+
+#     user_input = user_entry.get()
+#     chat_window.insert(tk.END, f"Você: ", "user_bold")
+#     chat_window.insert(tk.END, f"{user_input}\n\n", "user")
+#     user_entry.delete(0, tk.END)
+    
+#     chat_window.insert(tk.END, f"Chatbot está pensando...\n\n", "bot_bold")
+    
+#     print(f"USER INPUT: {user_input}\n")
+    
+#     window.after(100, generate_response, user_input)
+    
+
+# def generate_response(user_input):
+#     chat_window_content = chat_window.get("1.0", tk.END)
+#     chat_window_content = chat_window_content.replace("Chatbot está pensando...\n\n", "") 
+#     chat_window.delete("1.0", tk.END)
+#     chat_window.insert(tk.END, chat_window_content)
+
+#     response = chatbot_response(user_input)
+
+#     chat_window.insert(tk.END, f"{chatbot_name}: ", "bot_bold")
+#     chat_window.insert(tk.END, f"{response}\n\n", "bot")
+    
+# # creating the main window
+# window = tk.Tk()
+# window.title(f"{supermarket_name}")
+
+# chat_window = scrolledtext.ScrolledText(window, wrap=tk.WORD, width=50, height=20)
+# chat_window.pack(padx=10, pady=10)
+
+# # Defining the tags for formatation
+# chat_window.tag_configure("user_bold", font=("Helvetica", 10, "bold"), justify="right", spacing3=10)
+# chat_window.tag_configure("user", justify="right", spacing3=10)
+# chat_window.tag_configure("bot_bold", font=("Helvetica", 10, "bold"), justify="left", spacing3=10)
+# chat_window.tag_configure("bot", justify="left", spacing3=10)
+
+# chat_window.insert(tk.END, f"{chatbot_name}: ", "bot_bold")
+# chat_window.insert(tk.END, f"Olá, me chamo {chatbot_name}. Em que posso lhe ajudar hoje?\n\n", "bot")
+
+# # Entrance of text for the user
+
+# user_entry = tk.Entry(window, width=50)
+# user_entry.pack(padx=10, pady=10)
+
+# # Button to send the message
+# send_button = tk.Button(window, text="Enviar", command=send_message)
+# send_button.pack(padx=10, pady=10)
+    
+# # Start the interface
+# window.mainloop()
+
+# # try:
+# #     with conn.cursor() as cur:
+# #         for record in data_tuples:
+# #             cur.execute(cur.mogrify(sql, record))
+
+# #     conn.commit()
+# # except (Exception, psycopg2.DatabaseError) as error:
+# #     print(error)
+# # finally:
+# #     conn.close()

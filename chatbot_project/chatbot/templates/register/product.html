@@ -1,0 +1,58 @@
+{% extends "../base/base.html" %}
+{% block content %}
+<form method="POST">
+    {% csrf_token %}
+    <div class="form-group">
+        <label for="productNameInput">Product Name</label>
+        <input type="text" class="form-control product" id="productNameInput" name="productNameInput" placeholder="Enter product name" list="productsSuggestions">
+        <datalist id="productsSuggestions">
+        </datalist> <!-- Hidden datalist for product suggestions -->
+    </div>
+    <div class="form-group">
+        <label for="productPriceInput">Product Section</label>
+        <input type="text" class="form-control section" id="productSectionInput" name="productSectionInput" placeholder="Enter product section">
+    </div>
+    <div class="form-group">
+        <label for="productPriceInput">Product Price</label>
+        <input type="number" class="form-control price" id="productPriceInput" name="productPriceInput" placeholder="Enter product price">
+    </div>
+    <div class="form-group">
+        <label for="productPriceInput">Product Metric Unity</label>
+        <input type="text" class="form-control metric_unity" id="productMetricUnityInput" name="productMetricUnityInput" placeholder="Enter product metric unity">
+    </div>
+    <div class="form-group">
+        <label for="productPriceInput">Product Available</label>
+        <input type="text" class="form-control isProductAvailable" id="productAvailableInput" name="productAvailableInput" placeholder="Enter product available (True = Yes | False = No)">
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const productNameInput = document.getElementById('productNameInput');
+        const productSuggestions = document.getElementById('productsSuggestions');
+
+        productNameInput.addEventListener('input', function() {
+            const query = productNameInput.value;
+            console.log(query);
+            if (query.length > 1) {
+                fetch(`http://127.0.0.1:8000/api/products/?search=${query}`)
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Data received: ', data)
+                        productSuggestions.innerHTML = '';
+                        data.forEach(product => {
+                            const option = document.createElement('option');
+                            option.value = product.nome;
+                            productSuggestions.appendChild(option);
+                            
+                        });
+                    }).catch(error => console.error('Error fetching product suggestions: ', error));
+            } else {
+                productSuggestions.innerHTML = 'TESTE'; // clear suggestions if input is less than 2 characters
+            }
+        });
+    });
+</script>
+{% endblock %}

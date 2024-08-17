@@ -17,6 +17,7 @@
                     ({{product.unidade_medida}})
                     ({{product.disponivel}})
                     ({{product.embeddings}})
+                    {% comment %} ({{% for embedding in product.embeddings|slice:":3" %%}{{ embedding }} {% if not forloop.last %}, {% endif %}{% endfor %}}) {% endcomment %}
                 </li>
             {% endfor %}
         </ul>

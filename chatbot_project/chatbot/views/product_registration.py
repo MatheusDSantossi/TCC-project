@@ -35,25 +35,39 @@ class ProductRegistration(View):
         
         products = Product.get_all_products()
         
+        # if Product.objects.filter(nome=productName).exists():
+        #     # If product is already on the database
+        #     return render(request, 'chatbot/index.html', {
+        #         'error_message': f"Product {productName} already exists!"
+        #     })
+        
         print("V1_PN: ", productName, product_section, price, metric_unity, available)
         
         # productName = Product.fix_product_name(productName)
         
         # print("V2_PN: ", productName, product_section, price, metric_unity, available)
         # THE RESULTS WERE REALLY BAD TO THE FIX OF PRODUCTS
-        
-        embeddings = Product.generate_emebed(productName)
-        
-        # print(embeddings)
-        
-        product = Product(nome=productName, secao_produto=product_section, preco_venda=price, unidade_medida=metric_unity, disponivel=available, embeddings=embeddings)
-        
-        # Product.objects.create(product.nome,)
-        product.save()
-        
-        print(Product.generate_synonimus(productName))
-        
-        # for product in products:
-        #     print(product.nome, product.preco_venda, product.secao_produto)
-        
+        if not Product.objects.filter(nome=productName).exists():
+            
+            embeddings = Product.generate_emebed(productName)
+            
+            # print(embeddings)
+            
+            product = Product(nome=productName, secao_produto=product_section, preco_venda=price, unidade_medida=metric_unity, disponivel=available, embeddings=embeddings)
+            
+            # Product.objects.create(product.nome,)
+            product.save()
+            
+            print(Product.generate_synonymous(productName))
+            
+            # for product in products:
+            #     print(product.nome, product.preco_venda, product.secao_produto)
+        else:
+            product_synonymous = Product.get_synonymus(productName)
+            print("SYNONYMOUS: ", product_synonymous)
+            if not product_synonymous:
+                Product.generate_synonymous(productName)
+            else:
+                print("PRODUCT ALREADY HAVE SYNONYMOUS: ", product_synonymous)
+            
         return redirect('index')

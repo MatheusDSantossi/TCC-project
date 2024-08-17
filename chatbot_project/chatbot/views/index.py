@@ -11,7 +11,6 @@ def index(request):
         user_input = request.POST.get('user_input')
         response = chatbot_response(user_input)
         
-        
                 
         return JsonResponse({'response': response})
     

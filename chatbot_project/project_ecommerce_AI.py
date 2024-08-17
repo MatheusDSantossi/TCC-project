@@ -46,11 +46,22 @@ genai.configure(api_key=GOOGLE_API_KEY)
 # response = model.generate_content(prompt, stream=True)
 generation_config = {
     "temperature": 0.4,
-    "candidate_count": 1,
 }
+    # "candidate_count": 1,
 
-model_2 = genai.GenerativeModel("gemini-1.5-flash",
+main_chatbot_model = genai.GenerativeModel("gemini-1.5-flash",
                                 generation_config=generation_config)
+
+chat = main_chatbot_model.start_chat(
+    history=[
+        {"role": "user", "parts": "Olá"},
+        {"role": "model", "parts": "É ótimo lhe conhecer. Como posso lhe ajudar?"}
+    ]    
+)
+
+generate_content_model = genai.GenerativeModel("gemini-1.5-flash", 
+                                               generation_config=generation_config)
+
 # model_2 = genai.GenerativeModel("gemini-1.0-pro",
 #                                 generation_config=generation_config)
 
@@ -158,12 +169,12 @@ products_list_after_user_input = []
 
 # # print(df)
 
-model = 'models/embedding-001'
+embed_model = 'models/embedding-001'
 
 #    content=f'O produto {title} é encontrado na {secao} com o preço de {preco_venda} reais possuindo a unidade de medida {unidade_medida}',  # Include the type of the product
 
 def embed_fn(title, secao="", preco_venda=0, unidade_medida=""):
-    return genai.embed_content(model=model,
+    return genai.embed_content(model=embed_model,
                                content=f'O produto {title}',  # I understood that this have to be the most alike the userp prompt
                                title=title,
                                task_type="RETRIEVAL_DOCUMENT")["embedding"]
@@ -229,15 +240,16 @@ for row in rows:
         "PrecoVenda": float(row[3]),
         "UnidadeMedida": row[4],
         "Disponivel": row[5],
-        "Embeddings": row[6]
+        "Embeddings": row[6],
+        "Synonymous": row[7],
     }
     products_list.append(products)
 
 products_df = pd.DataFrame(products_list)
 
-print(products_df)
+# print(products_df)
 
-# List of available products
+# List of available products (I can keep that in the DB as well)
 products_available = [p["Nome"] for p in products_df.to_dict(orient='records') if p['Disponivel']]
 
 def for_dividing_prompt_limit():
@@ -253,14 +265,20 @@ def for_dividing_prompt_limit():
         prompt+= products_list_2[i]
 
 # Generating synonymus using Gemini
-def generate_synonymus(product=None, product_list=None):
+def generate_synonymous(product=None, product_list=None):
     # global pre_processed_prompt_products_list
     
     if not product_list:
     
         new_product = pre_process_prompt_grammatical(product)
         
-        prompt = "Coloque todos os sinônimos possíveis para as palavras abaixo.\n"
+        prompt = """Coloque todos os sinônimos possíveis para as palavras abaixo. Leve em
+                    consideração que as palavras podem aparecer abreviadas como "INSET SBP AERO" que 
+                    significa "INSETICIDA SBP AEROSSOL" faça uma pesquisa aprofundada do que cada palavra
+                    pode significada estando abreviada ou não, considerando que muito provavelmente todas 
+                    elas são produtos de varejo encontrados em qualquer supermercado, pense nisso também quando
+                    for tentar identificar as palvras. Segue as palavras.
+        \n"""
         
         prompt+=new_product
         # products_list_2 = []
@@ -277,27 +295,50 @@ def generate_synonymus(product=None, product_list=None):
         
         # for i in range(max_prompt_size, len(products_list):
         
-        prompt += """\n\nRetorne como um dicionário, por exemplo: {'CAFE PILAO ALMOFADA': ['Expresso', 'Cappuccino', 'Mocha', 'Latte', 'Café da Manhã', 'Café Coado', 'Café em Grãos']}
-        lembre-se de abrir a chave { e fechar a mesma chave }
-        retorne apenas o diciónario sem nenhum texto adicional, ou seja, a sua resposta deve começar com uma { e terminar com o fechamento dela }. Adicione todos os possíveis sinônimos de cada palavra
+        prompt += """\n\nRetorne todos os produtos e sinônimos como um dicionário, por exemplo: {'CAFE PILAO ALMOFADA': ['Expresso', 'Cappuccino', 'Mocha', 'Latte', 'Café da Manhã', 'Café Coado', 'Café em Grãos']}
+        lembre-se de abrir a chave { e fechar a mesma chave } retorne apenas o diciónario sem nenhum texto adicional, 
+        ou seja, a sua resposta deve começar com uma { e terminar com o fechamento dela }. Adicione todos os possíveis sinônimos de cada palavra
         """ 
     else:
-        prompt = "Coloque todos os sinônimos possíveis para as palavras abaixo.\n"
+        prompt = """Coloque todos os sinônimos possíveis para as palavras abaixo. Leve em
+                    consideração que as palavras podem aparecer abreviadas como "INSET SBP AERO" que 
+                    significa "INSETICIDA SBP AEROSSOL" faça uma pesquisa aprofundada do que cada palavra
+                    pode significada estando abreviada ou não, considerando que muito provavelmente todas 
+                    elas são produtos de varejo encontrados em qualquer supermercado, pense nisso também quando
+                    for tentar identificar as palvras. Segue as palavras.
+                \n"""
         
         for product in products_list:
             prompt+=product
         
-        prompt += """\n\nRetorne como um dicionário, por exemplo: {'CAFE PILAO ALMOFADA': ['Expresso', 'Cappuccino', 'Mocha', 'Latte', 'Café da Manhã', 'Café Coado', 'Café em Grãos']}
-        lembre-se de abrir a chave { e fechar a mesma chave }
-        retorne apenas o diciónario sem nenhum texto adicional, ou seja, a sua resposta deve começar com uma { e terminar com o fechamento dela }. Adicione todos os possíveis sinônimos de cada palavra
+        prompt += """\n\nRetorne todos os produtos e sinônimos como um dicionário, por exemplo: {'CAFE PILAO ALMOFADA': ['Expresso', 'Cappuccino', 'Mocha', 'Latte', 'Café da Manhã', 'Café Coado', 'Café em Grãos']}
+        lembre-se de abrir a chave { e fechar a mesma chave } retorne apenas o diciónario sem nenhum texto adicional, 
+        ou seja, a sua resposta deve começar com uma { e terminar com o fechamento dela }. Adicione todos os possíveis sinônimos de cada palavra
         """ 
         
     print(prompt)
     print("==========================================")
     
     # print("PROMPT:", prompt)   
-    response = model_2.generate_content(prompt)
+    response = generate_content_model.generate_content(prompt)
     print(response.text)
+    
+    # {'Macarrão Pilsen Médio': ['Macarrão', 'Massa', 
+    #                            'Espaguete', 'Talharim', 'Fideli', 'Ninhos', 'Penne', 'Farfalle', 'Spaghetti', 'Macarrão Tipo Pilsen', 'Macarrão Médio', 'Macarrão de Trigo', 'Macarrão Seco', 'Macarrão Cozido', 'Macarrão para Sopa', 'Macarrão para Salada', 'Macarrão para Massa']}
+    
+    synonymous_dict = ast.literal_eval(response.text)
+    synonymous_list = list(synonymous_dict.values())[0]
+    print(synonymous_list)
+    
+    with conn.cursor() as cursor:
+        cursor.execute("""
+                       UPDATE products_with_embeddings
+                       SET synonymous = %s
+                       WHERE nome = %s
+                       """, [synonymous_list, product])
+        conn.commit()
+        
+    print(f"Synonym '{synonymous_list}' added to product '{product}'.")
     
     # text = response.text
     
@@ -337,15 +378,22 @@ def process_prompt(prompt):
     # return prompt_representation
     if fuzz.token_set_ratio(prompt.lower(), "quero sair") >= 80:
         # print(process_prompt(user_prompt.lower()))  # Processa antes de sair
-        print(f'Obrigado por vir ao nosso {supermarket_name}. Volte sempre!')
+        print(f'Obrigado por vir ao {supermarket_name}. Volte sempre!')
         return True  # Sinaliza para sair do loop
 
 def pre_process_prompt_grammatical(prompt):
+    
+    # OBS: The input INSET is being blocked for some reason with the error message:
+    # ValueError: Invalid operation: The `response.text` quick accessor requires the response to contain a valid `Part`, but none 
+    # were returned. Please check the `candidate.safety_ratings` to determine if the response was blocked.
+    
     fix_prompt = f"""
         Corrija os erros gramaticais e ortográficos no seguinte texto para que ele seja compreensível para um leitor 
         humano e normalize os nomes para uma forma padrão, seja eles produtos, utensilíos ou qualquer outra coisa. Leve em consideração que 
         esse texto está sendo retirado do cliente do estabelecimento {supermarket_name} leve isso em consideração para corrigir da melhor
-        forma possível. Segue o texto para ser corrigido:
+        forma possível. Considerando que as palavras podem aparecer abreviadas como "INSET SBP AERO" que significa "INSETICIDA SBP AEROSSOL" 
+        faça uma pesquisa aprofundada do que cada palavra pode significada estando abreviada ou não, considerando que muito provavelmente todas 
+        elas são produtos de varejo encontrados em qualquer supermercado, pense nisso também quando for tentar identificar as palvras. Segue o texto para ser corrigido:
 
         Texto:
 
@@ -369,7 +417,7 @@ def pre_process_prompt_grammatical(prompt):
     """
     # In case the product is not in the list, show the message "Produto não está disponível!"
     
-    pre_processed_prompt = model_2.generate_content(fix_prompt)
+    pre_processed_prompt = generate_content_model.generate_content(fix_prompt)
 
     # Problema agora é identificar mais de um produto :)
 
@@ -503,7 +551,8 @@ def pre_process_prompt(prompt):
         "Quanto custa o biscoito e o sabao" para "Quanto custa o [BISCOITO POPULAR MAIZENA DOCE 10X400G, SABAO EM PO BRILHANTE MULTI TECIDOS]"
         "Aendo figa localezado os tomate e a cebole" para "Aonde fica localizado os [Tomates, Cebola]", "Vocês te jel, deterge e saco" para "Vocês têm [GEL FIXADOR STYLO VITAL AMARELO, DETERGENTE YPE COCO, SUCO DAFRUTA CONCENT.CAJU PET CXA 1 X 12 500ML]"
         Preste bastante atenção na lista e aos minimos detalhes dela e do texto, perceba que alguns produtos estão abrevidados como "REFRIG." leve isso em consideração
-        antes de fazer a correção modificação do prompt. Faça isso para qualquer palavra minimamente parecida com as da lista acima.
+        antes de fazer a correção modificação do prompt. Faça isso para qualquer palavra minimamente parecida com as da lista acima. Porém, não substitua de forma aleátoria
+        seja bastante preciso e fala apenas as substituições se realmente a palavra for muito parecida, caso contrário não substitua/corrija.
         Seja o mais direto possível, sem acrescentar informações adicionais. Coloque os produtos separados por virgula e dentro de colchetes independete da forma que eles estão
         por exemplo, "Quanto é o [AMAC.ROUPA SONHO MAGIC CXA 1 X 12 500ML, DESINF.PINHO SOL CXA 4 X 3 500ML]",         
         "Quais desses produtos vocês tem disponível? [REFR.PO TANG UVA CXT 1 X 15 25G, DET.LIQ.YPE MACA CXA 1 X 24 500ML, DET.LIQ.YPE NEUTRO CXA 1 X 24 500ML, DET.PO BEM TE VI TRAD.S.PLAST. FDO 1 X 26 500, DES.ALMA FLORES SPRAY PCT 1 X 12 90ML]" coloque exatamente dessa forma o texto. 
@@ -513,9 +562,10 @@ def pre_process_prompt(prompt):
 
         Caso o texto não contenha nenhum produto ou seja, o texto disponibilizado é algo totalmente diferente aos produtos acima ou a de produtos existentes normalmente no mundo, como por exemplo,
         "Olá, como você está?", "Queria saber que horas o mercado abre?", "Como é o seu nome", "Qual o estado do mercado" ou "Como funciona o mercado"
+        "Qual o nome do gerente", "Como funciona o estabelecimento", "Quantos anos você tem"
         "Onde está locaslzi o mercado", "Quantos funcionarsio vocês tema" ou qualquer coisa que NÃO contenha algum nome parecido com algum produto 
         preste bastante atenção ao texto recebido pelo usuário, conforme disse caso o texto seja aleátorio ou seja, não tenha o nome de algum produto ou
-        algo parecido nele retorne apenas "Texto RA"
+        algo parecido nele, retorne apenas "Texto RA" sem nenhum texto adicional nada, apenas "Texto RA".
     """
     
     ### ELE ESTÁ MUDANDO MUITOS NOMES PARA REFRIG PRO ALGUM MOTIVO
@@ -534,7 +584,7 @@ def pre_process_prompt(prompt):
 
     # In case the product is not in the list, show the message "Produto não está disponível!"
     
-    pre_processed_prompt = model_2.generate_content(fix_prompt_v2)
+    pre_processed_prompt = generate_content_model.generate_content(fix_prompt_v2)
 
     # Problema agora é identificar mais de um produto :)
 
@@ -609,7 +659,7 @@ def find_similarity_products(prompt, embeddings_products=None):
 
         prompt = fix_response
         
-        print(prompt)
+        print("PROMPT: ", prompt)
         
         # global index_dict 
         # index_dict += 1
@@ -617,10 +667,11 @@ def find_similarity_products(prompt, embeddings_products=None):
         # conversation_history[name] = prompt
         
         new_prompt = prompt.lower()
+        new_prompt_without_spaces = new_prompt.strip()
 
         # new_prompt = prompt.strip()
         
-        new_prompt = unicodedata.normalize('NFKD', prompt).encode('ascii', 'ignore').decode('ascii')
+        # new_prompt = unicodedata.normalize('NFKD', prompt).encode('ascii', 'ignore').decode('ascii')
         
         products_df['Nome'] = products_df['Nome'].str.lower()
         products_df['Nome'] = products_df['Nome'].apply(lambda x: unicodedata.normalize('NFKD', x).encode('ascii', 'ignore').decode('ascii'))
@@ -638,9 +689,10 @@ def find_similarity_products(prompt, embeddings_products=None):
         print("PRE_PROCESSED_PROMPT_PRODUCT: ", pre_processed_prompt_products_list)
         # PRE_PROCESSED_PROMPT_PRODUCT:  ['DES.ALMA FLORES SPRAY PCT 1 X 12 90ML', 'DES.ALMA FLORES SPRAY C.BRANCAS CXA 1 X 12 90ML', 'DES.SENADOR SPRAY SEDUCTION CXA 1 X 12 90ML', 'DES.SENADOR SPRAY CLASSIC CXA 1 X 12 90ML']
         
-        generate_synonymus(pre_processed_prompt_products_list)
         
-        if (new_prompt not in ['Produto NA \n', 'Texto RA \n']):
+        if (new_prompt_without_spaces not in ['produto na', 'texto ra']):
+            print("new_prompt: ", new_prompt_without_spaces)
+            generate_synonymous(pre_processed_prompt_products_list)
 
             contains_a_product = True
 
@@ -1041,7 +1093,7 @@ def chatbot_response(user_prompt):
             # The following example shows how to implement streaming 
             # using the streamGenerateContent method to 
             # generate text from a text-only input prompt.
-            generated_detailed_prompt = model_2.generate_content(detailed_prompt, stream=True)
+            generated_detailed_prompt = generate_content_model.generate_content(detailed_prompt)
 
             # if find_product['Disponivel'].item():
             if find_product['Disponivel'].any():
@@ -1124,7 +1176,8 @@ def chatbot_response(user_prompt):
                 answer_prompt+=f"{info}\n"
             
 
-        response = model_2.generate_content(answer_prompt)
+        # response = main_chatbot_model.generate_content(answer_prompt)
+        response = chat.send_message(answer_prompt)
 
         print(f"ANSWER PROMPT {answer_prompt}")
 
@@ -1136,6 +1189,9 @@ def chatbot_response(user_prompt):
         # conversation_history[name] = response.text
         # print(f"\nCONVERSATION HISTORY - {conversation_history}\n")
         
+        # I changed the Gemini chatbot model and now he decorates
+        # the conversation history automatically, so it's unnecessary
+        # to keep the conversation history in my DB
         sql = """INSERT INTO conversation_history (
             user_input,
             chatbot_response)
@@ -1148,9 +1204,13 @@ def chatbot_response(user_prompt):
             
         except (Exception, psycopg2.DatabaseError) as error:
             print(error)
-            
+        
+        print("-"*80)
+        print("RESPONSE: ", response.text)
         return f"'{response.text}'"
 
+
+# chatbot_response("Qual o noem do mercado de gvoces")
 
 # def send_message():
 #     # user_input = user_entry.get()

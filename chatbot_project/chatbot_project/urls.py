@@ -24,6 +24,8 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     # path("cadastrar_produto/", views.product, name='product'),
     path("", include("chatbot.urls")),
+    
+    # path("index/", index.as_view(), name='index'),
     path("cadastrar_produto/", ProductRegistration.as_view(), name='productRegistration'),
     path("products/", ProductListView.as_view(), name='productList'),
     

@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
-from project_ecommerce_AI import generate_synonymus, embed_fn, pre_process_prompt_grammatical
+from project_ecommerce_AI import generate_synonymous, embed_fn, pre_process_prompt_grammatical
 
 class Product(models.Model):
     # productName = models.CharField(max_length=200)
@@ -15,6 +15,7 @@ class Product(models.Model):
     unidade_medida = models.CharField(max_length=255)
     disponivel = models.BooleanField()
     embeddings = ArrayField(models.FloatField())
+    synonymous = ArrayField(models.TextField())
 
     @staticmethod
     def get_product_by_id(ids):
@@ -31,8 +32,15 @@ class Product(models.Model):
         return Product.get_all_products()
     
     @staticmethod
-    def generate_synonimus(product):
-        generate_synonymus(product)
+    def generate_synonymous(product):
+        generate_synonymous(product)
+
+    @staticmethod
+    def get_synonymus(name):
+        product = Product.objects.filter(nome=name).first()
+        if product:
+            return product.synonymous
+        return None
     
     @staticmethod
     def generate_emebed(productName):

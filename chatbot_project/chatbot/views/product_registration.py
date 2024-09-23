@@ -41,6 +41,8 @@ class ProductRegistration(View):
         #         'error_message': f"Product {productName} already exists!"
         #     })
         
+        productName = productName.strip()
+        
         print("V1_PN: ", productName, product_section, price, metric_unity, available)
         
         # productName = Product.fix_product_name(productName)
@@ -56,9 +58,13 @@ class ProductRegistration(View):
             product = Product(nome=productName, secao_produto=product_section, preco_venda=price, unidade_medida=metric_unity, disponivel=available, embeddings=embeddings)
             
             # Product.objects.create(product.nome,)
+            
+            Product.fetch_products_alike(productName)
+            
             product.save()
             
-            print(Product.generate_synonymous(productName))
+            # print("ALL SIMILAR PRODUCTS: ", Product.generate_synonymous(productName))
+            Product.generate_synonymous(productName)
             
             # for product in products:
             #     print(product.nome, product.preco_venda, product.secao_produto)

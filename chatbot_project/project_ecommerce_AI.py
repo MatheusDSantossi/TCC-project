@@ -30,6 +30,9 @@ import ast
 import tkinter as tk
 from tkinter import scrolledtext
 
+import time
+from prompt_searcher import find_section, find_price, find_similar_products_using_input_embeddings
+
 # Você: quero um refrige
 
 
@@ -134,30 +137,6 @@ products_list_after_user_input = []
 #     products_list.append(products)
 
 
-# Products DataFrame
-# products = [
-#     {"Nome": "Café Ouro Verde", "Seção": "Seção 1", "Disponivel": True},
-#     {"Nome": "Leite Camponesa", "Seção": "Seção 2", "Disponivel": True},
-#     {"Nome": "Arroz Caçarola", "Seção": "Seção 2", "Disponivel": False},
-#     {"Nome": "Feijão Carioca", "Seção": "Seção 2", "Disponivel": True},
-#     {"Nome": "Macarrão Barilla", "Seção": "Seção 2", "Disponivel": True},
-#     {"Nome": "Suco de Laranja Natural", "Seção": "Seção 3", "Disponivel": True},
-#     {"Nome": "Refrigerante Coca-Cola", "Seção": "Seção 3", "Disponivel": True},
-#     {"Nome": "Água Mineral", "Seção": "Seção 3", "Disponivel": True},
-#     {"Nome": "Ovos Brancos", "Seção": "Seção 4", "Disponivel": True},
-#     {"Nome": "Frango Congelado", "Seção": "Seção 4", "Disponivel": True},
-#     {"Nome": "Banana Nanica", "Seção": "Seção 5", "Disponivel": True},
-#     {"Nome": "Maçã Gala", "Seção": "Seção 5", "Disponivel": True},
-#     {"Nome": "Tomate", "Seção": "Seção 5", "Disponivel": False},
-#     {"Nome": "Cebola", "Seção": "Seção 5", "Disponivel": True},
-#     {"Nome": "Sabão em Pó Omo", "Seção": "Seção 6", "Disponivel": True},
-#     {"Nome": "Detergente Limpol", "Seção": "Seção 6", "Disponivel": False},
-#     {"Nome": "Papel Higiênico", "Seção": "Seção 7", "Disponivel": True},
-#     {"Nome": "Shampoo Head & Shoulders", "Seção": "Seção 8", "Disponivel": True},
-#     {"Nome": "Pasta de Dente Colgate", "Seção": "Seção 8", "Disponivel": True},
-#     {"Nome": "Biscoito Negresco", "Seção": "Seção 9", "Disponivel": True},
-# ]
-
 # products_df = pd.DataFrame(products_list)
 
 # # print(products_df)
@@ -174,10 +153,24 @@ embed_model = 'models/embedding-001'
 #    content=f'O produto {title} é encontrado na {secao} com o preço de {preco_venda} reais possuindo a unidade de medida {unidade_medida}',  # Include the type of the product
 
 def embed_fn(title, secao="", preco_venda=0, unidade_medida=""):
+    
+    if find_section(title, conn)== None:
+    
+        return genai.embed_content(model=embed_model,
+                                content=f'{title}',  # I understood that this have to be the most alike the userp prompt
+                                title=title,
+                                task_type="RETRIEVAL_DOCUMENT")["embedding"]
+        
+    secao = find_section(title, conn)    
+    
     return genai.embed_content(model=embed_model,
-                               content=f'O produto {title}',  # I understood that this have to be the most alike the userp prompt
+                               content=f'{title} e seção {secao}',  # I understood that this have to be the most alike the userp prompt
                                title=title,
                                task_type="RETRIEVAL_DOCUMENT")["embedding"]
+    # return genai.embed_content(model=embed_model,
+    #                            content=f'O produto {title}',  # I understood that this have to be the most alike the userp prompt
+    #                            title=title,
+    #                            task_type="RETRIEVAL_DOCUMENT")["embedding"]
 
 # print(embed_fn("Arroz"))
 
@@ -264,122 +257,23 @@ def for_dividing_prompt_limit():
     for i in range(0, max_prompt_size):
         prompt+= products_list_2[i]
 
-# Generating synonymus using Gemini
-def generate_synonymous(product=None, product_list=None):
-    # global pre_processed_prompt_products_list
-    
-    if not product_list:
-    
-        new_product = pre_process_prompt_grammatical(product)
-        
-        prompt = """Coloque todos os sinônimos possíveis para as palavras abaixo. Leve em
-                    consideração que as palavras podem aparecer abreviadas como "INSET SBP AERO" que 
-                    significa "INSETICIDA SBP AEROSSOL" faça uma pesquisa aprofundada do que cada palavra
-                    pode significada estando abreviada ou não, considerando que muito provavelmente todas 
-                    elas são produtos de varejo encontrados em qualquer supermercado, pense nisso também quando
-                    for tentar identificar as palvras. Segue as palavras.
-        \n"""
-        
-        prompt+=new_product
-        # products_list_2 = []
-        
-        # for p in products_df.to_dict(orient='records'):
-        #     # prompt += p['Nome']
-        #     products_list_2.append(p['Nome'])
-            
-        # max_prompt_size = 425 # this one is the maximum for the prompt input
-        # max_prompt_size = 140 # this one is the maxium for the prompt output, more than that and the answer is cut off
-        
-        # for i in range(0, max_prompt_size):
-        #     prompt+= products_list_2[i]
-        
-        # for i in range(max_prompt_size, len(products_list):
-        
-        prompt += """\n\nRetorne todos os produtos e sinônimos como um dicionário, por exemplo: {'CAFE PILAO ALMOFADA': ['Expresso', 'Cappuccino', 'Mocha', 'Latte', 'Café da Manhã', 'Café Coado', 'Café em Grãos']}
-        lembre-se de abrir a chave { e fechar a mesma chave } retorne apenas o diciónario sem nenhum texto adicional, 
-        ou seja, a sua resposta deve começar com uma { e terminar com o fechamento dela }. Adicione todos os possíveis sinônimos de cada palavra
-        """ 
-    else:
-        prompt = """Coloque todos os sinônimos possíveis para as palavras abaixo. Leve em
-                    consideração que as palavras podem aparecer abreviadas como "INSET SBP AERO" que 
-                    significa "INSETICIDA SBP AEROSSOL" faça uma pesquisa aprofundada do que cada palavra
-                    pode significada estando abreviada ou não, considerando que muito provavelmente todas 
-                    elas são produtos de varejo encontrados em qualquer supermercado, pense nisso também quando
-                    for tentar identificar as palvras. Segue as palavras.
-                \n"""
-        
-        for product in products_list:
-            prompt+=product
-        
-        prompt += """\n\nRetorne todos os produtos e sinônimos como um dicionário, por exemplo: {'CAFE PILAO ALMOFADA': ['Expresso', 'Cappuccino', 'Mocha', 'Latte', 'Café da Manhã', 'Café Coado', 'Café em Grãos']}
-        lembre-se de abrir a chave { e fechar a mesma chave } retorne apenas o diciónario sem nenhum texto adicional, 
-        ou seja, a sua resposta deve começar com uma { e terminar com o fechamento dela }. Adicione todos os possíveis sinônimos de cada palavra
-        """ 
-        
-    print(prompt)
-    print("==========================================")
-    
-    # print("PROMPT:", prompt)   
-    response = generate_content_model.generate_content(prompt)
-    print(response.text)
-    
-    # {'Macarrão Pilsen Médio': ['Macarrão', 'Massa', 
-    #                            'Espaguete', 'Talharim', 'Fideli', 'Ninhos', 'Penne', 'Farfalle', 'Spaghetti', 'Macarrão Tipo Pilsen', 'Macarrão Médio', 'Macarrão de Trigo', 'Macarrão Seco', 'Macarrão Cozido', 'Macarrão para Sopa', 'Macarrão para Salada', 'Macarrão para Massa']}
-    
-    synonymous_dict = ast.literal_eval(response.text)
-    synonymous_list = list(synonymous_dict.values())[0]
-    print(synonymous_list)
-    
-    with conn.cursor() as cursor:
-        cursor.execute("""
-                       UPDATE products_with_embeddings
-                       SET synonymous = %s
-                       WHERE nome = %s
-                       """, [synonymous_list, product])
-        conn.commit()
-        
-    print(f"Synonym '{synonymous_list}' added to product '{product}'.")
-    
-    # text = response.text
-    
-    # regex = re.compile(pattern_for_syn, text, re.DOTALL)
-    
-    # matches = re.findall(pattern_for_syn, text, re.DOTALL)
-    
-    # for match in matches:
-    #     print("MATCH: ", match)
-    
-    # match = re.search(pattern_for_syn, text)
-
-    # if match:
-    #     # extracting the correspondent group to the pattern
-    #     product_string = match.group(1)
-    #     print("PRODUCT STRING: ", product_string)
-
-    #     pre_processed_prompt_products_list = [product.strip() for product in product_string.split(',')]
-    
-    # start = fixed_text.find('{')+1
-    # end =fixed_text.find('}')
-    # json_string = fixed_text[start:end]
-    
-    # dictionary = json.loads(json_string)
-    
-    # print("==========================================")
-    
-    # print(pre_processed_prompt_products_list) 
-
-# generate_synonymus()
-
-
-
 # Process the prompt using NLTK 
 def process_prompt(prompt):
+    """
+    This function processes the user's prompt to check if the user wants to exit.
 
-    # return prompt_representation
+    # return prompt_representation#-
+    Parameters:
+    prompt (str): The user's input prompt.
+
+    Returns:
+    bool: True if the user wants to exit, False otherwise.
+    """
     if fuzz.token_set_ratio(prompt.lower(), "quero sair") >= 80:
         # print(process_prompt(user_prompt.lower()))  # Processa antes de sair
         print(f'Obrigado por vir ao {supermarket_name}. Volte sempre!')
-        return True  # Sinaliza para sair do loop
+        return True
+    return False
 
 def pre_process_prompt_grammatical(prompt):
     
@@ -417,156 +311,184 @@ def pre_process_prompt_grammatical(prompt):
     """
     # In case the product is not in the list, show the message "Produto não está disponível!"
     
+    time.sleep(3)
+    
     pre_processed_prompt = generate_content_model.generate_content(fix_prompt)
 
     # Problema agora é identificar mais de um produto :)
 
     return pre_processed_prompt.text
 
+def fetch_products_alike(product_name):
+    with conn.cursor() as cursor:
+        
+        cursor.execute("CREATE EXTENSION IF NOT EXISTS pg_trgm;")
+        conn.commit()
+        
+        query = """
+            SELECT nome, secao_produto, preco_venda FROM products_with_embeddings
+            WHERE SIMILARITY(nome, %s) > 0.1;
+        """
+        
+        # print(type(product_name))
+        
+        product_dict = {}
+        
+        # for keyword in product_name:
+        cursor.execute(query, (product_name,))
+        products = cursor.fetchall()
+        conn.commit()
+            
+        for product in products:
+            if product[0] not in product_dict:
+                product_dict[product[0]] = []
+            product_dict[product[0]].extend(product[1].split(","))
+            
+    return product_dict
+
 def pre_process_prompt(prompt):
     
     fix_prompt_v1 = pre_process_prompt_grammatical(prompt)
     print(f"FIXED 1 {fix_prompt_v1}")
     
-    fix_prompt_v2 = f"""
-        Corrija os erros gramaticais e ortográficos no seguinte texto para que ele seja compreensível para um leitor 
-        humano e normalize os nomes dos produtos para a forma padrão, segue uma lista de produtos exemplo:
+    products_alike = fetch_products_alike(fix_prompt_v1)
 
-        Lista de produtos:
+    # print("PRODUCTS ALIKE: ", products_alike)
+    
+    input_embed = embed_fn(fix_prompt_v1)
+    
+    print("INPUT EMBED: ", input_embed)
+    
+    products_find_in_section = find_section(fix_prompt_v1, conn)
+    products_find_with_price = find_price(fix_prompt_v1, conn)
+    products_find_using_prompt = find_similar_products_using_input_embeddings(input_embed, conn, np, cosine_similarity)
+    
+    if(products_find_in_section != None):
+        fix_prompt_v2 = f"""
+        Corrija quaisquer erros gramaticais e ortográficos no texto fornecido, 
+        mantendo o significado original e, principalmente, substituindo os nomes 
+        de produtos pelos seus nomes padrão conforme a lista de produtos fornecida.
 
-        REFRIG. GUARANA ANTARCT PET CACULINHA
-        REFRIG. GUARANA ANTARCT PET
-        REFRIG. SODA LIMONADA PET CACULINHA
-        REFRIG. SODA LIMONADA ANTARC PET
-        GOMA DE MANDIOCA LOPES
-        MILHO VERDE FUGINI AO VAPOR LATA
-        REFRESCO FRUCTUS PLUS LARANJA
-        ACETONA FARMAX
-        MAC. VITARELLA SPECIALE PARAFUSO
-        CAMIL SARD COQ OLEO 54X125
-        CAMIL SARD COQ M TOMATE 54X125
-        FRALDA DESC.BABY ROGER G CXA 1 X 12 18UND
-        FRALDA DESC.BABY ROGER XG CXA 1 X 12 16UND
-        LAMP. 15W220V OUROLUX ELETR.3U UND 1 X 1 1UND
-        LAMP. 20W220V OUROLUX ELETR.3U UND 1 X 1 1UND
-        LAMP. 25W220V OUROLUX ELETR.3U UND 1 X 1 1UND
-        MASSA P/ TAPIOCA AMAFIL
-        PROTEINA DE SOJA SORA ESCURA T.A.M.
-        SABAO YPE BARRA AZUL MULTIATIVO
-        CHARQUE FRINENSE J.BEEF PONTA AGULHA
-        AGUA SANITARIA BRILUX MULTIPLO USO
-        AGUA SANITARIA BRILUX 2lt
-        CAFE PILAO DESCAFEINADO VACUO CXA 1 X 20 250G
-        DET.PO BEM TE VI SUP.BRANCO S.PLAST FDO 1 X 26 500G
-        MARG.PURO SABOR POTE PTE 1 X 1 3KG
-        ACUCAR DEMERARA PETRIBU FDO 1 X 10 1KG
-        BOMBOM GAROTO SORTIDO UND 1 X 1 300G
-        INSET.BAYGON AERO A.TOTAL CXA 1 X 12 395ML
-        MAION.HELLMANNS PET CXA 1 X 24 250G
-        SABAO PASTA ATOL/ASSOLAN CXA 1 X 12 500G
-        BISC. MARIA DOCE DE LEITE 20X400G
-        BISC. CIPANDOCE 20X400G
-        BISC. ROSQ. LEITE 10X400G
-        CAFE PALACIO MOIDO 250G
-        SALG. TOBOGA CEBOLA E SALSA 50X25G
-        SALG. TOBOGA PICANHA 50X50G
-        COND.PALMOLIVE ILUMINADOR CAB.PR CXA 1 X 6 350ML
-        SABAO PDC YPE AZUL PERFUMADO CXA 1 X 10 5X200G
-        SABAO PDC YPE NEUTRO CXA 1 X 10 5X200G
-        SABAO PDC YPE VERMELHO CXA 1 X 10 5X200G
-        SARDINHA COQUEIRO PQ OLEO CXA 9 X 6 83G
-        SHAMP.PALMOLIVE NAT.NEUTRO CXA 1 X 6 350ML
-        SHAMP.PALMOLIVE ILUMINADOR CAB.PR CXA 1 X 6 350ML
-        BISC. POPULAR COQUINHO 10X400G
-        BISC. POPULAR TOP DOCE 10X400G
-        BISC. POPULAR TOP SAL 10X400G
-        BISC. CREAM CRACKER 20X400G
-        BISC. ROSQ. CHOCOLATE 10X400G
-        BISC. MINI CRACKER 10X400G
-        BISC. MINI MAISENA 10X400G
-        BISC. MINI MARIA 10X400G
-        MACARRAO PARAFUSO VITAMASSA 12 X 500G
-        SALG. TOBOGA QUEIJO 50X30G
-        START LIMPA CER. AZULEJOS AZULIM LAVAND
-        ALVEJANTE BRILUX MULTI 3X1
-        LEITE EM PO NINHO INSTANTANEO
-        ACHOC. TODDYNHO CHOC. UHT
-        CREME DENTAL COLGATE M.P.A
-        AGUA SANITARIA IGUAL
-        SABAO LIQ. OMO MULTIACAO DOYP
-        SABAO LIQ. BRILUX T.ACAO
-        CERA POLITRIZ INCOLOR EMULSIONADA
-        SABAO ARCOVERDE GLICERINADO LIMAO
-        LEITE UHT BETANIA DESNATADO
-        LEITE EM PO CAMPONESA INTEGRAL
-        NESCAU 2.0 ACTIGEN-E NESTLE
-        PAPEL HIGIENICO LEVE NEUTRO 60MT
-        PAPEL HIGIENICO LEVE NEUTRO 30MT
-        BISC VITARELLA C.CRACKER TRADICIONAL
-        MARGARINA VEG. PRIMOR COMUM
-        MARGARINA VEG. DELICIA CREMOSA LIGHT
-        BISC.FORTALEZA MARIA CXA 1 X 20 400G
-        BISC.FORTALEZA CREAM CRACKER CXA 1 X 20 400G
-        SAB.EVEN CHA VERDE/LIMAO EMB 1 X 12 90G
-        SAB.EVEN EXTRATO FLORES PCT 1 X 12 90G
-        SAB.EVEN PITANGA/ACEROLA EMB 1 X 12 90G
-        SAB.LUX BUQUE DOS SONHOS EMB 1 X 12 85G
-        SAB.PALMOLIVE SUAVE MANT.KARITE PCT 1 X 12 90G
-        SAB.PALMOLIVE SUAVE LEITE/ROSAS EMB 1 X 12 90G
-        SAB.PHEBO ODOR ROSAS PCT 1 X 12 90G
-        AMAC.ROUPA SONHO MAGIC CXA 1 X 6 2L
-        AMAC.ROUPA SONHO MAGIC CXA 1 X 12 500ML
-        DESINF.PINHO SOL CXA 4 X 3 500ML
-        REFR.PO TANG ABACAXI CXT 1 X 15 25G
-        REFR.PO TANG LARANJA CXT 1 X 15 25G
-        REFR.PO TANG MANGA CXT 1 X 15 25G
-        CR.DENTAL COLGATE TRIPLA A.ORIGINAL PCT 1 X 12 90G
-        REFR.PO TANG MARACUJA CXT 1 X 15 25G
-        REFR.PO TANG TANGERINA CXT 1 X 15 25G
-        REFR.PO TANG UVA CXT 1 X 15 25G
-        DET.LIQ.YPE MACA CXA 1 X 24 500ML
-        DET.LIQ.YPE NEUTRO CXA 1 X 24 500ML
-        DET.PO BEM TE VI TRAD.S.PLAST. FDO 1 X 26 500G
-        DES.ALMA FLORES SPRAY PCT 1 X 12 90ML
-        DES.ALMA FLORES SPRAY C.BRANCAS CXA 1 X 12 90ML
-        DES.SENADOR SPRAY SEDUCTION CXA 1 X 12 90ML
-        DES.SENADOR SPRAY CLASSIC CXA 1 X 12 90ML
-        FARINHA TRIGO ROSA BRANCA C/FERM. FDO 1 X 10 1KG
-        FARINHA TRIGO ROSA BRANCA TIPO 1 FDO 1 X 10 1KG
-        SHAMP.SEDA BRILHO E MOVIMENTO UND 1 X 1 325ML
-        SHAMP.SEDA HIDRATACAO E LEVEZA UND 1 X 1 325ML
-        SHAMP.SEDA PRETOS LUMINOSOS EMB 1 X 3 325ML
-        CAFE STA.CLARA DESCAFEINADO VACUO FDO 1 X 20 250G
-        LEITE EM PO INTEGRAL CAMPONESA 200 GRS CXA.C/50X1
-        SUCO DAFRUTA CONCENT.CAJU PET CXA 1 X 12 500ML
-        DETERGENTE YPE COCO
+        Lista de Produtos encontrados na seção comentada pelo cliente:
+        {products_find_in_section}
+        
+        Lista de possíveis produtos parecidos com a que pdoe ser encontrado no prompt:
+        {products_find_using_prompt}
+
+        Texto para correção:
 
         Texto:
-
         "{fix_prompt_v1}"
 
-        Mantenha o significado original do texto e corrija apenas os erros de escrita e gramática. Por exemplo, "quero um cafezinho" 
-        deve ser corrigido para "Quero um CAFE STA.CLARA DESCAFEINADO VACUO FDO 1 X 20 250G", "Tem leitinho" para "Tem LEITE EM PO INTEGRAL CAMPONESA 200 GRS CXA.C/50X1 PCT",
-        "Refrigerante" para "REFRIG. GUARANA ANTARCT PET", "Quero pasta" para "Quero CR.DENTAL COLGATE TRIPLA A.ORIGINAL PCT 1 X 12 90G", 
-        "Quanto custa o biscoito e o sabao" para "Quanto custa o [BISCOITO POPULAR MAIZENA DOCE 10X400G, SABAO EM PO BRILHANTE MULTI TECIDOS]"
-        "Aendo figa localezado os tomate e a cebole" para "Aonde fica localizado os [Tomates, Cebola]", "Vocês te jel, deterge e saco" para "Vocês têm [GEL FIXADOR STYLO VITAL AMARELO, DETERGENTE YPE COCO, SUCO DAFRUTA CONCENT.CAJU PET CXA 1 X 12 500ML]"
-        Preste bastante atenção na lista e aos minimos detalhes dela e do texto, perceba que alguns produtos estão abrevidados como "REFRIG." leve isso em consideração
-        antes de fazer a correção modificação do prompt. Faça isso para qualquer palavra minimamente parecida com as da lista acima. Porém, não substitua de forma aleátoria
-        seja bastante preciso e fala apenas as substituições se realmente a palavra for muito parecida, caso contrário não substitua/corrija.
-        Seja o mais direto possível, sem acrescentar informações adicionais. Coloque os produtos separados por virgula e dentro de colchetes independete da forma que eles estão
-        por exemplo, "Quanto é o [AMAC.ROUPA SONHO MAGIC CXA 1 X 12 500ML, DESINF.PINHO SOL CXA 4 X 3 500ML]",         
-        "Quais desses produtos vocês tem disponível? [REFR.PO TANG UVA CXT 1 X 15 25G, DET.LIQ.YPE MACA CXA 1 X 24 500ML, DET.LIQ.YPE NEUTRO CXA 1 X 24 500ML, DET.PO BEM TE VI TRAD.S.PLAST. FDO 1 X 26 500, DES.ALMA FLORES SPRAY PCT 1 X 12 90ML]" coloque exatamente dessa forma o texto. 
-        Não precisa colocar nenhuma pontuação o texto sempre será nesse formato, quando tiver mais de um produto separe eles com virgulas e os coloque dentro de colchetes.
+        Outros produtos:
+        {products_alike}
+
+        Instruções de Normalização:
+
+        - Substitua termos que correspondam, sejam semelhantes, ou possuam abreviações de produtos listados pela forma exata do nome do produto conforme fornecido na lista.
+        - Considere variações fonéticas e gramaticais, tais como pluralização, diminutivos ou abreviações (ex: 'cafe' -> 'CAFE PILAO ALMOFADA').
+        - Se o nome do produto estiver incompleto, parcial ou abreviado, substitua pelo nome completo conforme a lista.
+        - Se houver correspondência parcial de nomes de produtos, aplique a substituição correspondente. Exemplo: "cafe" ou "pilao" deve ser substituído por "CAFE PILAO ALMOFADA".
+        - Para termos que não correspondem a produtos da lista, mantenha o texto original ou retorne "Texto RA" se irrelevante.
+
+        Exemplo de Substituições:
+        - "cafe" deve ser substituído por "CAFE PILAO ALMOFADA" ou qualquer outro café listado na lista de produtos.
+        - "pastel" -> "PASTEL DE QUEIJO".
+        - "cond" -> "COND SEDA PRETOS LUMINOSOS NE".
+
+        Formato de Resposta:
+
+        - Liste os produtos identificados entre colchetes, separados por vírgulas.
+        - Exemplo: "Quais as opções de [BISC. MINI MARIA 10X400G, LEITE EM PO NINHO INSTANTANEO] disponíveis?"
 
         Regras de Retorno:
 
-        Caso o texto não contenha nenhum produto ou seja, o texto disponibilizado é algo totalmente diferente aos produtos acima ou a de produtos existentes normalmente no mundo, como por exemplo,
-        "Olá, como você está?", "Queria saber que horas o mercado abre?", "Como é o seu nome", "Qual o estado do mercado" ou "Como funciona o mercado"
-        "Qual o nome do gerente", "Como funciona o estabelecimento", "Quantos anos você tem"
-        "Onde está locaslzi o mercado", "Quantos funcionarsio vocês tema" ou qualquer coisa que NÃO contenha algum nome parecido com algum produto 
-        preste bastante atenção ao texto recebido pelo usuário, conforme disse caso o texto seja aleátorio ou seja, não tenha o nome de algum produto ou
-        algo parecido nele, retorne apenas "Texto RA" sem nenhum texto adicional nada, apenas "Texto RA".
-    """
+        - Se um produto for identificado no texto, o chatbot deve retornar o nome completo do produto entre colchetes.
+        - Caso não haja produtos correspondentes, retorne "Texto RA".
+        """
+    elif products_find_with_price != None:
+        fix_prompt_v2 = f"""
+        Corrija quaisquer erros gramaticais e ortográficos no texto fornecido, 
+        mantendo o significado original e, principalmente, substituindo os nomes 
+        de produtos pelos seus nomes padrão conforme a lista de produtos fornecida.
+
+        Lista de Produtos que contém o mesmo preço que o cliente comentou:
+        {products_find_with_price}
+        
+        Lista de possíveis produtos parecidos com a que pdoe ser encontrado no prompt:
+        {products_find_using_prompt}
+
+        Texto para correção:
+
+        Texto:
+        "{fix_prompt_v1}"
+        
+        Outros produtos:
+        {products_alike}
+
+        Instruções de Normalização:
+
+        - Substitua termos que correspondam, sejam semelhantes, ou possuam abreviações de produtos listados pela forma exata do nome do produto conforme fornecido na lista.
+        - Considere variações fonéticas e gramaticais, tais como pluralização, diminutivos ou abreviações (ex: 'cafe' -> 'CAFE PILAO ALMOFADA').
+        - Se o nome do produto estiver incompleto, parcial ou abreviado, substitua pelo nome completo conforme a lista.
+        - Se houver correspondência parcial de nomes de produtos, aplique a substituição correspondente. Exemplo: "cafe" ou "pilao" deve ser substituído por "CAFE PILAO ALMOFADA".
+        - Para termos que não correspondem a produtos da lista, mantenha o texto original ou retorne "Texto RA" se irrelevante.
+
+        Exemplo de Substituições:
+        - "cafe" deve ser substituído por "CAFE PILAO ALMOFADA" ou qualquer outro café listado na lista de produtos.
+        - "pastel" -> "PASTEL DE QUEIJO".
+        - "cond" -> "COND SEDA PRETOS LUMINOSOS NE".
+
+        Formato de Resposta:
+
+        - Liste os produtos identificados entre colchetes, separados por vírgulas.
+        - Exemplo: "Quais as opções de [BISC. MINI MARIA 10X400G, LEITE EM PO NINHO INSTANTANEO] disponíveis?"
+
+        Regras de Retorno:
+
+        - Se um produto for identificado no texto, o chatbot deve retornar o nome completo do produto entre colchetes.
+        - Caso não haja produtos correspondentes, retorne "Texto RA".
+        """
+    else:
+        fix_prompt_v2 = f"""
+        Corrija quaisquer erros gramaticais e ortográficos no texto fornecido, 
+        mantendo o significado original e, principalmente, substituindo os nomes 
+        de produtos pelos seus nomes padrão conforme a lista de produtos fornecida.
+
+        Lista de Produtos:
+        {products_alike}
+        
+        Lista de possíveis produtos parecidos com a que pdoe ser encontrado no prompt:
+        {products_find_using_prompt}
+
+        Texto para correção:
+
+        Texto:
+        "{fix_prompt_v1}"
+
+        Instruções de Normalização:
+
+        - Substitua termos que correspondam, sejam semelhantes, ou possuam abreviações de produtos listados pela forma exata do nome do produto conforme fornecido na lista.
+        - Considere variações fonéticas e gramaticais, tais como pluralização, diminutivos ou abreviações (ex: 'cafe' -> 'CAFE PILAO ALMOFADA').
+        - Se o nome do produto estiver incompleto, parcial ou abreviado, substitua pelo nome completo conforme a lista.
+        - Se houver correspondência parcial de nomes de produtos, aplique a substituição correspondente. Exemplo: "cafe" ou "pilao" deve ser substituído por "CAFE PILAO ALMOFADA".
+        - Para termos que não correspondem a produtos da lista, mantenha o texto original ou retorne "Texto RA" se irrelevante.
+
+        Exemplo de Substituições:
+        - "cafe" deve ser substituído por "CAFE PILAO ALMOFADA" ou qualquer outro café listado na lista de produtos.
+        - "pastel" -> "PASTEL DE QUEIJO".
+        - "cond" -> "COND SEDA PRETOS LUMINOSOS NE".
+
+        Formato de Resposta:
+
+        - Liste os produtos identificados entre colchetes, separados por vírgulas.
+        - Exemplo: "Quais as opções de [BISC. MINI MARIA 10X400G, LEITE EM PO NINHO INSTANTANEO] disponíveis?"
+
+        Regras de Retorno:
+
+        - Se um produto for identificado no texto, o chatbot deve retornar o nome completo do produto entre colchetes.
+        - Caso não haja produtos correspondentes, retorne "Texto RA".
+        """
     
     ### ELE ESTÁ MUDANDO MUITOS NOMES PARA REFRIG PRO ALGUM MOTIVO
     #Posso ajudar em algo mais? que hras i mercqwd fecea
@@ -584,13 +506,22 @@ def pre_process_prompt(prompt):
 
     # In case the product is not in the list, show the message "Produto não está disponível!"
     
+    time.sleep(3)
+    
+    print("FIX_PROMP_V2: ", fix_prompt_v2)
+    
     pre_processed_prompt = generate_content_model.generate_content(fix_prompt_v2)
 
     # Problema agora é identificar mais de um produto :)
 
     return pre_processed_prompt.text
 
-def create_semantic_dictionary(user_input, product_df):
+# pre_process_prompt("quais produtos custam 2.30")
+
+# pre_process_prompt("Quanto custa o café")
+
+
+def create_semantic_dictionary(user_input):
     """
     Creaates a semantic dictionary based on embeddings.
 
@@ -617,6 +548,9 @@ def create_semantic_dictionary(user_input, product_df):
 
     return semantic_dictonary
 
+# print("SEMANTIC DIC: ",create_semantic_dictionary("Quais os produtos da seção 1"))
+
+
 def encontrar_produtos_similares(semantic_dictionary, threshold=0.7):
     """
     Encontra produtos similares à consulta do usuário com base em embeddings.
@@ -637,8 +571,11 @@ def encontrar_produtos_similares(semantic_dictionary, threshold=0.7):
 
     return similar_products
 
-# Função para identificar produtos na consulta do usuário
 
+
+
+
+# Função para identificar produtos na consulta do usuário
 def find_similarity_products(prompt, embeddings_products=None):
     # in teh answer I have to distinguish between the answers with products and the answerrs without products (Olá, quero saber onde fica a seção 2)
 
@@ -692,7 +629,7 @@ def find_similarity_products(prompt, embeddings_products=None):
         
         if (new_prompt_without_spaces not in ['produto na', 'texto ra']):
             print("new_prompt: ", new_prompt_without_spaces)
-            generate_synonymous(pre_processed_prompt_products_list)
+            # generate_synonymous(pre_processed_prompt_products_list)
 
             contains_a_product = True
 
@@ -717,8 +654,6 @@ def find_similarity_products(prompt, embeddings_products=None):
             # print(f"INDEX LIST {index[:5].tolist()}")
             return similar_products
 
-        # else: 
-
     contains_a_product = False
     return prompt
 
@@ -733,6 +668,64 @@ def generate_and_search(prompt):
         return products_df.iloc[similarities]
 
     return similarities
+
+def create_menu_options_prompts():
+    query_select = """
+        SELECT menu_option_description FROM menu_options 
+        WHERE prompts IS NULL
+    """
+    with conn.cursor() as cursor:
+        cursor.execute(query_select)
+        options = cursor.fetchall()
+        
+        for option in options:
+            print("OPTIONS: ", option[0])
+            menu_prompt = f"""
+                Considerando que a seguinte pergunta foi feita por um cliente: "{option[0]}"
+
+                Para criar o melhor prompt possível para essa pergunta, leve em consideração os seguintes pontos:
+
+                1. **Contexto**: O cliente está fazendo uma pergunta relacionada ao nosso supermercado. O objetivo é fornecer uma resposta precisa, direta e informativa, com base nos produtos e serviços que oferecemos.
+                
+                2. **Clareza**: O prompt deve ser claro o suficiente para que a IA entenda a intenção por trás da pergunta e seja capaz de gerar uma resposta que atenda às expectativas do cliente. Evite ambiguidades e garanta que a pergunta seja compreensível.
+                
+                3. **Personalização**: Sempre que possível, personalize o prompt para refletir a experiência do cliente em nosso supermercado. Isso pode incluir informações sobre produtos disponíveis, ofertas, recomendações personalizadas ou detalhes que mostrem atenção ao cliente.
+                
+                4. **Estilo e Tom**: A resposta gerada deve ser amigável e profissional, mantendo um tom acolhedor que reflita o atendimento ao cliente que nosso supermercado oferece. 
+
+                5. **Objetivo**: Certifique-se de que o prompt gerado guiará a IA a fornecer informações úteis e relevantes sobre os produtos ou serviços que o cliente busca.
+
+                Exemplo de como gerar um prompt para essa pergunta:
+                Pergunta do cliente: "{option[0]}"
+                Prompt ideal: "Baseado na pergunta do cliente sobre "tópico relevante", forneça uma resposta clara que ajude a responder diretamente à pergunta feita e inclua recomendações relacionadas aos nossos produtos ou serviços que possam ser de interesse para o cliente."
+                
+                no lugar de tópico relevantes use as informações abaixo que se adequarem mais a pergunta do cliente.
+                
+                Informações sobre o {supermarket_name}:\n
+                {info_about_the_business}
+                
+                \n
+                Alguns produtos que vendemos que podem ser do interesse do cliente:\n
+                {fetch_products_alike("refrigerante,suco,cafe")}
+                
+                \n
+                
+                Use a estrutura acima e ajuste para a pergunta dada.
+                                                    """
+            query_add = """
+                UPDATE menu_options
+                SET prompts = %s
+                WHERE menu_option_description = %s
+            """
+            
+            menu_prompt_generate = generate_content_model.generate_content(menu_prompt)
+            response = menu_prompt_generate.text
+            
+            cur.execute(query_add, (response, option[0]))
+            conn.commit()   
+    
+
+
 
 # user_input = "Onde fica o Refrigerante e Detergente e suco"
 
@@ -1044,6 +1037,10 @@ def generate_and_search(prompt):
 
 # user_interaction()
 
+# um algoritmo que descreve a inclusão de um novo topico
+
+
+
 def chatbot_response(user_prompt):
     
     global dict_of_client_products
@@ -1053,11 +1050,13 @@ def chatbot_response(user_prompt):
 
     is_product = isinstance(find_product, pd.DataFrame)
     
+    print("USER PROMPT: ", user_prompt)
+    
     if process_prompt(user_prompt):
         return
 
-
     else: 
+        
         if is_product:
             count_row = find_product.shape[0]
             print(count_row)
@@ -1162,18 +1161,81 @@ def chatbot_response(user_prompt):
                 uma lista que substitua o produto da melhor forma possível explicando o porque da lista"""
 
         else:
-            answer_prompt = f"""Considerando que o cliente do nosso 
-                mercado {supermarket_name} quer saber {pre_process_prompt_grammatical(user_prompt)} 
-                responda com uma frase simples e útil ao cliente. 
-                E por fim gere alguma evento ou ação para o cliente fazer
-                no mercado se vier a o caso, por exemplo, "Queria saber que horas o
-                mercado abre?", resposta, "O mercado abre as 7h e hoje temos uma grande promoção"
+            
+            products_alike = fetch_products_alike(user_prompt)
+            
+            if user_prompt == "Saber mais sobre os produtos":
+                answer_prompt = f"""
+                    Considerando que o cliente do nosso
+                    mercado {supermarket_name} enviou a mensagem:
+
+                    {user_prompt} 
+
+                    e os possíveis produtos temos disponíveis são esses: 
+                    \n
+                    """
+                    
+                with conn.cursor() as cursor:
+                    
+                    sql_query = """
+                    SELECT nome, secao_produto, preco_venda, disponivel FROM products_with_embeddings
+                    ORDER BY RANDOM() LIMIT 20;
+                    """
+                    
+                    cursor.execute(sql_query)
+                    result = cursor.fetchall()
+                    
+                    conn.commit()
                 
-                Leve em consideração essas informações sobre o {supermarket_name}:
+                product_info = ""
+                
+                for product in result:
+                    for i in range(len(product)):
+                        # print("RANDOM PRODUCT: ", product[i])
+                        product_info += str(product[i]) + " " 
+                    
+                    answer_prompt+=product_info.strip() + "\n"
+                
+                answer_prompt+="""
+                Considerando esses produtos que contém os seguintes valores nome do produto, seção do produto, preco de venda e se o mesmo está disponivel 
+                extamente nessa sequência, retorne uma mensagem com alguns produtos que temos para ver se o cliente vai querer algum deles
+                retorne a melhor resposta possível.
                 """
-             
-            for info in info_about_the_business:
-                answer_prompt+=f"{info}\n"
+                
+            elif user_prompt == "Saber mais sobre nosso mercado":
+                answer_prompt = f"""
+                    Considerando que o cliente do nosso
+                    mercado {supermarket_name} enviou a mensagem:
+
+                    {user_prompt} 
+
+                    e as informações sobre o {supermarket_name} que temos disponíveis são essas: 
+                    \n
+                    """
+                    
+                for info in info_about_the_business:
+                    answer_prompt+=f"{info}\n"
+                
+                answer_prompt+="""
+                Considerando essas informações retorne uma mensagem com elas e alguma
+                possível ação ou pergunta que o cliente pode fazer agora.
+                retorne a melhor resposta possível.
+                """
+                
+            else:
+                
+                answer_prompt = f"""Considerando que o cliente do nosso 
+                    mercado {supermarket_name} quer saber {pre_process_prompt_grammatical(user_prompt)} 
+                    responda com uma frase simples e útil ao cliente. 
+                    E por fim gere alguma evento ou ação para o cliente fazer
+                    no mercado se vier a o caso, por exemplo, "Queria saber que horas o
+                    mercado abre?", resposta, "O mercado abre as 7h e hoje temos uma grande promoção"
+                    
+                    Leve em consideração essas informações sobre o {supermarket_name}:
+                    """
+                
+                for info in info_about_the_business:
+                    answer_prompt+=f"{info}\n"
             
 
         # response = main_chatbot_model.generate_content(answer_prompt)
@@ -1208,6 +1270,143 @@ def chatbot_response(user_prompt):
         print("-"*80)
         print("RESPONSE: ", response.text)
         return f"'{response.text}'"
+
+
+
+def generate_synonymous(product=None, product_list=None):
+    # global pre_processed_prompt_products_list
+    
+    # semantic_dictorinary = create_semantic_dictionary(product)
+    products = generate_and_search(product)
+    
+    products_dict = {}
+    
+    print("PRODUCTS SIZE: ", products.size)
+    
+    if products.size > 1:
+        for index, row in products.iterrows():
+            products_dict = {
+                "Name": row['Nome'],
+                "Section": row['Secao'],
+                "Price": row['PrecoVenda'],
+                "Available": row['Disponivel'],
+            }            
+        print("GENERATE SYNONYMOUS PRODUCT", products_dict["Name"])
+    
+    # print("""PRODUCTS: """, products)
+    
+    # if not product_list:
+    if not products_dict:
+    
+        new_product = pre_process_prompt_grammatical(product)
+        
+        prompt = """Coloque todos os sinônimos possíveis para as palavras abaixo. Leve em
+                    consideração que as palavras podem aparecer abreviadas como "INSET SBP AERO" que 
+                    significa "INSETICIDA SBP AEROSSOL" faça uma pesquisa aprofundada do que cada palavra
+                    pode significada estando abreviada ou não, considerando que muito provavelmente todas 
+                    elas são produtos de varejo encontrados em qualquer supermercado, pense nisso também quando
+                    for tentar identificar as palvras. Não repita os sinônimos e se limita a no máximo 30 sinônimos. 
+                    Segue as palavras.
+        \n"""
+        
+        prompt+=new_product
+        # products_list_2 = []
+        
+        # for p in products_df.to_dict(orient='records'):
+        #     # prompt += p['Nome']
+        #     products_list_2.append(p['Nome'])
+            
+        # max_prompt_size = 425 # this one is the maximum for the prompt input
+        # max_prompt_size = 140 # this one is the maxium for the prompt output, more than that and the answer is cut off
+        
+        # for i in range(0, max_prompt_size):
+        #     prompt+= products_list_2[i]
+        
+        # for i in range(max_prompt_size, len(products_list):
+        
+        prompt += """\n\nRetorne todos os produtos e sinônimos como um dicionário, por exemplo: {'CAFE PILAO ALMOFADA': ['Expresso', 'Cappuccino', 'Mocha', 'Latte', 'Café da Manhã', 'Café Coado', 'Café em Grãos']}
+        lembre-se de abrir a chave { e fechar a mesma chave } retorne apenas o diciónario sem nenhum texto adicional, 
+        ou seja, a sua resposta deve começar com uma { e terminar com o fechamento dela }. Adicione todos os possíveis sinônimos de cada palavra
+        """ 
+    else:
+        prompt = """Coloque todos os sinônimos possíveis para as palavras abaixo. Leve em
+                    consideração que as palavras podem aparecer abreviadas como "INSET SBP AERO" que 
+                    significa "INSETICIDA SBP AEROSSOL" faça uma pesquisa aprofundada do que cada palavra
+                    pode significada estando abreviada ou não, considerando que muito provavelmente todas 
+                    elas são produtos de varejo encontrados em qualquer supermercado, pense nisso também quando
+                    for tentar identificar as palvras. Segue as palavras.
+                \n"""
+        
+        for product in products_dict:
+            prompt+=product
+        
+        prompt += """\n\nRetorne todos os produtos e sinônimos como um dicionário, por exemplo: {'CAFE PILAO ALMOFADA': ['Expresso', 'Cappuccino', 'Mocha', 'Latte', 'Café da Manhã', 'Café Coado', 'Café em Grãos']}
+        lembre-se de abrir a chave { e fechar a mesma chave } retorne apenas o diciónario sem nenhum texto adicional, 
+        ou seja, a sua resposta deve começar com uma { e terminar com o fechamento dela }. Em formato de dicionário em Python
+        não retorne em nenhum outro formato.
+        Adicione todos os possíveis sinônimos de cada palavra
+        """ 
+        
+    print("GENERATE SYNONYMOUS PROMPT: ", prompt)
+    print("==========================================")
+    
+    # print("PROMPT:", prompt)   
+    response = generate_content_model.generate_content(prompt)
+    print(response.text)
+    
+    # {'Macarrão Pilsen Médio': ['Macarrão', 'Massa', 
+    #                            'Espaguete', 'Talharim', 'Fideli', 'Ninhos', 'Penne', 'Farfalle', 'Spaghetti', 'Macarrão Tipo Pilsen', 'Macarrão Médio', 'Macarrão de Trigo', 'Macarrão Seco', 'Macarrão Cozido', 'Macarrão para Sopa', 'Macarrão para Salada', 'Macarrão para Massa']}
+    
+    synonymous_dict = ast.literal_eval(response.text)
+    synonymous_list = list(synonymous_dict.values())[0]
+    # print(""" """,synonymous_list)
+    
+    with conn.cursor() as cursor:
+        cursor.execute("""
+                       UPDATE products_with_embeddings
+                       SET synonymous = %s
+                       WHERE nome = %s
+                       """, [synonymous_list, product])
+        conn.commit()
+        
+    # print(f"Synonym '{synonymous_list}' added to product '{product}'.")
+    
+    return synonymous_list
+    
+    # text = response.text
+    
+    # regex = re.compile(pattern_for_syn, text, re.DOTALL)
+    
+    # matches = re.findall(pattern_for_syn, text, re.DOTALL)
+    
+    # for match in matches:
+    #     print("MATCH: ", match)
+    
+    # match = re.search(pattern_for_syn, text)
+
+    # if match:
+    #     # extracting the correspondent group to the pattern
+    #     product_string = match.group(1)
+    #     print("PRODUCT STRING: ", product_string)
+
+    #     pre_processed_prompt_products_list = [product.strip() for product in product_string.split(',')]
+    
+    # start = fixed_text.find('{')+1
+    # end =fixed_text.find('}')
+    # json_string = fixed_text[start:end]
+    
+    # dictionary = json.loads(json_string)
+    
+    # print("==========================================")
+    
+    # print(pre_processed_prompt_products_list) 
+
+
+
+
+
+# generate_synonymous("Quero um refrigerante")
+
 
 
 # chatbot_response("Qual o noem do mercado de gvoces")

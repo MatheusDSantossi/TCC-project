@@ -1,0 +1,71 @@
+{% extends "../base/base.html" %}
+{% block content %}
+<div id="options-container" class="options-container">
+    {% for option in menu_options %}
+    <div class="option-item">
+        <button class="option-button" onclick="selectOption('{{ option.menu_option_description }}')">
+            {{ option.menu_option_description }}
+        </button>
+        <button onclick="moveUp(this)"> Move UP</button>
+        <button onclick="moveDown(this)"> Move Down</button>
+    </div>
+    {% endfor %}
+    <button onclick="saveOrder()">Save Order</button>
+</div>
+
+<script>
+    function moveUp(optionBtn) {
+        const optionItem = optionBtn.parentNode;
+
+        const previousOption = optionItem.previousElementSibling;
+
+        if (previousOption) {
+            optionItem.parentNode.insertBefore(optionItem, previousOption);
+        }
+    }
+
+    function moveDown(optionBtn) {
+        const optionItem = optionBtn.parentNode;
+        
+        const nextOption = optionItem.nextElementSibling;
+
+        if (nextOption) {
+            optionItem.parentNode.insertBefore(nextOption, optionItem);
+        }
+    }
+
+    function saveOrder() {
+        const options = document.querySelectorAll('.option-item .option-button');
+
+        const selectedOption = [];
+
+        options.forEach((option, index) => {
+            if (index < 4)
+                selectedOption.push(option.innerText);
+        });
+
+        console.log(selectedOption);
+
+        fetch("{% url 'saveMenuOrder' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({
+                menuOptions: selectedOption
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log("Response from server:", data);
+            if (!data.success) {
+                alert("Failed to save order");
+                return;
+            }
+            alert("Order saved succesfully");
+            })
+            .catch(error => console.error("Error: ", error));
+    }
+</script>
+{% endblock %}

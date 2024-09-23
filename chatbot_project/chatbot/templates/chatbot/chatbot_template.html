@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% comment %} {% load static %} {% endcomment %}
+    <title>Chatbot Hecate</title>
+    {% comment %} <link rel="stylesheet" href="../../css/chatbot.css"> {% endcomment %}
+    {% comment %} <link rel="stylesheet" href="{% static 'css/chatbot.css' %}"> {% endcomment %}
+    
+</head>
+<body>
+    {% comment %} Chatbot Container {% endcomment %}
+    {% comment %} <div class="chat-container position-fixed end-0 m-3 shadow-lg rounded bg-light" style="z-index: 1050;"> {% endcomment %}
+    {% comment %} <div class="chat-container position-absolute bottom-0 end-0 m-5 shadow-lg rounded bg-light" style="z-index: 1050;"> {% endcomment %}
+    <div class="chat-container shadow-lg rounded bg-light" style="display:block;">
+        {% comment %} Chat box container {% endcomment %}
+        <div class="chat-box-container overflow-auto">
+            {% comment %} Chat box {% endcomment %}
+            <div id="chat-box" class="chat-box p-3">
+                <div class="bot-message mb-2"><strong>Hecate:</strong> Olá, em que posso lhe ajudar hoje?</div>
+            </div>
+            {% comment %} Recommended option like the image {% endcomment %}
+            {% comment %} <div id="options-container" class="options-container">
+                <button class="option-button" onclick="selectOption('Saber mais sobre os produtos')">Saber mais sobre os produtos</button>
+                <button class="option-button" onclick="selectOption('Saber mais sobre nosso mercado')">Saber mais sobre nosso mercado</button>
+                <button class="option-button" onclick="selectOption('Promoções do dia')">Promoções do dia</button>
+                <button class="option-button" onclick="selectOption('Já sei o produto que quero')">Já sei o produto que quero</button>
+            </div> {% endcomment %}
+            {% comment %} Options Container {% endcomment %}
+            <div id="options-container" class="options-container mb-3" style="display: block;">
+                {% for option in menu_options %}
+                <button class="option-button btn btn-light w-100 text-start mb-2" onclick="selectOption('{{ option.menu_option_description }}')">
+                    {{ option.menu_option_description }}
+                </button>
+                {% endfor %}
+            </div>
+        </div>
+
+        <textarea class="user-textarea form-control" type="textArea" rows="4" cols="50" id="user-input" placeholder="Digite sua mensagem. Ex: Quero saber o preço do refrigerante Coca-cola 2 litros" ></textarea>
+        <button class="btn btn-primary" onclick="sendMessage()">Enviar</button>
+
+    </div>
+
+    <script>
+        function sendMessage() {
+            const userInput = document.getElementById('user-input').value;
+            const chatBox = document.getElementById('chat-box');
+
+            // Exibir a mensagem do usuário
+            chatBox.innerHTML += `<div class="user-message"><strong>Você:</strong> ${userInput}</div>`;
+
+            // Enviar a mensagem para o servidor Django
+            fetch('/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                },
+                body: `user_input=${encodeURIComponent(userInput)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Exibir a resposta do chatbot
+                chatBox.innerHTML += `<div class="bot-message"><strong>Hecate:</strong> ${data.response}</div>`;
+                document.getElementById('user-input').value = '';
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function selectOption(optionText) {
+            const userInput = optionText;
+            const chatBox = document.getElementById('chat-box');
+            const menuOptions = document.getElementById('options-container');
+
+            // Show the selected option by user
+            chatBox.innerHTML += `<div class="user-message"><strong>Você:</strong> ${userInput}</div>`;
+
+            // Show the textarea after the first option is selected
+            const userTextarea = document.getElementsByClassName('user-textarea');
+
+            if (userTextarea) {
+                // console.error("Element not found!")
+                userTextarea[0].style.display = 'block';
+                menuOptions.style.display = 'none';
+            }
+
+
+
+            // Send the selected option as it was a message
+            fetch('/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                },
+                body: `user_input=${encodeURIComponent(userInput)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Show the response from the chatbot
+                chatBox.innerHTML += `<div class="bot-message"><strong>Hecate:</strong> ${data.response}</div>`;
+                chatBox.scrollTop = chatBox.scrollHeight; // Automatic scroll for the last message
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
+
+</body>
+</html>

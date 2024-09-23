@@ -1,0 +1,17 @@
+{% extends "../base/base.html" %}
+{% block content %}
+<form method="POST">
+    {% csrf_token %}
+    <div class="form-group">
+        <label for="menuOptionNameInput">Menu Option Name</label>
+        <input type="text" class="form-control product" id="menuOptionNameInput" name="menuOptionNameInput" placeholder="Enter menu option name" list="productsSuggestions">
+    </div>
+    <div class="form-group">
+        <label for="menuOptionDescriptionInput">Menu Option Description</label>
+        <input type="text" class="form-control section" id="menuOptionDescriptionInput" name="menuOptionDescriptionInput" placeholder="Enter menu option description. Ex: Quais os produtos mais vendidos">
+    </div>
+    
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+
+{% endblock %}

@@ -1,16 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    {% comment %} {% load static %} {% endcomment %}
+
     <title>Chatbot Hecate</title>
-    {% comment %} <link rel="stylesheet" href="../../css/chatbot.css"> {% endcomment %}
-    {% comment %} <link rel="stylesheet" href="{% static 'css/chatbot.css' %}"> {% endcomment %}
-    
+
 </head>
 <body>
-    {% comment %} Chatbot Container {% endcomment %}
-    {% comment %} <div class="chat-container position-fixed end-0 m-3 shadow-lg rounded bg-light" style="z-index: 1050;"> {% endcomment %}
-    {% comment %} <div class="chat-container position-absolute bottom-0 end-0 m-5 shadow-lg rounded bg-light" style="z-index: 1050;"> {% endcomment %}
     <div class="chat-container shadow-lg rounded bg-light" style="display:block;">
         {% comment %} Chat box container {% endcomment %}
         <div class="chat-box-container overflow-auto">
@@ -18,15 +13,10 @@
             <div id="chat-box" class="chat-box p-3">
                 <div class="bot-message mb-2"><strong>Hecate:</strong> Olá, em que posso lhe ajudar hoje?</div>
             </div>
-            {% comment %} Recommended option like the image {% endcomment %}
-            {% comment %} <div id="options-container" class="options-container">
-                <button class="option-button" onclick="selectOption('Saber mais sobre os produtos')">Saber mais sobre os produtos</button>
-                <button class="option-button" onclick="selectOption('Saber mais sobre nosso mercado')">Saber mais sobre nosso mercado</button>
-                <button class="option-button" onclick="selectOption('Promoções do dia')">Promoções do dia</button>
-                <button class="option-button" onclick="selectOption('Já sei o produto que quero')">Já sei o produto que quero</button>
-            </div> {% endcomment %}
+            
             {% comment %} Options Container {% endcomment %}
             <div id="options-container" class="options-container mb-3" style="display: block;">
+                {% comment %} Recommended option like the image {% endcomment %}
                 {% for option in menu_options %}
                 <button class="option-button btn btn-light w-100 text-start mb-2" onclick="selectOption('{{ option.menu_option_description }}')">
                     {{ option.menu_option_description }}
@@ -35,15 +25,19 @@
             </div>
         </div>
 
+        {% comment %} <textarea onkeydown="sendMessage(event)" class="user-textarea form-control" type="textArea" rows="4" cols="50" id="user-input" placeholder="Digite sua mensagem. Ex: Quero saber o preço do refrigerante Coca-cola 2 litros" ></textarea> {% endcomment %}
         <textarea class="user-textarea form-control" type="textArea" rows="4" cols="50" id="user-input" placeholder="Digite sua mensagem. Ex: Quero saber o preço do refrigerante Coca-cola 2 litros" ></textarea>
-        <button class="btn btn-primary" onclick="sendMessage()">Enviar</button>
+        <button class="btn btn-primary mt-2" onclick="sendMessage()">Enviar</button>
 
     </div>
 
     <script>
+        //function sendMessage(event=null) {
         function sendMessage() {
             const userInput = document.getElementById('user-input').value;
             const chatBox = document.getElementById('chat-box');
+
+            // if (message.trim() !== ""){}
 
             // Exibir a mensagem do usuário
             chatBox.innerHTML += `<div class="user-message"><strong>Você:</strong> ${userInput}</div>`;
@@ -62,8 +56,12 @@
                 // Exibir a resposta do chatbot
                 chatBox.innerHTML += `<div class="bot-message"><strong>Hecate:</strong> ${data.response}</div>`;
                 document.getElementById('user-input').value = '';
+                chatBox.scrollTop = chatBox.scrollHeight;
             })
             .catch(error => console.error('Error:', error));
+
+            chatBox.scrollTop = chatBox.scrollHeight;
+
         }
 
         function selectOption(optionText) {
@@ -101,6 +99,8 @@
                 chatBox.scrollTop = chatBox.scrollHeight; // Automatic scroll for the last message
             })
             .catch(error => console.error('Error:', error));
+
+            chatBox.scrollTop = chatBox.scrollHeight;
         }
     </script>
 

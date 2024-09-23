@@ -17,9 +17,11 @@
     {% block content %}
       <h2>TESTING</h2>
     {% endblock %}
-    <button id="showChatbotBtn" class="position-fixed bottom-0 end-0 m-5 btn btn-primary">Open Chatbot</button>
+    <div>
+      <button id="showChatbotBtn" class="showChatbotBtn position-fixed bottom-0 end-0 m-5 btn btn-primary">Open Chatbot</button>
+    </div>
 
-    <div id="chatbotContainer" class="position-absolute bottom-60 end-0 m-5" style="display:none; z-index: 1050;">
+    <div id="chatbotContainer" class="position-fixed bottom-0 end-0 m-5" style="display:none; z-index: 1050;">
       {% include "../chatbot/chatbot_template.html" %}
     </div>
 </div>

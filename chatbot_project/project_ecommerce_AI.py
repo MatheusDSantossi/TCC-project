@@ -148,7 +148,8 @@ products_list_after_user_input = []
 
 # # print(df)
 
-embed_model = 'models/embedding-001'
+# embed_model = 'models/embedding-001'
+embed_model = 'models/text-embedding-004'
 
 #    content=f'O produto {title} é encontrado na {secao} com o preço de {preco_venda} reais possuindo a unidade de medida {unidade_medida}',  # Include the type of the product
 
@@ -327,7 +328,7 @@ def fetch_products_alike(product_name):
         
         query = """
             SELECT nome, secao_produto, preco_venda FROM products_with_embeddings
-            WHERE SIMILARITY(nome, %s) > 0.1;
+            WHERE SIMILARITY(nome, %s) > 0.3;
         """
         
         # print(type(product_name))
@@ -641,7 +642,8 @@ def find_similarity_products(prompt, embeddings_products=None):
 
             # Getting the products index with similarity above the threshold
 
-            threshold = 0.3
+            # threshold = 0.3
+            threshold = 0.5
             similar_index = np.where(similarities > threshold)[0]
             sorted_index = similar_index[np.argsort(-similarities[similar_index])]
             # index = np.argsort(similarities)[0][::-1]
@@ -1274,24 +1276,29 @@ def chatbot_response(user_prompt):
 
 
 def generate_synonymous(product=None, product_list=None):
-    # global pre_processed_prompt_products_list
+    
+    print("product: ", product)
+    original_product = product
     
     # semantic_dictorinary = create_semantic_dictionary(product)
     products = generate_and_search(product)
     
     products_dict = {}
+    product_synonymous_list = []
     
     print("PRODUCTS SIZE: ", products.size)
     
     if products.size > 1:
         for index, row in products.iterrows():
+
             products_dict = {
                 "Name": row['Nome'],
                 "Section": row['Secao'],
                 "Price": row['PrecoVenda'],
                 "Available": row['Disponivel'],
             }            
-        print("GENERATE SYNONYMOUS PRODUCT", products_dict["Name"])
+            product_synonymous_list.append(products_dict)
+            # print("GENERATE SYNONYMOUS PRODUCT", products_dict["Name"])
     
     # print("""PRODUCTS: """, products)
     
@@ -1305,28 +1312,18 @@ def generate_synonymous(product=None, product_list=None):
                     significa "INSETICIDA SBP AEROSSOL" faça uma pesquisa aprofundada do que cada palavra
                     pode significada estando abreviada ou não, considerando que muito provavelmente todas 
                     elas são produtos de varejo encontrados em qualquer supermercado, pense nisso também quando
-                    for tentar identificar as palvras. Não repita os sinônimos e se limita a no máximo 30 sinônimos. 
-                    Segue as palavras.
+                    for tentar identificar as palvras. Não repita os sinônimos e se limita a no máximo 30 sinônimos.
+                    Não adicione nenhum texto ou caracter extra como por exemplo  ```python, ```json  ou ```markdown
+                    ou algo parecido retorne apenas os sinonimos. 
+                    Segue o/os produtos.
         \n"""
         
         prompt+=new_product
-        # products_list_2 = []
-        
-        # for p in products_df.to_dict(orient='records'):
-        #     # prompt += p['Nome']
-        #     products_list_2.append(p['Nome'])
-            
-        # max_prompt_size = 425 # this one is the maximum for the prompt input
-        # max_prompt_size = 140 # this one is the maxium for the prompt output, more than that and the answer is cut off
-        
-        # for i in range(0, max_prompt_size):
-        #     prompt+= products_list_2[i]
-        
-        # for i in range(max_prompt_size, len(products_list):
         
         prompt += """\n\nRetorne todos os produtos e sinônimos como um dicionário, por exemplo: {'CAFE PILAO ALMOFADA': ['Expresso', 'Cappuccino', 'Mocha', 'Latte', 'Café da Manhã', 'Café Coado', 'Café em Grãos']}
         lembre-se de abrir a chave { e fechar a mesma chave } retorne apenas o diciónario sem nenhum texto adicional, 
         ou seja, a sua resposta deve começar com uma { e terminar com o fechamento dela }. Adicione todos os possíveis sinônimos de cada palavra
+        Lembre de colocar as palavras entre aspas duplas, por exemplo, {"Caixa de Fósforos","Palito de Fósforo","Fósforo de Segurança"}
         """ 
     else:
         prompt = """Coloque todos os sinônimos possíveis para as palavras abaixo. Leve em
@@ -1334,19 +1331,25 @@ def generate_synonymous(product=None, product_list=None):
                     significa "INSETICIDA SBP AEROSSOL" faça uma pesquisa aprofundada do que cada palavra
                     pode significada estando abreviada ou não, considerando que muito provavelmente todas 
                     elas são produtos de varejo encontrados em qualquer supermercado, pense nisso também quando
-                    for tentar identificar as palvras. Segue as palavras.
+                    for tentar identificar as palavras. Não adicione nenhum texto ou caracter extra como por exemplo  ```python, ```json  ou ```markdown
+                    ou algo parecido retorne apenas os sinonimos. 
+                    Segue o/os produtos.
                 \n"""
         
-        for product in products_dict:
-            prompt+=product
+        for product in product_synonymous_list:
+            prompt += str(product["Name"]) + "\n"
         
         prompt += """\n\nRetorne todos os produtos e sinônimos como um dicionário, por exemplo: {'CAFE PILAO ALMOFADA': ['Expresso', 'Cappuccino', 'Mocha', 'Latte', 'Café da Manhã', 'Café Coado', 'Café em Grãos']}
         lembre-se de abrir a chave { e fechar a mesma chave } retorne apenas o diciónario sem nenhum texto adicional, 
         ou seja, a sua resposta deve começar com uma { e terminar com o fechamento dela }. Em formato de dicionário em Python
         não retorne em nenhum outro formato.
+        Em hipotese alguma adicione nenhum texto ou caracter extra como por exemplo  ```python, ```json  ou ```markdown
+        ou algo parecido retorne apenas os sinonimos. 
         Adicione todos os possíveis sinônimos de cada palavra
+        Lembre de colocar as palavras entre aspas duplas, por exemplo, {"Caixa de Fósforos","Palito de Fósforo","Fósforo de Segurança"}
         """ 
-        
+
+    
     print("GENERATE SYNONYMOUS PROMPT: ", prompt)
     print("==========================================")
     
@@ -1358,19 +1361,41 @@ def generate_synonymous(product=None, product_list=None):
     #                            'Espaguete', 'Talharim', 'Fideli', 'Ninhos', 'Penne', 'Farfalle', 'Spaghetti', 'Macarrão Tipo Pilsen', 'Macarrão Médio', 'Macarrão de Trigo', 'Macarrão Seco', 'Macarrão Cozido', 'Macarrão para Sopa', 'Macarrão para Salada', 'Macarrão para Massa']}
     
     synonymous_dict = ast.literal_eval(response.text)
-    synonymous_list = list(synonymous_dict.values())[0]
-    # print(""" """,synonymous_list)
+    # synonymous_list = list(synonymous_dict.values())[0]
     
+    first_key = next(iter(synonymous_dict))
+    
+    synonymous_list = synonymous_dict[first_key]
+    # synonymous_dict = dict(synonymous_dict.values())[0]
+    print("Synonymous list: ",synonymous_list)
+    print("Synonymous dict: ",synonymous_dict)
+    
+    # for key, value in synonymous_dict.items():
+        # print("synonymous key: ",key, "synonymous value: ", value)
+        # synonymous_list = synonymous_dict[key]
+    
+    # Transform list into the format you want
+    formatted_string = '{' + ', '.join(f'"{syn}"' for syn in synonymous_list) + '}'
+    
+    # synonymous_dict_wrapped = f"'{formatted_string}'"
+    # print("Synonymous dict wrapped: ",synonymous_dict_wrapped)
+    
+    # Escaping special characters in the list and converting it to PostgreSQL's array format
+    # synonymous_list_pg = '{' + ','.join('"' + syn + '"' for syn in synonymous_list) + '}'
+
+    if isinstance(product, dict):
+        print("product: ", product['Name'])
+        product = product['Name']
+
+
     with conn.cursor() as cursor:
         cursor.execute("""
                        UPDATE products_with_embeddings
                        SET synonymous = %s
                        WHERE nome = %s
-                       """, [synonymous_list, product])
+                       """, (formatted_string, original_product))
         conn.commit()
-        
-    # print(f"Synonym '{synonymous_list}' added to product '{product}'.")
-    
+            
     return synonymous_list
     
     # text = response.text
@@ -1405,7 +1430,7 @@ def generate_synonymous(product=None, product_list=None):
 
 
 
-# generate_synonymous("Quero um refrigerante")
+# generate_synonymous("NESCAU 2.0 ACTIGEN-E NESTLE CX COM 2")
 
 
 

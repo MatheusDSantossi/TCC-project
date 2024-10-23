@@ -1,3 +1,5 @@
+from django.core.cache import cache
+
 from django.shortcuts import render, redirect
 
 from django.contrib.auth.hashers import check_password
@@ -53,6 +55,9 @@ class MenuOptionEdit(View):
     
     def save_menu_order(request):
         if request.method == 'POST':
+            # invalidate the cache (if used)
+            cache.clear()
+            
             try:
                 data = json.loads(request.body)
                 menu_options = data.get('menuOptions', [])
@@ -63,7 +68,10 @@ class MenuOptionEdit(View):
                     menu_option = MenuOptionOrdered(menu_option_description=description)
                     menu_option.save()
                     
-                return JsonResponse({'success': True})
+                # Fetcg tge updated menu options to ensure it reflets in the next request
+                menu_options = list(MenuOptionOrdered.get_all_menuOptions())
+                    
+                return JsonResponse({'success': True, 'menuOptions': [opt.menu_option_description for opt in menu_options]})
                 
             except Exception as e:
                 return JsonResponse({'success': False, 'error': str(e)})

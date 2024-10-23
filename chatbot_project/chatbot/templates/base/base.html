@@ -37,9 +37,21 @@
     <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
 
     <script>
+      // reloading the windows to get the orderd menu options after 
+      // possible update.
+      window.onload = function() {
+        if (!window.location.hash) {
+          window.location = window.location + '#loaded';
+          window.location.reload();
+        }
+      }
+
       document.getElementById("showChatbotBtn").addEventListener("click", function() {
         var chatbotContainer = document.getElementById("chatbotContainer");
         var showChatbotBtn = document.getElementById("showChatbotBtn");
+
+      
+
         //chatbotContainer.classList.toggle('show');
         if (chatbotContainer.style.display === 'none') {
           showChatbotBtn.innerHTML = "Close Chatbot";
@@ -48,6 +60,8 @@
           showChatbotBtn.innerHTML = "Open Chatbot";
           chatbotContainer.style.display = 'none';
         }
+
+        
         
       });
     </script>

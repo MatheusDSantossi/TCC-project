@@ -64,6 +64,12 @@
                 return;
             }
             alert("Order saved succesfully");
+
+            /*
+            If you don’t want to reload the entire page, you can fetch the updated menu options and dynamically replace the content. You'd adjust the response to send back the new options in JSON and then re-render the options container with JavaScript.
+            */
+            // reload the page or fetch new menu options from server
+            location.reload();
             })
             .catch(error => console.error("Error: ", error));
     }

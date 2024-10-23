@@ -23,11 +23,13 @@
                 </button>
                 {% endfor %}
             </div>
+            <textarea class="user-textarea form-control" type="textArea" rows="4" cols="50" id="user-input" placeholder="Digite sua mensagem. Ex: Quero saber o preço do refrigerante Coca-cola 2 litros" ></textarea>
+            <button id="btn-option" class="btn btn-primary mt-2" onclick="sendMessage()" style="display: none;">Enviar</button>
         </div>
 
         {% comment %} <textarea onkeydown="sendMessage(event)" class="user-textarea form-control" type="textArea" rows="4" cols="50" id="user-input" placeholder="Digite sua mensagem. Ex: Quero saber o preço do refrigerante Coca-cola 2 litros" ></textarea> {% endcomment %}
-        <textarea class="user-textarea form-control" type="textArea" rows="4" cols="50" id="user-input" placeholder="Digite sua mensagem. Ex: Quero saber o preço do refrigerante Coca-cola 2 litros" ></textarea>
-        <button class="btn btn-primary mt-2" onclick="sendMessage()">Enviar</button>
+        {% comment %} <textarea class="user-textarea form-control" type="textArea" rows="4" cols="50" id="user-input" placeholder="Digite sua mensagem. Ex: Quero saber o preço do refrigerante Coca-cola 2 litros" ></textarea>
+        <button id="btn-option" class="btn btn-primary mt-2" onclick="sendMessage()" style="display: none;">Enviar</button> {% endcomment %}
 
     </div>
 
@@ -68,6 +70,7 @@
             const userInput = optionText;
             const chatBox = document.getElementById('chat-box');
             const menuOptions = document.getElementById('options-container');
+            const btnOption = document.getElementById('btn-option');
 
             // Show the selected option by user
             chatBox.innerHTML += `<div class="user-message"><strong>Você:</strong> ${userInput}</div>`;
@@ -78,6 +81,7 @@
             if (userTextarea) {
                 // console.error("Element not found!")
                 userTextarea[0].style.display = 'block';
+                btnOption.style.display = 'block';
                 menuOptions.style.display = 'none';
             }
 

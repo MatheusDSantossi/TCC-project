@@ -1,12 +1,10 @@
 from django.shortcuts import render
 from django.http import JsonResponse
 from project_ecommerce_AI import chatbot_response
-# from chatbot.models.models import models
-# from chatbot.models.product import product
+
 from ..models.product import Product
 from ..models.models import models
 
-# from ..models.menu_options import MenuOption
 from ..models.menu_options_ordered import MenuOptionOrdered
 from random import sample
 
@@ -38,20 +36,6 @@ def index(request):
     # elif request.method == 'GET':
     #     return render(request, 'chatbot/edit_menu_options_list.html', context)
     
-    return render(request, 'base/base.html', context)
+    return render(request, 'index.html', context)
+    # return render(request, 'base/base.html', context)
     # return render(request, 'chatbot/index.html')
-
-
-# def menu_option_chatbot_view(request):
-#     # Fetch all menu options from the database
-#     all_options = list(MenuOption.objects.all())
-    
-#     # Get 4 random options
-#     menu_options = sample(all_options, 4) if len(all_options) >= 4 else all_options
-    
-#     context = {
-#         'menu_options': menu_options,
-#     }
-    
-#     return render(request, 'chatbot/chatbot_template.html', context)
-

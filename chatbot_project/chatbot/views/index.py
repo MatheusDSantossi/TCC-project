@@ -19,23 +19,16 @@ def index(request):
     # Get the first 4 options
     menu_options = all_options[:4]
     
-    context = {
-        'menu_options': menu_options,
-    }
-    
-    # return render(request, 'chatbot/chatbot_template.html', context)
-    
-    if request.method == 'POST':
+    # context = {
+    #     'menu_options': menu_options,
+    # }
         
-        user_input = request.POST.get('user_input')
-        response = chatbot_response(user_input)
+    # if request.method == 'POST':
+        
+    #     user_input = request.POST.get('user_input')
+    #     response = chatbot_response(user_input)
         
                 
-        return JsonResponse({'response': response})
+    return JsonResponse([{'menu_option_description': option.menu_option_description} for option in menu_options], safe=False)
     
-    # elif request.method == 'GET':
-    #     return render(request, 'chatbot/edit_menu_options_list.html', context)
-    
-    return render(request, 'index.html', context)
-    # return render(request, 'base/base.html', context)
-    # return render(request, 'chatbot/index.html')
+    # return render(request, 'index.html', context)

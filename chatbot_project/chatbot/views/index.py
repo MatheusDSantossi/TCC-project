@@ -7,7 +7,10 @@ from ..models.models import models
 
 from ..models.menu_options_ordered import MenuOptionOrdered
 from random import sample
+from django.views.decorators.csrf import csrf_exempt
 
+# DON'T USE THAT IN PROD
+@csrf_exempt
 def index(request):
     
     # Fetch all menu options from the database
@@ -23,10 +26,11 @@ def index(request):
     #     'menu_options': menu_options,
     # }
         
-    # if request.method == 'POST':
+    if request.method == 'POST':
         
-    #     user_input = request.POST.get('user_input')
-    #     response = chatbot_response(user_input)
+        user_input = request.POST.get('user_input')
+        response = chatbot_response(user_input)
+        return JsonResponse({'response': response})
         
                 
     return JsonResponse([{'menu_option_description': option.menu_option_description} for option in menu_options], safe=False)

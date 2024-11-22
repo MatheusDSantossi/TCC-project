@@ -52,7 +52,7 @@ generation_config = {
 }
     # "candidate_count": 1,
 
-main_chatbot_model = genai.GenerativeModel("gemini-1.5-flash",
+main_chatbot_model = genai.GenerativeModel(model_name="gemini-1.5-flash-8b",
                                 generation_config=generation_config)
 
 chat = main_chatbot_model.start_chat(
@@ -62,7 +62,7 @@ chat = main_chatbot_model.start_chat(
     ]    
 )
 
-generate_content_model = genai.GenerativeModel("gemini-1.5-flash", 
+generate_content_model = genai.GenerativeModel(model_name="gemini-1.5-flash-8b", 
                                                generation_config=generation_config)
 
 # model_2 = genai.GenerativeModel("gemini-1.0-pro",
@@ -270,6 +270,8 @@ def process_prompt(prompt):
     Returns:
     bool: True if the user wants to exit, False otherwise.
     """
+    
+    print("PROMPT: ", prompt)
     if fuzz.token_set_ratio(prompt.lower(), "quero sair") >= 80:
         # print(process_prompt(user_prompt.lower()))  # Processa antes de sair
         print(f'Obrigado por vir ao {supermarket_name}. Volte sempre!')
@@ -1274,6 +1276,7 @@ def chatbot_response(user_prompt):
         return f"'{response.text}'"
 
 
+# chatbot_response("Quero um guaraca quanto custa?")
 
 def generate_synonymous(product=None, product_list=None):
     

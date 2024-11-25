@@ -369,151 +369,193 @@ def pre_process_prompt(prompt):
     
     if(products_find_in_section != None):
         fix_prompt_v2 = f"""
-        Corrija quaisquer erros gramaticais e ortográficos no texto fornecido, 
-        mantendo o significado original e, principalmente, substituindo os nomes 
-        de produtos pelos seus nomes padrão conforme a lista de produtos fornecida.
+        Task Description:
 
-        Lista de Produtos encontrados na seção comentada pelo cliente:
+        You are a text normalizer and corrector. Your goal is to correct any grammatical and orthographic errors in the provided
+        text while standardizing product names to match the exact names from the given product lists. You must ensure no relevant
+        products are overlooked and avoid returning "Texto RA" unless absolutely no products match the input.
+    
+        Provided Information:
+
+        1. Products in the same section:
         {products_find_in_section}
         
-        Lista de possíveis produtos parecidos com a que pode ser encontrado no prompt:
+        2. Possible Similar Products:
         {products_find_using_prompt}
 
-        Texto para correção:
-
+        3. Standard Product List (Exact Names and Sections):
+        {products_alike}
+        
+        Text to Normalize:
         "{fix_prompt_v1}"
 
-        Lista de produtos que possam ser encontrados ou parecido com o texto acima:
-        {products_alike}
+        Normalization Instructions:
+        
+        1.Product Name Matching Rules:
 
-        Instruções de Normalização:
+        Match input terms to products in the list based on exact name, abbreviations, partial matches, or phonetic similarity.
+        Variations like "cafe," "CAFÉ," or "Cafe Pilao" should be normalized to "CAFE PILAO ALMOFADA" or another appropriate match from the list.
+        
+        2. Handling Partial or Ambiguous Matches:
 
-        - Substitua termos que correspondam, sejam semelhantes, ou possuam abreviações de produtos listados pela forma exata do nome do produto conforme fornecido na lista.
-        - Considere variações fonéticas e gramaticais, tais como pluralização, diminutivos ou abreviações (ex: 'cafe' -> 'CAFE PILAO ALMOFADA').
-        - Se o nome do produto estiver incompleto, parcial ou abreviado, substitua pelo nome completo conforme a lista.
-        - Se houver correspondência parcial de nomes de produtos, aplique a substituição correspondente. Exemplo: "cafe" ou "pilao" deve ser substituído por "CAFE PILAO ALMOFADA".
-        - Para termos que não correspondem a produtos da lista, mantenha o texto original ou retorne "Texto RA" se irrelevante.
+        If the input refers to a category or group (e.g., "café" with no additional qualifiers), prioritize the most generic product from the list (e.g., "CAFE PALACIO MOIDO 250G").
+        
+        3.Text Not Containing Products:
 
-        Exemplo de Substituições:
-        - "cafe" deve ser substituído por "CAFE PILAO ALMOFADA ou CAFE PALACIO MOIDO 250G" ou qualquer outro café listado na lista de produtos.
-        - "refrigerante" -> "REFRIG. GUARANA ANTARCT PET".
-        - "cond" -> "COND SEDA PRETOS LUMINOSOS NE".
+        If the text contains no identifiable product names or similar terms, return "Texto RA."
+        
+        4. Output Format:
 
-        Formato de Resposta:
+        If a product is identified, list the product(s) in square brackets with their exact names.
+        If multiple products fit, list all relevant matches, separated by commas.
+        
+        Example:
+        Input: "cafe" -> Output: [CAFE PILAO ALMOFADA, CAFE PALACIO MOIDO 250G].
+        
+        5. Contextual Normalization:
 
-        - Liste os produtos identificados entre colchetes, separados por vírgulas.
-        - Exemplo: "Quais as opções de [BISC. MINI MARIA 10X400G, LEITE EM PO NINHO INSTANTANEO] disponíveis?"
+        Consider context and section information when normalizing. For example:
+        If "250G" appears, prioritize matching with products of the same size.
+        If no context (e.g., size or section) is given, use a default or generic match.
+        
+        6. Specific Cases:
 
-        Regras de Retorno:
+        Abbreviations: Normalize terms like "refri" or "refrigerante" to specific product names like "REFRIG. PEPSI COLA PET 2 EM 1."
+        Plurals or variants: "cafés" -> "CAFE PILAO ALMOFADA."
+        
+        Examples of Substitutions:
 
-        - Se um produto for identificado no texto, o chatbot deve retornar o nome completo do produto entre colchetes.
-        - Caso não haja produtos correspondentes, retorne "Texto RA".
+        Input: "cafe" -> Output: [CAFE PILAO ALMOFADA, CAFE PALACIO MOIDO 250G].
+        Input: "pepsi" -> Output: [REFRIG. PEPSI COLA PET 2 EM 1].
+        Input: "cafe palacio" -> Output: [CAFE PALACIO MOIDO 250G, CAFE PALACIO MOIDO 500G].
         """
     elif products_find_with_price != None:
         fix_prompt_v2 = f"""
-        Corrija quaisquer erros gramaticais e ortográficos no texto fornecido, 
-        mantendo o significado original e, principalmente, substituindo os nomes 
-        de produtos pelos seus nomes padrão conforme a lista de produtos fornecida.
+        Task Description:
 
-        Lista de Produtos que contém o mesmo preço que o cliente comentou:
+        You are a text normalizer and corrector. Your goal is to correct any grammatical and orthographic errors in the provided
+        text while standardizing product names to match the exact names from the given product lists. You must ensure no relevant
+        products are overlooked and avoid returning "Texto RA" unless absolutely no products match the input.
+
+        Provided Information:
+
+        1. Products with the same price:
         {products_find_with_price}
         
-        Lista de possíveis produtos parecidos com a que pode ser encontrado no prompt:
+        2. Possible Similar Products:
         {products_find_using_prompt}
 
-        Texto para correção:
-
+        3. Standard Product List (Exact Names and Sections):
+        {products_alike}
+        
+        Text to Normalize:
         "{fix_prompt_v1}"
         
-        Lista de produtos que possam ser encontrados ou parecido com o texto acima:
-        {products_alike}
+        Normalization Instructions:
+        
+        1.Product Name Matching Rules:
 
-        Instruções de Normalização:
+        Match input terms to products in the list based on exact name, abbreviations, partial matches, or phonetic similarity.
+        Variations like "cafe," "CAFÉ," or "Cafe Pilao" should be normalized to "CAFE PILAO ALMOFADA" or another appropriate match from the list.
+        
+        2. Handling Partial or Ambiguous Matches:
 
-        - Substitua termos que correspondam, sejam semelhantes, ou possuam abreviações de produtos listados pela forma exata do nome do produto conforme fornecido na lista.
-        - Considere variações fonéticas e gramaticais, tais como pluralização, diminutivos ou abreviações (ex: 'cafe' -> 'CAFE PILAO ALMOFADA').
-        - Se o nome do produto estiver incompleto, parcial ou abreviado, substitua pelo nome completo conforme a lista.
-        - Se houver correspondência parcial de nomes de produtos, aplique a substituição correspondente. Exemplo: "cafe" ou "pilao" deve ser substituído por "CAFE PILAO ALMOFADA".
-        - Para termos que não correspondem a produtos da lista, mantenha o texto original ou retorne "Texto RA" se irrelevante.
+        If the input refers to a category or group (e.g., "café" with no additional qualifiers), prioritize the most generic product from the list (e.g., "CAFE PALACIO MOIDO 250G").
+        
+        3.Text Not Containing Products:
 
-        Exemplo de Substituições:
-        - "cafe" deve ser substituído por "CAFE PILAO ALMOFADA ou CAFE PALACIO MOIDO 250G" ou qualquer outro café listado na lista de produtos.
-        - "refrigerante" -> "REFRIG. GUARANA ANTARCT PET".
-        - "cond" -> "COND SEDA PRETOS LUMINOSOS NE".
+        If the text contains no identifiable product names or similar terms, return "Texto RA."
+        
+        4. Output Format:
 
-        Formato de Resposta:
+        If a product is identified, list the product(s) in square brackets with their exact names.
+        If multiple products fit, list all relevant matches, separated by commas.
+        
+        Example:
+        Input: "cafe" -> Output: [CAFE PILAO ALMOFADA, CAFE PALACIO MOIDO 250G].
+        
+        5. Contextual Normalization:
 
-        - Liste os produtos identificados entre colchetes, separados por vírgulas.
-        - Exemplo: "Quais as opções de [BISC. MINI MARIA 10X400G, LEITE EM PO NINHO INSTANTANEO] disponíveis?"
+        Consider context and section information when normalizing. For example:
+        If "250G" appears, prioritize matching with products of the same size.
+        If no context (e.g., size or section) is given, use a default or generic match.
+        
+        6. Specific Cases:
 
-        Regras de Retorno:
+        Abbreviations: Normalize terms like "refri" or "refrigerante" to specific product names like "REFRIG. PEPSI COLA PET 2 EM 1."
+        Plurals or variants: "cafés" -> "CAFE PILAO ALMOFADA."
+        
+        Examples of Substitutions:
 
-        - Se um produto for identificado no texto, o chatbot deve retornar o nome completo do produto entre colchetes.
-        - Caso não haja produtos correspondentes, retorne "Texto RA".
+        Input: "cafe" -> Output: [CAFE PILAO ALMOFADA, CAFE PALACIO MOIDO 250G].
+        Input: "pepsi" -> Output: [REFRIG. PEPSI COLA PET 2 EM 1].
+        Input: "cafe palacio" -> Output: [CAFE PALACIO MOIDO 250G, CAFE PALACIO MOIDO 500G].
         """
     else:
         fix_prompt_v2 = f"""
-        Corrija quaisquer erros gramaticais e ortográficos no texto fornecido, 
-        mantendo o significado original e, principalmente, substituindo os nomes 
-        de produtos pelos seus nomes padrão conforme a lista de produtos fornecida.
+        Task Description:
 
-        Lista de produtos que possam ser encontrados ou parecido com o texto texto para correção:
+        You are a text normalizer and corrector. Your goal is to correct any grammatical and orthographic errors in the provided
+        text while standardizing product names to match the exact names from the given product lists. You must ensure no relevant
+        products are overlooked and avoid returning "Texto RA" unless absolutely no products match the input.
+
+        Provided Information:
+
+        1. Standard Product List (Exact Names and Sections):
         {products_alike}
         
-        Lista de possíveis produtos parecidos com os que podem ser encontrados no texto para correção:
+        2. Possible Similar Products:
         {products_find_using_prompt}
 
-        Texto para correção:
-
+        Text to Normalize:
         "{fix_prompt_v1}"
 
-        Instruções de Normalização:
+        Normalization Instructions:
+        
+        1.Product Name Matching Rules:
 
-        - Substitua termos que correspondam, sejam semelhantes, ou possuam abreviações de produtos listados pela forma exata do nome do produto conforme fornecido na lista.
-        - Considere variações fonéticas e gramaticais, tais como pluralização, diminutivos ou abreviações (ex: 'cafe' -> 'CAFE PILAO ALMOFADA').
-        - Se o nome do produto estiver incompleto, parcial ou abreviado, substitua pelo nome completo conforme a lista.
-        - Se houver correspondência parcial de nomes de produtos, aplique a substituição correspondente. Exemplo: "cafe" ou "pilao" deve ser substituído por "CAFE PILAO ALMOFADA".
-        - Para termos que não correspondem a produtos da lista, mantenha o texto original ou retorne "Texto RA" se irrelevante.
+        Match input terms to products in the list based on exact name, abbreviations, partial matches, or phonetic similarity.
+        Variations like "cafe," "CAFÉ," or "Cafe Pilao" should be normalized to "CAFE PILAO ALMOFADA" or another appropriate match from the list.
+        
+        2. Handling Partial or Ambiguous Matches:
 
-        Exemplo de Substituições:
-        - "cafe" deve ser substituído por "CAFE PILAO ALMOFADA ou CAFE PALACIO MOIDO 250G" ou qualquer outro café listado na lista de produtos.
-        - "refrigerante" -> "REFRIG. GUARANA ANTARCT PET".
-        - "cond" -> "COND SEDA PRETOS LUMINOSOS NE".
+        If the input refers to a category or group (e.g., "café" with no additional qualifiers), prioritize the most generic product from the list (e.g., "CAFE PALACIO MOIDO 250G").
+        
+        3.Text Not Containing Products:
 
-        Formato de Resposta:
+        If the text contains no identifiable product names or similar terms, return "Texto RA."
+        
+        4. Output Format:
 
-        - Liste os produtos identificados entre colchetes, separados por vírgulas.
-        - Exemplo: "Quais as opções de [BISC. MINI MARIA 10X400G, LEITE EM PO NINHO INSTANTANEO] disponíveis?"
+        If a product is identified, list the product(s) in square brackets with their exact names.
+        If multiple products fit, list all relevant matches, separated by commas.
+        
+        Example:
+        Input: "cafe" -> Output: [CAFE PILAO ALMOFADA, CAFE PALACIO MOIDO 250G].
+        
+        5. Contextual Normalization:
 
-        Regras de Retorno:
+        Consider context and section information when normalizing. For example:
+        If "250G" appears, prioritize matching with products of the same size.
+        If no context (e.g., size or section) is given, use a default or generic match.
+        
+        6. Specific Cases:
 
-        - Se um produto for identificado no texto, o chatbot deve retornar o nome completo do produto entre colchetes.
-        - Caso não haja produtos correspondentes, retorne "Texto RA".
+        Abbreviations: Normalize terms like "refri" or "refrigerante" to specific product names like "REFRIG. PEPSI COLA PET 2 EM 1."
+        Plurals or variants: "cafés" -> "CAFE PILAO ALMOFADA."
+        
+        Examples of Substitutions:
+
+        Input: "cafe" -> Output: [CAFE PILAO ALMOFADA, CAFE PALACIO MOIDO 250G].
+        Input: "pepsi" -> Output: [REFRIG. PEPSI COLA PET 2 EM 1].
+        Input: "cafe palacio" -> Output: [CAFE PALACIO MOIDO 250G, CAFE PALACIO MOIDO 500G].
         """
     
-    ### ELE ESTÁ MUDANDO MUITOS NOMES PARA REFRIG PRO ALGUM MOTIVO
-    #Posso ajudar em algo mais? que hras i mercqwd fecea
-    # FIXED 1 Que horas o mercado fecha? 
-
-    # Que horas o [REFRIG. GUARANA ANTARCT PET] fecha? 
-
-    # ['REFRIG. GUARANA ANTARCT PET']
-    # Considere também que Guaraná é sinônimo de Refrigerante, ou seja, caso o usuário digite que quer Guaraná considere que ele quer refrigerante.
-    
-    # Caso tenho um nome que não pareça com algo da lista, por exemplo, "Sandália", "Ração" ou algo do tipo, corrija o texto para o mais proximo possível de um produto normal
-    # exemplo, "Raceo de cachorro" para "Ração de cachorro" ou "Pipoeq" para "Pipoca" são alguns exemplos que quero que você corrija quando aparecer
-
-    # CHECK IF IT'S USEFUL PUT THE TEXT ABOVE ON THE PROMPT
-
-    # In case the product is not in the list, show the message "Produto não está disponível!"
-    
-    time.sleep(3)
+    time.sleep(3) # a little sleep to avoid overflow of questions to Gemini API
     
     print("FIX_PROMP_V2: ", fix_prompt_v2)
     
     pre_processed_prompt = generate_content_model.generate_content(fix_prompt_v2)
-
-    # Problema agora é identificar mais de um produto :)
 
     return pre_processed_prompt.text
 
@@ -552,7 +594,7 @@ def create_semantic_dictionary(user_input):
 # print("SEMANTIC DIC: ",create_semantic_dictionary("Quais os produtos da seção 1"))
 
 
-def encontrar_produtos_similares(semantic_dictionary, threshold=0.7):
+def encontrar_produtos_similares(semantic_dictionary, threshold=0.5):
     """
     Encontra produtos similares à consulta do usuário com base em embeddings.
 

@@ -1,4 +1,5 @@
 import re
+# from chatbot_test import embeddings_testing
 
 def find_section(text, conn):
     # Define the regular expression to match "section" followed by a letter or a number
@@ -73,26 +74,21 @@ def find_similar_products_using_input_embeddings(input_embed, conn, np, cosine_s
         
         # Convert the input embeddings to a numpy array
         input_embedding = np.array(input_embed, dtype=np.float32)
+        
+        # embeddings_testing(input_embedding, embeddings)
                 
         # similarities = cosine_similarity([input_embed], embeddings)[0]
         similarities = cosine_similarity([input_embedding], embeddings)[0]
         
         # Find the most similar embeddings and their indices
-        # most_similar_indices = np.argsort(similarities)[::-1][:30]
         most_similar_indices = np.argsort(similarities)[::-1][:20]
-        
-        # Fetch the corresponding product names from the database
-        # cursor.execute("""
-        #     SELECT nome FROM products_with_embeddings
-        #     WHERE embeddings @> %s
-        #     LIMIT 30
-        # """, (input_embed,))
-        
-        # return cursor.fetchall()
         
         # Fetch the products_ids and similarities for the top similar products
         
-        similar_products = [(product_ids[idx], similarities[idx]) for idx in most_similar_indices]
+        threshold = 0.5
+        
+        similar_products = [(product_ids[idx], similarities[idx]) for idx in most_similar_indices if similarities[idx] > threshold]
+        # similar_products = [(product_ids[idx], similarities[idx]) for idx in most_similar_indices]
         
         product_details = []
         for product_id, similarity in similar_products:

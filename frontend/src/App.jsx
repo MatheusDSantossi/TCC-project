@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import Home from "./components/Home";
 // import StarsCanvas from "./components/canvas/Stars";
 import Chatbot from "./components/Chatbot";
+import ProductRegistration from "./components/ProductRegistration";
 
 import { RocketCanvas, StarsCanvas } from "./components/canvas";
 
@@ -15,6 +16,7 @@ function App() {
           <Routes>
             <Route exact path="/" element={<Home />} />
             <Route exact path="/chatbot" element={<Chatbot />} />
+            <Route exact path="/productregistration" element={<ProductRegistration />} />
           </Routes>
         </div>
         <div className="relative z-0">

@@ -1,4 +1,6 @@
 import google.generativeai as genai
+import numpy as np
+from sklearn.metrics.pairwise import cosine_similarity
 
 genai.configure(api_key="AIzaSyBskS4hcTWUP0L0QROEbuPEKdvp4KVlWkQ")
 
@@ -26,9 +28,22 @@ def generate_response_interactive_chat():
     response = chat.send_message("What's the name of my supermarmekt?")
     print(response.text)
 
+
+def embeddings_testing(input_embed, embeddings):
+    
+   
+                
+    # similarities = cosine_similarity([input_embed], embeddings)[0]
+    similarities = cosine_similarity([input_embedding], embeddings)[0]
+    
+    # Find the most similar embeddings and their indices
+    most_similar_indices = np.argsort(similarities)[::-1][:20]
+    
+    return most_similar_indices
+
 if __name__ == "__main__":
     # generate_response_stream_chat()
-    
-    generate_response_interactive_chat()
+    print("TESTING EMBEDDING: ", embeddings_testing())
+    # generate_response_interactive_chat()
     
     

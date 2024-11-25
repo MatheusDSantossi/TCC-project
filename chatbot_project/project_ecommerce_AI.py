@@ -155,19 +155,20 @@ embed_model = 'models/text-embedding-004'
 
 def embed_fn(title, secao="", preco_venda=0, unidade_medida=""):
     
-    if find_section(title, conn)== None:
+    section = find_section(title, conn)
+    
+    if section == None:
     
         return genai.embed_content(model=embed_model,
                                 content=f'{title}',  # I understood that this have to be the most alike the userp prompt
                                 title=title,
-                                task_type="RETRIEVAL_DOCUMENT")["embedding"]
-        
-    secao = find_section(title, conn)    
+                                task_type="RETRIEVAL_DOCUMENT")["embedding"]  
     
     return genai.embed_content(model=embed_model,
-                               content=f'{title} e seção {secao}',  # I understood that this have to be the most alike the userp prompt
+                               content=f'{title} e seção {section}',  # I understood that this have to be the most alike the userp prompt
                                title=title,
                                task_type="RETRIEVAL_DOCUMENT")["embedding"]
+    
     # return genai.embed_content(model=embed_model,
     #                            content=f'O produto {title}',  # I understood that this have to be the most alike the userp prompt
     #                            title=title,
@@ -308,7 +309,7 @@ def pre_process_prompt_grammatical(prompt):
 
         Regras de Retorno:
 
-        Caso o texto não contenha nenhum produto ou seja, o texto disponibilizado é algo totalmente diferente a produtos que possam ser vendidos no {supermarket_name}, como por exemplo,
+        Caso o texto não contenha nenhum produto ou seja, o texto disponibilizado é algo totalmente diferente a Lista de produtos que possam ser vendidos no {supermarket_name}, como por exemplo,
         "Ole, como você está?", "Quera saber que horas o mercado facha?", "Como é o seu nome", "Qual o estado do mercado" ou "Como funciona o mercado" 
         corrija apenas os erros gramaticais e retorne o texto.
     """
@@ -330,7 +331,7 @@ def fetch_products_alike(product_name):
         
         query = """
             SELECT nome, secao_produto, preco_venda FROM products_with_embeddings
-            WHERE SIMILARITY(nome, %s) > 0.3;
+            WHERE SIMILARITY(nome, %s) > 0.1;
         """
         
         # print(type(product_name))
@@ -375,15 +376,14 @@ def pre_process_prompt(prompt):
         Lista de Produtos encontrados na seção comentada pelo cliente:
         {products_find_in_section}
         
-        Lista de possíveis produtos parecidos com a que pdoe ser encontrado no prompt:
+        Lista de possíveis produtos parecidos com a que pode ser encontrado no prompt:
         {products_find_using_prompt}
 
         Texto para correção:
 
-        Texto:
         "{fix_prompt_v1}"
 
-        Outros produtos:
+        Lista de produtos que possam ser encontrados ou parecido com o texto acima:
         {products_alike}
 
         Instruções de Normalização:
@@ -395,8 +395,8 @@ def pre_process_prompt(prompt):
         - Para termos que não correspondem a produtos da lista, mantenha o texto original ou retorne "Texto RA" se irrelevante.
 
         Exemplo de Substituições:
-        - "cafe" deve ser substituído por "CAFE PILAO ALMOFADA" ou qualquer outro café listado na lista de produtos.
-        - "pastel" -> "PASTEL DE QUEIJO".
+        - "cafe" deve ser substituído por "CAFE PILAO ALMOFADA ou CAFE PALACIO MOIDO 250G" ou qualquer outro café listado na lista de produtos.
+        - "refrigerante" -> "REFRIG. GUARANA ANTARCT PET".
         - "cond" -> "COND SEDA PRETOS LUMINOSOS NE".
 
         Formato de Resposta:
@@ -418,15 +418,14 @@ def pre_process_prompt(prompt):
         Lista de Produtos que contém o mesmo preço que o cliente comentou:
         {products_find_with_price}
         
-        Lista de possíveis produtos parecidos com a que pdoe ser encontrado no prompt:
+        Lista de possíveis produtos parecidos com a que pode ser encontrado no prompt:
         {products_find_using_prompt}
 
         Texto para correção:
 
-        Texto:
         "{fix_prompt_v1}"
         
-        Outros produtos:
+        Lista de produtos que possam ser encontrados ou parecido com o texto acima:
         {products_alike}
 
         Instruções de Normalização:
@@ -438,8 +437,8 @@ def pre_process_prompt(prompt):
         - Para termos que não correspondem a produtos da lista, mantenha o texto original ou retorne "Texto RA" se irrelevante.
 
         Exemplo de Substituições:
-        - "cafe" deve ser substituído por "CAFE PILAO ALMOFADA" ou qualquer outro café listado na lista de produtos.
-        - "pastel" -> "PASTEL DE QUEIJO".
+        - "cafe" deve ser substituído por "CAFE PILAO ALMOFADA ou CAFE PALACIO MOIDO 250G" ou qualquer outro café listado na lista de produtos.
+        - "refrigerante" -> "REFRIG. GUARANA ANTARCT PET".
         - "cond" -> "COND SEDA PRETOS LUMINOSOS NE".
 
         Formato de Resposta:
@@ -458,15 +457,14 @@ def pre_process_prompt(prompt):
         mantendo o significado original e, principalmente, substituindo os nomes 
         de produtos pelos seus nomes padrão conforme a lista de produtos fornecida.
 
-        Lista de Produtos:
+        Lista de produtos que possam ser encontrados ou parecido com o texto texto para correção:
         {products_alike}
         
-        Lista de possíveis produtos parecidos com a que pdoe ser encontrado no prompt:
+        Lista de possíveis produtos parecidos com os que podem ser encontrados no texto para correção:
         {products_find_using_prompt}
 
         Texto para correção:
 
-        Texto:
         "{fix_prompt_v1}"
 
         Instruções de Normalização:
@@ -478,8 +476,8 @@ def pre_process_prompt(prompt):
         - Para termos que não correspondem a produtos da lista, mantenha o texto original ou retorne "Texto RA" se irrelevante.
 
         Exemplo de Substituições:
-        - "cafe" deve ser substituído por "CAFE PILAO ALMOFADA" ou qualquer outro café listado na lista de produtos.
-        - "pastel" -> "PASTEL DE QUEIJO".
+        - "cafe" deve ser substituído por "CAFE PILAO ALMOFADA ou CAFE PALACIO MOIDO 250G" ou qualquer outro café listado na lista de produtos.
+        - "refrigerante" -> "REFRIG. GUARANA ANTARCT PET".
         - "cond" -> "COND SEDA PRETOS LUMINOSOS NE".
 
         Formato de Resposta:
@@ -599,7 +597,7 @@ def find_similarity_products(prompt, embeddings_products=None):
 
         prompt = fix_response
         
-        print("PROMPT: ", prompt)
+        print("CHATBOT RETURN: ", prompt)
         
         # global index_dict 
         # index_dict += 1
@@ -1276,7 +1274,7 @@ def chatbot_response(user_prompt):
         return f"'{response.text}'"
 
 
-# chatbot_response("Quero um guaraca quanto custa?")
+chatbot_response("cafe")
 
 def generate_synonymous(product=None, product_list=None):
     

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import logo from '../assets/logo.svg';
 
 function getCSRFToken() {
@@ -17,7 +17,7 @@ function Capitalize(str) {
 function Chatbot() {
     const [menuOptions, setMenuOptions] = useState([]);
     const [userInput, setUserInput] = useState('');
-    const [showTextArea, setShowTextArea] = useState(false);
+    // const [showTextArea, setShowTextArea] = useState(false);
     const [userName, setUserName] = useState('');
     const [isNameEntered, setIsNameEntered] = useState(false);
     const [hasSelectedOption, setHasSelectedOption] = useState(false);

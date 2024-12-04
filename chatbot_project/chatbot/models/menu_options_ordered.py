@@ -11,6 +11,7 @@ class MenuOptionOrdered(models.Model):
     
     menu_ordered_id = models.AutoField(primary_key=True)
     menu_option_description = models.CharField(max_length=255, default='')
+    next_options = models.ManyToManyField('self', blank=True, symmetrical=False)
 
     @staticmethod
     def get_menuOption_by_id(ids):

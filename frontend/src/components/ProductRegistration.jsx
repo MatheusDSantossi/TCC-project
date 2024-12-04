@@ -1,6 +1,73 @@
+import { useEffect, useState } from 'react';
 import logo from '../assets/logo.svg';
 
 function ProductRegistration() {
+  const [productName, setProductName] = useState('');
+  const [productSection, setProductSection] = useState(0);
+  const [productPrice, setProductPrice] = useState('');
+  const [productMetricUnity, setProductMetricUnity] = useState('');
+  const [productAvailibility, setProductAvailibility] = useState('');
+
+  const [suggestions, setSuggestions] = useState([]);
+
+  useEffect(() => {
+    if (productName.length > 3) {
+      fetch(`http://127.0.0.1:8000/api/products/?search=${productName}`)
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error('Failed to fetch product suggestions');
+          }
+          return response.json();
+        })
+        .then((data) => {
+          setSuggestions(data);
+        })
+        .catch((err) => {
+          console.error('Error fetching product suggestions: ', err);
+          setSuggestions([]);
+        });
+    } else {
+      setSuggestions([]);
+    }
+
+  }, [productName]);
+
+  const registerProduct = (event) => {
+    // TODO: Implement the logic to register the product
+    event.preventDefault();
+    console.log('Product registered successfully!');
+
+    fetch('http://127.0.0.1:8000/cadastrar_produto/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify({
+        productNameInput: productName.trim(),
+        productSectionInput: Number(productSection),
+        productPriceInput: productPrice,
+        productMetricUnityInput: productMetricUnity.trim(),
+        productAvailableInput: productAvailibility,
+      }),
+    })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error('Failed to register the product');
+      }
+      return response.json();
+    
+    })
+    .then((data) => {
+      console.log('Product registered succesfully: ', data);
+      alert('Product registered succesfully!');
+    
+    })
+    .catch((error) => {
+      console.error('Error registering the product: ', error);
+    });
+  };
+
   return (
     <div className="flex justify-center items-center min-h-screen p-4">
       <div className="w-full max-w-lg bg-primary p-8 shadow-xl rounded-lg">
@@ -15,16 +82,27 @@ function ProductRegistration() {
             <input
               type="text"
               id="productName"
-              name="productName" required className="mt-1 p-2 w-full border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
+              name="productName" required
+              className="mt-1 p-2 w-full border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
+              value={productName}
+              list='productsSuggestions'
+              onChange={(e) => setProductName(e.target.value)}
             />
+            <datalist id='productsSuggestions'>
+              {suggestions.map((product, index) => (
+                <option key={index} value={product.nome}>{product.nome}</option>
+              ))}
+            </datalist>
           </div>
 
           {/* Product Section */}
           <div>
             <label htmlFor="productSection" className="block text-sm font-semibold text-white">Product Section</label>
             <input
-              type="text"
+              type="number"
               id="productSection" name="productSection" required className="mt-1 p-2 w-full border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
+              value={productSection}
+              onChange={(e) => setProductSection(e.target.value)}
             />
           </div>
           {/* Product Price */}
@@ -33,6 +111,8 @@ function ProductRegistration() {
             <input
               type="text"
               id="productPrice" name="productPrice" required className="mt-1 p-2 w-full border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
+              value={productPrice}
+              onChange={(e) => setProductPrice(e.target.value)}
             />
           </div>
           {/* Prouct Metric Unity */}
@@ -40,6 +120,8 @@ function ProductRegistration() {
             <label htmlFor="productMetricUnity" className="block text-sm font-semibold text-white">Product Metric Unity</label>
             <input type="text" id="productMetricUnity"
               name="ProductRegistration" required className="mt-1 p-2 w-full border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
+              value={productMetricUnity}
+              onChange={(e) => setProductMetricUnity(e.target.value)}
             />
           </div>
           {/* Product Availability */}
@@ -50,19 +132,26 @@ function ProductRegistration() {
               <input
                 type="radio"
                 id="productAvailability"
-                name="productAvailability" value="Yes" required />
+                name="productAvailability" 
+                value="Yes" 
+                onChange={(e) => setProductAvailibility(e.target.value)}
+                required 
+                />
             </div>
             <div className="flex">
               <label htmlFor="productAvailability" className="block text-sm font-medium text-white mr-3">No&nbsp;&nbsp;</label>
               <input
                 type="radio"
-                id="productAvailability" 
-                name="productAvailability" 
-                value="No" required />
+                id="productAvailability"
+                name="productAvailability"
+                value="No" 
+                onChange={(e) => setProductAvailibility(e.target.value)}
+                required 
+                />
             </div>
           </div>
 
-          <button className="mt-4 bg-yellow-400 hover:bg-yellow-300 text-black font-bold py-2 px-4 rounded-lg transition duration-200" type="submit">Register</button>
+          <button className="mt-4 bg-yellow-400 hover:bg-yellow-300 text-black font-bold py-2 px-4 rounded-lg transition duration-200" type="submit" onClick={registerProduct}>Register</button>
         </form>
       </div>
     </div>

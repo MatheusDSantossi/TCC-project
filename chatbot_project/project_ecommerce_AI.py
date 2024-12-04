@@ -373,7 +373,7 @@ def pre_process_prompt(prompt):
 
         You are a text normalizer and corrector. Your goal is to correct any grammatical and orthographic errors in the provided
         text while standardizing product names to match the exact names from the given product lists. You must ensure no relevant
-        products are overlooked and avoid returning "Texto RA" unless absolutely no products match the input.
+        products are overlooked and avoid returning "Texto RA" unless absolutely no products match the input. Consider that you're talking directly with the client don't return any weird answer.
     
         Provided Information:
 
@@ -427,7 +427,11 @@ def pre_process_prompt(prompt):
 
         Input: "cafe" -> Output: [CAFE PILAO ALMOFADA, CAFE PALACIO MOIDO 250G].
         Input: "pepsi" -> Output: [REFRIG. PEPSI COLA PET 2 EM 1].
+        Input: "quanto custa o refrigerante" -> Output: quanto custa o [REFRIG. GUARANA PET CACULINHA].
         Input: "cafe palacio" -> Output: [CAFE PALACIO MOIDO 250G, CAFE PALACIO MOIDO 500G].
+        
+        DON'T RETURN any different text just consider the examples above. 
+        Any code in Python or add any new/different text. Consider the products examples and the context to return your answer.
         """
     elif products_find_with_price != None:
         fix_prompt_v2 = f"""
@@ -436,6 +440,7 @@ def pre_process_prompt(prompt):
         You are a text normalizer and corrector. Your goal is to correct any grammatical and orthographic errors in the provided
         text while standardizing product names to match the exact names from the given product lists. You must ensure no relevant
         products are overlooked and avoid returning "Texto RA" unless absolutely no products match the input.
+        Consider that you're talking directly with the client don't return any weird answer.
 
         Provided Information:
 
@@ -489,7 +494,11 @@ def pre_process_prompt(prompt):
 
         Input: "cafe" -> Output: [CAFE PILAO ALMOFADA, CAFE PALACIO MOIDO 250G].
         Input: "pepsi" -> Output: [REFRIG. PEPSI COLA PET 2 EM 1].
+        Input: "quanto custa o refrigerante" -> Output: quanto custa o [REFRIG. GUARANA PET CACULINHA].
         Input: "cafe palacio" -> Output: [CAFE PALACIO MOIDO 250G, CAFE PALACIO MOIDO 500G].
+        
+        DON'T RETURN any different text just consider the examples above. 
+        Any code in Python or add any new/different text. Consider the products examples and the context to return your answer.
         """
     else:
         fix_prompt_v2 = f"""
@@ -498,6 +507,7 @@ def pre_process_prompt(prompt):
         You are a text normalizer and corrector. Your goal is to correct any grammatical and orthographic errors in the provided
         text while standardizing product names to match the exact names from the given product lists. You must ensure no relevant
         products are overlooked and avoid returning "Texto RA" unless absolutely no products match the input.
+        Consider that you're talking directly with the client don't return any weird answer.
 
         Provided Information:
 
@@ -548,7 +558,11 @@ def pre_process_prompt(prompt):
 
         Input: "cafe" -> Output: [CAFE PILAO ALMOFADA, CAFE PALACIO MOIDO 250G].
         Input: "pepsi" -> Output: [REFRIG. PEPSI COLA PET 2 EM 1].
+        Input: "quanto custa o refrigerante" -> Output: quanto custa o [REFRIG. GUARANA PET CACULINHA].
         Input: "cafe palacio" -> Output: [CAFE PALACIO MOIDO 250G, CAFE PALACIO MOIDO 500G].
+        
+        DON'T RETURN any different text just consider the examples above. 
+        Any code in Python or add any new/different text. Consider the products examples and the context to return your answer.
         """
     
     time.sleep(3) # a little sleep to avoid overflow of questions to Gemini API
@@ -1316,7 +1330,7 @@ def chatbot_response(user_prompt):
         return f"'{response.text}'"
 
 
-chatbot_response("cafe")
+# chatbot_response("cafe")
 
 def generate_synonymous(product=None, product_list=None):
     

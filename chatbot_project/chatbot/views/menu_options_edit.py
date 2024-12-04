@@ -64,6 +64,7 @@ class MenuOptionEdit(View):
                 
                 MenuOptionOrdered.objects.all().delete()
                 
+                # for description in menu_options[:4]:
                 for description in menu_options[:4]:
                     menu_option = MenuOptionOrdered(menu_option_description=description)
                     menu_option.save()

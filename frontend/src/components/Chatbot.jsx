@@ -25,6 +25,8 @@ function Chatbot() {
         { sender: 'Hecate', text: `Olá, em que posso lhe ajudar hoje?` }
     ]);
 
+    const [isHecateAnswering, setIsHecateAnswering] = useState(false);
+
     // Fetch initial menu options from Django backend
     useEffect(() => {
         if (userName) {
@@ -33,6 +35,12 @@ function Chatbot() {
             ])
         }
 
+        fetchMenuOptions();
+    }, [userName]);
+
+    const fetchMenuOptions = () => {
+
+
         fetch('http://127.0.0.1:8000/', {
             method: 'GET',
 
@@ -40,12 +48,14 @@ function Chatbot() {
             .then((response) => response.json())
             .then((data) => setMenuOptions(data))
             .catch((error) => console.error('Error fetching menu options:', error));
-    }, [userName]);
+    };
 
     // Send a message to the chatbot
     const sendMessage = (message) => {
         const newMessage = { sender: "Você", text: message };
         setChatMessages((prevMessages) => [...prevMessages, newMessage]);
+
+        setIsHecateAnswering(true);
 
         fetch('http://127.0.0.1:8000/', {
             method: 'POST',
@@ -63,16 +73,38 @@ function Chatbot() {
             .then((data) => {
                 const botResponse = { sender: "Hecate", text: data.response };
                 setChatMessages((prevMessages) => [...prevMessages, botResponse]);
+
             })
             .catch((error) => console.error('Error sending message: ', error));
+
+        setIsHecateAnswering(false);
     };
 
     // Handle option selection
-    const selectOption = (optionText) => {
-        sendMessage(optionText);
+    const selectOption = (optionId, optionText) => {
+        // sendMessage(optionText);
         // setShowTextArea(true); // Show textarea after selecting an option
         setMenuOptions([]); // Hide options after one is selected
         setHasSelectedOption(true); // Indicate an option was selected
+
+        // Fetch the next options based on the selected option ID
+        fetch('http://127.0.0.1:8080/', {
+            method: 'POST',
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                "X-CSRFToken": getCSRFToken(),
+            },
+            body: `selected_option_id=${optionId}`
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                if (data.error) {
+                    console.error('Error fetching next options:', data.error);
+                } else {
+                    setMenuOptions(data); // Update menu options with the new ones
+                }
+            })
+            .catch((error) => console.error('Error fetching next options:', error));
     };
 
     const handleNameSubmit = (e) => {
@@ -140,6 +172,7 @@ function Chatbot() {
                             </div>
                         ))}
 
+
                         {/* Options container */}
                         {!hasSelectedOption && (
                             <div className='options-container mb-4 grid gap-2'>
@@ -147,24 +180,30 @@ function Chatbot() {
                                     <button
                                         key={index}
                                         className='bg-yellow-400 hover:bg-yellow-300 text-black font-bold py-2 px-4 rounded-lg transition duration-200'
-                                        onClick={() => selectOption(option.menu_option_description)}
+                                        onClick={() => {
+                                            selectOption(option.id, option.menu_option_description, 1);
+                                        }}
                                     >
                                         {option.menu_option_description}
                                     </button>
                                 ))}
                             </div>
+
                         )}
 
+                        {isHecateAnswering &&
+                            <span className='font-bold text-2xl'>Hecate está pensando...</span>}
                         {/* Input field */}
                         {hasSelectedOption && (
-                            // <div className=''>
+
                             <div className="absolute bottom-0 left-0 w-full bg-gray-300">
+
                                 <form
                                     onSubmit={handleSubmit}
                                     className="flex items-center px-4 py-3">
 
                                     <input
-                                        className="flex-grow h-10 px-3 border border-gray-400 rounded-l-md focus:outline-none focus:ring focus:ring-blue-5500" type="text"
+                                        className="flex-grow h-10 px-3 border border-gray-400 rounded-l-md focus:outline-none focus:ring focus:ring-yellow-500" type="text"
                                         placeholder="Type your message…" onSubmit={handleSubmit}
                                         onChange={(e) => setUserInput(e.target.value)}
                                         value={userInput}

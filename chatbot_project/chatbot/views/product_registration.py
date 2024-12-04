@@ -6,6 +6,8 @@ from django.views import View
 from ..models.product import *
 from django.http import JsonResponse
 
+import json
+
 def is_ajax(request):
     return request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
 
@@ -27,53 +29,44 @@ class ProductRegistration(View):
     
     
     def post(self, request):
-        productName = request.POST.get('productNameInput')
-        product_section = request.POST.get('productSectionInput')
-        price = request.POST.get('productPriceInput')
-        metric_unity = request.POST.get('productMetricUnityInput')
-        available = request.POST.get('productAvailableInput')
-        
-        products = Product.get_all_products()
-        
-        # if Product.objects.filter(nome=productName).exists():
-        #     # If product is already on the database
-        #     return render(request, 'chatbot/index.html', {
-        #         'error_message': f"Product {productName} already exists!"
-        #     })
-        
-        productName = productName.strip()
-        
-        print("V1_PN: ", productName, product_section, price, metric_unity, available)
-        
-        # productName = Product.fix_product_name(productName)
-        
-        # print("V2_PN: ", productName, product_section, price, metric_unity, available)
-        # THE RESULTS WERE REALLY BAD TO THE FIX OF PRODUCTS
-        if not Product.objects.filter(nome=productName).exists():
+        try:
+            data = json.loads(request.body)
+
+            productName = data.get('productName')
+            product_section = data.get('productSection')
+            price = data.get('productPrice')
+            metric_unity = data.get('productMetricUnity')
+            available = data.get('productAvailability')
             
-            embeddings = Product.generate_emebed(productName)
+            products = Product.get_all_products()
             
-            # print(embeddings)
+            productName = productName.strip()
             
-            product = Product(nome=productName, secao_produto=product_section, preco_venda=price, unidade_medida=metric_unity, disponivel=available, embeddings=embeddings)
+            print("V1_PN: ", productName, product_section, price, metric_unity, available)
             
-            # Product.objects.create(product.nome,)
-            
-            Product.fetch_products_alike(productName)
-            
-            product.save()
-            
-            # print("ALL SIMILAR PRODUCTS: ", Product.generate_synonymous(productName))
-            Product.generate_synonymous(productName)
-            
-            # for product in products:
-            #     print(product.nome, product.preco_venda, product.secao_produto)
-        else:
-            product_synonymous = Product.get_synonymus(productName)
-            print("SYNONYMOUS: ", product_synonymous)
-            if not product_synonymous:
+            # THE RESULTS WERE REALLY BAD TO THE FIX OF PRODUCTS
+            if not Product.objects.filter(nome=productName).exists():
+                
+                embeddings = Product.generate_emebed(productName)
+
+                product = Product(nome=productName, secao_produto=product_section, preco_venda=price, unidade_medida=metric_unity, disponivel=available, embeddings=embeddings)
+                
+                Product.fetch_products_alike(productName)
+                
+                product.save()
+                
                 Product.generate_synonymous(productName)
+                
             else:
-                print("PRODUCT ALREADY HAVE SYNONYMOUS: ", product_synonymous)
+                product_synonymous = Product.get_synonymus(productName)
+                print("SYNONYMOUS: ", product_synonymous)
+                if not product_synonymous:
+                    Product.generate_synonymous(productName)
+                else:
+                    print("PRODUCT ALREADY HAVE SYNONYMOUS: ", product_synonymous)
+                    
+        except Exception as err:
+            print('Error: ', err)
+            return JsonResponse({'error': 'An error occured while registering the product: '}, status=500)
             
         return redirect('index')

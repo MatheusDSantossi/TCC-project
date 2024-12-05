@@ -84,8 +84,15 @@ function Chatbot() {
     const selectOption = (optionId, optionText) => {
         // sendMessage(optionText);
         // setShowTextArea(true); // Show textarea after selecting an option
-        setMenuOptions([]); // Hide options after one is selected
-        setHasSelectedOption(true); // Indicate an option was selected
+        const userMessage = { sender: 'Você', text: optionText };
+        setChatMessages((prevMessages) => [...prevMessages, userMessage]);
+
+        const botConfirmation = { sender: "Hecate", text: "Entendi o que você quis dizer:"}
+        setChatMessages((prevMessages) => [...prevMessages, botConfirmation]);
+
+        setMenuOptions([]); // Clear options menu
+
+        // setHasSelectedOption(true); // Indicate an option was selected
 
         // Fetch the next options based on the selected option ID
         fetch('http://127.0.0.1:8080/', {
@@ -174,7 +181,8 @@ function Chatbot() {
 
 
                         {/* Options container */}
-                        {!hasSelectedOption && (
+                        {/* {!hasSelectedOption && ( */}
+                        {menuOptions.length > 0 && (
                             <div className='options-container mb-4 grid gap-2'>
                                 {menuOptions.map((option, index) => (
                                     <button

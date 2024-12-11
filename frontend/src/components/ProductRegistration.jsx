@@ -69,11 +69,11 @@ function ProductRegistration() {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen p-4">
-      <div className="w-full max-w-lg bg-primary p-8 shadow-xl rounded-lg">
-        <div className="flex mb-5 justify-center items-center">
+    <div className="flex items-center justify-center min-h-screen p-4">
+      <div className="w-full max-w-lg p-8 rounded-lg shadow-xl bg-primary">
+        <div className="flex items-center justify-center mb-5">
           <img className='w-20 mr-4' src={logo} alt="" />
-          <h2 className="text-2xl left-40 mb-6 font-semibold text-center">Products Registration</h2>
+          <h2 className="mb-6 text-2xl font-semibold text-center left-40">Products Registration</h2>
         </div>
         <form action="" className="grid grid-cols-1 gap-6">
           {/* Product Name */}
@@ -83,7 +83,7 @@ function ProductRegistration() {
               type="text"
               id="productName"
               name="productName" required
-              className="mt-1 p-2 w-full border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
+              className="w-full p-2 mt-1 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
               value={productName}
               list='productsSuggestions'
               onChange={(e) => setProductName(e.target.value)}
@@ -100,7 +100,7 @@ function ProductRegistration() {
             <label htmlFor="productSection" className="block text-sm font-semibold text-white">Product Section</label>
             <input
               type="number"
-              id="productSection" name="productSection" required className="mt-1 p-2 w-full border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
+              id="productSection" name="productSection" required className="w-full p-2 mt-1 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
               value={productSection}
               onChange={(e) => setProductSection(e.target.value)}
             />
@@ -110,7 +110,7 @@ function ProductRegistration() {
             <label htmlFor="productPrice" className="block text-sm font-semibold text-white">Product Price</label>
             <input
               type="text"
-              id="productPrice" name="productPrice" required className="mt-1 p-2 w-full border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
+              id="productPrice" name="productPrice" required className="w-full p-2 mt-1 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
               value={productPrice}
               onChange={(e) => setProductPrice(e.target.value)}
             />
@@ -119,7 +119,7 @@ function ProductRegistration() {
           <div>
             <label htmlFor="productMetricUnity" className="block text-sm font-semibold text-white">Product Metric Unity</label>
             <input type="text" id="productMetricUnity"
-              name="ProductRegistration" required className="mt-1 p-2 w-full border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
+              name="ProductRegistration" required className="w-full p-2 mt-1 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
               value={productMetricUnity}
               onChange={(e) => setProductMetricUnity(e.target.value)}
             />
@@ -128,7 +128,7 @@ function ProductRegistration() {
           <div>
             <label htmlFor="productAvailability" className="block text-sm font-semibold text-white">Product Availability</label>
             <div className="flex">
-              <label htmlFor="productAvailability" className="block text-sm font-medium text-white mr-3">Yes</label>
+              <label htmlFor="productAvailability" className="block mr-3 text-sm font-medium text-white">Yes</label>
               <input
                 type="radio"
                 id="productAvailability"
@@ -139,7 +139,7 @@ function ProductRegistration() {
                 />
             </div>
             <div className="flex">
-              <label htmlFor="productAvailability" className="block text-sm font-medium text-white mr-3">No&nbsp;&nbsp;</label>
+              <label htmlFor="productAvailability" className="block mr-3 text-sm font-medium text-white">No&nbsp;&nbsp;</label>
               <input
                 type="radio"
                 id="productAvailability"
@@ -151,7 +151,7 @@ function ProductRegistration() {
             </div>
           </div>
 
-          <button className="mt-4 bg-yellow-400 hover:bg-yellow-300 text-black font-bold py-2 px-4 rounded-lg transition duration-200" type="submit" onClick={registerProduct}>Register</button>
+          <button className="px-4 py-2 mt-4 font-bold text-black transition duration-200 bg-yellow-400 rounded-lg hover:bg-yellow-300" type="submit" onClick={registerProduct}>Register</button>
         </form>
       </div>
     </div>

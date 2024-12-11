@@ -24,7 +24,7 @@ function App() {
           <Routes>
             <Route exact path="/" element={<Home />} />
             <Route exact path="/chatbot" element={<Chatbot />} />
-            <Route exact path="/productregistration" element={<ProductRegistration />} />
+            {/* <Route exact path="/productregistration" element={<ProductRegistration />} /> */}
             <Route exact path="/admin" element={<AdminDashboard openSidebarToggle={openSidebarToggle} OpenSidebar={OpenSidebar} />} />
           </Routes>
         </div>

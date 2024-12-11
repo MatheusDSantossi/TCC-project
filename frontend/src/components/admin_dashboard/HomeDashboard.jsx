@@ -10,39 +10,39 @@ function HomeDashboard() {
     <div className="flex flex-col p-6 space-y-6">
       {/* Stats cards */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <div className="bg-white shadow-card p-4 rounded-lg text-center">
-          <h3 className="text-lg font-medium">Total Products</h3>
+        <div className="p-4 text-center bg-white rounded-lg shadow-card">
+          <h3 className="text-lg text-primary">Total Products</h3>
           <p className="text-2xl font-bold text-primary">4805</p>
         </div>
-        <div className="bg-white shadow-card p-4 rounded-lg text-center">
-          <h3 className="text-lg font-medium">Total Products</h3>
+        <div className="p-4 text-center bg-white rounded-lg shadow-card">
+          <h3 className="text-lg text-primary">Total Products</h3>
           <p className="text-2xl font-bold text-primary">4805</p>
         </div>
-        <div className="bg-white shadow-card p-4 rounded-lg text-center">
-          <h3 className="text-lg font-medium">Total Products</h3>
+        <div className="p-4 text-center bg-white rounded-lg shadow-card">
+          <h3 className="text-lg text-primary">Total Products</h3>
           <p className="text-2xl font-bold text-primary">4805</p>
         </div>
-        <div className="bg-white shadow-card p-4 rounded-lg text-center">
-          <h3 className="text-lg font-medium">Total Products</h3>
+        <div className="p-4 text-center bg-white rounded-lg shadow-card">
+          <h3 className="text-lg text-primary">Total Products</h3>
           <p className="text-2xl font-bold text-primary">4805</p>
         </div>
       </div>
 
       {/* Charts Section */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <div className="bg-white shadow-card p-6 rounded-lg text-center">
-          <p className="text-lg font-medium">Bar Chart Placeholder</p>
+        <div className="p-6 text-center bg-white rounded-lg shadow-card">
+          <p className="text-2xl font-medium text-primary">Bar Chart Placeholder</p>
           <BarChart />
         </div>
-        <div className="bg-white shadow-card p-6 rounded-lg text-center">
-          <p className="text-lg font-medium">Line Chart Placeholder</p>
+        <div className="p-6 text-center bg-white rounded-lg shadow-card">
+          <p className="text-2xl font-medium text-primary">Line Chart Placeholder</p>
           <LineChart />
         </div>
       </div>
 
       {/* Recent Orders */}
-      <div className="bg-white shadow-card p-6 rounded-lg">
-        <h3 className="text-lg font-medium mb-4">Recent Orders</h3>
+      <div className="p-6 bg-white rounded-lg shadow-card text-primary">
+        <h3 className="mb-4 text-lg font-medium">Recent Orders</h3>
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="border-b">

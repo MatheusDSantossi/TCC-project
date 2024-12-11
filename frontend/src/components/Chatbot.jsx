@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import logo from '../assets/logo.svg';
+import Typewriter from './Typewriter';
+// import ReactTyped
 
 function getCSRFToken() {
     const name = 'csrftoken';
@@ -71,13 +73,13 @@ function Chatbot() {
         })
             .then((response) => response.json())
             .then((data) => {
+                setIsHecateAnswering(false);
                 const botResponse = { sender: "Hecate", text: data.response };
                 setChatMessages((prevMessages) => [...prevMessages, botResponse]);
 
             })
             .catch((error) => console.error('Error sending message: ', error));
 
-        setIsHecateAnswering(false);
     };
 
     // Handle option selection
@@ -87,7 +89,8 @@ function Chatbot() {
         const userMessage = { sender: 'Você', text: optionText };
         setChatMessages((prevMessages) => [...prevMessages, userMessage]);
 
-        const botConfirmation = { sender: "Hecate", text: "Entendi o que você quis dizer:"}
+        // get this message based on the user menu choice
+        const botConfirmation = { sender: "Hecate", text: "Entendi o que você quis dizer:" }
         setChatMessages((prevMessages) => [...prevMessages, botConfirmation]);
 
         setMenuOptions([]); // Clear options menu
@@ -95,20 +98,26 @@ function Chatbot() {
         // setHasSelectedOption(true); // Indicate an option was selected
 
         // Fetch the next options based on the selected option ID
-        fetch('http://127.0.0.1:8080/', {
+        fetch('http://127.0.0.1:8000/', {
             method: 'POST',
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded",
-                "X-CSRFToken": getCSRFToken(),
             },
+            credentials: 'include',
             body: `selected_option_id=${optionId}`
         })
             .then((response) => response.json())
             .then((data) => {
                 if (data.error) {
                     console.error('Error fetching next options:', data.error);
+                } else if (data.data == 'No more options available') {
+                    const chatbotAnswer = { sender: "Hecate", text: "Digite sua dúvida." };
+
+                    setChatMessages((prevMessages) => [...prevMessages, chatbotAnswer])
+                    setHasSelectedOption(true)
                 } else {
-                    setMenuOptions(data); // Update menu options with the new ones
+                    setMenuOptions(data);
+                    // Update menu options with the new ones
                 }
             })
             .catch((error) => console.error('Error fetching next options:', error));
@@ -136,24 +145,24 @@ function Chatbot() {
                 <img className="w-20" src={logo} alt="Logo" />
             </div>
             {!isNameEntered ? (
-                <div className="flex flex-col items-center bg-white shadow-xl rounded-lg p-8">
-                    <h2 className="text-lg font-semibold mb-4">Please enter your name:</h2>
-                    <form onSubmit={handleNameSubmit} className="w-full flex">
+                <div className="flex flex-col items-center p-8 bg-white rounded-lg shadow-xl">
+                    <h2 className="mb-4 text-lg font-semibold">Please enter your name:</h2>
+                    <form onSubmit={handleNameSubmit} className="flex w-full">
                         <input
-                            className="flex-grow p-2 rounded border border-gray-300 focus:outline-none focus:border-blue-500"
+                            className="flex-grow p-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
                             type="text"
                             placeholder="Your name"
                             value={Capitalize(userName)}
                             onChange={(e) => setUserName(e.target.value)}
                         />
-                        <button type="submit" className="ml-2 bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded">
+                        <button type="submit" className="px-4 py-2 ml-2 text-white bg-blue-500 rounded hover:bg-blue-600">
                             Start Chat
                         </button>
                     </form>
                 </div>
             ) : (
 
-                < div className="flex flex-col flex-grow w-full max-w-4xl bg-white shadow-xl rounded-lg overflow-hidden">
+                < div className="flex flex-col flex-grow w-full max-w-4xl overflow-hidden bg-white rounded-lg shadow-xl">
                     <div className="flex flex-col flex-grow h-0 p-4 overflow-auto">
                         {/* Chat Message */}
                         {chatMessages.map((message, index) => (
@@ -164,17 +173,26 @@ function Chatbot() {
                                     }`}
                             >
                                 <div>
-                                    <div className='flex-shrink-0 h-10 w-10 rounded-full bg-gray-100'></div>
-                                    <span className='text-black font-semibold'>{message.sender == 'Você' ? `${Capitalize(userName)}` : "Hecate"}</span>
+                                    <div className='flex-shrink-0 w-10 h-10 bg-gray-100 rounded-full'></div>
+                                    <span className='font-semibold text-black'>{message.sender == 'Você' ? `${Capitalize(userName)}` : "Hecate"}</span>
+
                                 </div>
 
                                 <div>
                                     <div
                                         className={`${message.sender === 'Você' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-black'} p-3 rounded-lg`}
                                     >
-                                        <p className="text-sm">{message.text}</p>
+                                        {(message.sender == "Você") ? <p className="text-sm">{message.text}</p>
+                                        :
+                                        <Typewriter
+                                            className='text-sm'
+                                            text={`${message.text}`}
+                                            delay={30}
+                                        />
+                                    }
+
                                     </div>
-                                    <span className="text-sx text-gray-50 leading-none">2 min ago</span>
+                                    <span className="leading-none text-sx text-gray-50">2 min ago</span>
                                 </div>
                             </div>
                         ))}
@@ -183,13 +201,13 @@ function Chatbot() {
                         {/* Options container */}
                         {/* {!hasSelectedOption && ( */}
                         {menuOptions.length > 0 && (
-                            <div className='options-container mb-4 grid gap-2'>
+                            <div className='grid gap-2 mb-4 options-container'>
                                 {menuOptions.map((option, index) => (
                                     <button
                                         key={index}
-                                        className='bg-yellow-400 hover:bg-yellow-300 text-black font-bold py-2 px-4 rounded-lg transition duration-200'
+                                        className='px-4 py-2 font-bold text-black transition duration-200 bg-yellow-400 rounded-lg hover:bg-yellow-300'
                                         onClick={() => {
-                                            selectOption(option.id, option.menu_option_description, 1);
+                                            selectOption(option.menu_extended_id, option.menu_option_description, 1);
                                         }}
                                     >
                                         {option.menu_option_description}
@@ -200,7 +218,7 @@ function Chatbot() {
                         )}
 
                         {isHecateAnswering &&
-                            <span className='font-bold text-2xl'>Hecate está pensando...</span>}
+                            <span className='text-2xl font-bold'>Hecate está pensando...</span>}
                         {/* Input field */}
                         {hasSelectedOption && (
 
@@ -217,7 +235,7 @@ function Chatbot() {
                                         value={userInput}
                                     />
 
-                                    <button type="submit" className="h-10 px-6 ml-2 bg-blue-500 hover:bg-blue-600 text-white rounded-r-md">
+                                    <button type="submit" className="h-10 px-6 ml-2 text-white bg-blue-500 hover:bg-blue-600 rounded-r-md">
                                         Send
                                     </button>
 

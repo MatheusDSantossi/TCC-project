@@ -9,7 +9,7 @@ from django.shortcuts import render
 
 class MenuOptionExtended(models.Model):
     
-    menu_ordered_id = models.AutoField(primary_key=True)
+    menu_extended_id = models.AutoField(primary_key=True, db_column="menu_extended_id")
     menu_option_description = models.CharField(max_length=255, default='')
     next_options = models.ManyToManyField('self', blank=True, symmetrical=False)
 

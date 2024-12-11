@@ -19,8 +19,8 @@ function App() {
   return (
     <div>
       <BrowserRouter>
-        {/* <div className="relative z-10" > */}
-        <div className="" >
+        <div className="relative z-10" >
+        {/* <div className="z-1" > */}
           <Routes>
             <Route exact path="/" element={<Home />} />
             <Route exact path="/chatbot" element={<Chatbot />} />
@@ -28,10 +28,10 @@ function App() {
             <Route exact path="/admin" element={<AdminDashboard openSidebarToggle={openSidebarToggle} OpenSidebar={OpenSidebar} />} />
           </Routes>
         </div>
-        {/* <div className="relative z-0">
+        <div className="relative z-0">
           <StarsCanvas />
         </div>
-        <div className="relative z-0">
+        {/* <div className="relative z-0">
           <RocketCanvas />
         </div> */}
       </BrowserRouter>

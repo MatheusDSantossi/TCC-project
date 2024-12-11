@@ -90,7 +90,7 @@ function Chatbot() {
         setChatMessages((prevMessages) => [...prevMessages, userMessage]);
 
         // get this message based on the user menu choice
-        const botConfirmation = { sender: "Hecate", text: "Entendi o que você quis dizer:" }
+        const botConfirmation = { sender: "Hecate", text: "Entendi. Selecione uma das opções:" }
         setChatMessages((prevMessages) => [...prevMessages, botConfirmation]);
 
         setMenuOptions([]); // Clear options menu
@@ -216,9 +216,9 @@ function Chatbot() {
                             </div>
 
                         )}
-
+                        {/* Put as the chatbot is saying that instead of a simple span */}
                         {isHecateAnswering &&
-                            <span className='text-2xl font-bold'>Hecate está pensando...</span>}
+                            <span className='text-2xl font-bold text-primary'>Aguarde. Em breve responderei!</span>}
                         {/* Input field */}
                         {hasSelectedOption && (
 

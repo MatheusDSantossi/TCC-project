@@ -15,19 +15,48 @@ class MenuOptionExtended(models.Model):
 
     @staticmethod
     def createMenusOptions():
-        # Example how to use it:
-        menu_option1_s1 = MenuOptionExtended.objects.create(menu_option_description='Quero saber mais sobre os produtos')
+        # First options
+        menu_option1_s1 = MenuOptionExtended.objects.create(menu_option_description='Informações sobre o produto')
+        # Tudo sobre produto
         menu_option2_s1 = MenuOptionExtended.objects.create(menu_option_description='Verificar disponibilidade de produtos')
-        menu_option3_s1 = MenuOptionExtended.objects.create(menu_option_description='Quero algumas sugestões de perguntas')
-        menu_option4_s1 = MenuOptionExtended.objects.create(menu_option_description='Quero saber mais sobre o mercado')
+        menu_option3_s1 = MenuOptionExtended.objects.create(menu_option_description='Quero saber mais sobre o mercado')
+        menu_option4_s1 = MenuOptionExtended.objects.create(menu_option_description='Quero algumas sugestões de perguntas')
+        # uma lista de perguntas (sugestões de perguntas com interrogação in the end?) uma lista com tudo que it's able to answer
         
-        menu_option1_s2 = MenuOptionExtended.objects.create(menu_option_description='Vou digitar o nome do produto')
-        menu_option2_s2 = MenuOptionExtended.objects.create(menu_option_description='Vou digitar a seção do produto')
-        menu_option3_s2 = MenuOptionExtended.objects.create(menu_option_description='Vou digitar a descrição do produto')
-        menu_option4_s2 = MenuOptionExtended.objects.create(menu_option_description='Vou digitar a pergunta sobre o mercado')
+        # Saber mais sobre os produtos
+        menu_option1_s2_o1 = MenuOptionExtended.objects.create(menu_option_description='Sobre o nome do produto')
+        # digite seu o nome do produto e reforçar essa ação
+        menu_option1_s2_o2 = MenuOptionExtended.objects.create(menu_option_description='Sobre a seção do produto')
+        menu_option1_s2_o3 = MenuOptionExtended.objects.create(menu_option_description='Sobre a descrição do produto')
+        menu_option1_s2_o4 = MenuOptionExtended.objects.create(menu_option_description='Sobre o código do produto')
+        ####
         
-        menu_option1_s1.next_options.add(menu_option1_s2, menu_option2_s2, menu_option3_s2)
-        menu_option2_s1.next_options.add(menu_option4_s2, menu_option2_s2, menu_option3_s2)
+        # Verificar disponibilidade de produtos
+        menu_option2_s2_o1 = MenuOptionExtended.objects.create(menu_option_description='Sobre o nome de um produto especifico')
+        menu_option2_s2_o2 = MenuOptionExtended.objects.create(menu_option_description='Quero saber sobre todos os produtos')
+        ###
+        
+        # Quero algumas sugestões de perguntas
+        menu_option3_s2_o1 = MenuOptionExtended.objects.create(menu_option_description='Vou escolher a área')
+        menu_option3_s2_o2 = MenuOptionExtended.objects.create(menu_option_description='Sobre a pergunta sobre o mercado')
+        ###
+        
+        # Quero saber mais sobre o mercado
+        menu_option4_s2_o1 = MenuOptionExtended.objects.create(menu_option_description='Nome do gerente')
+        menu_option4_s2_o2 = MenuOptionExtended.objects.create(menu_option_description='Digitar a pergunta sobre o mercado')
+        ###
+        
+        # Saber mais sobre os produtos
+        menu_option1_s1.next_options.add(menu_option1_s2_o1, menu_option1_s2_o2, menu_option1_s2_o3, menu_option1_s2_o4)
+        ####
+        
+        # Verificar disponibilidade de produtos
+        menu_option2_s1.next_options.add(menu_option2_s2_o1, menu_option2_s2_o2)
+        
+        # Quero algumas sugestões de perguntas
+        menu_option3_s1.next_options.add(menu_option3_s2_o1, menu_option3_s2_o2)
+        
+        menu_option4_s1.next_options.add(menu_option4_s2_o1, menu_option4_s2_o2)
         
 
     # menu_option1.next_options.add(menu_option2, menu_option3)

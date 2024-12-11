@@ -76,6 +76,7 @@ function ProductRegistration() {
           <h2 className="mb-6 text-2xl font-semibold text-center left-40">Products Registration</h2>
         </div>
         <form action="" className="grid grid-cols-1 gap-6">
+          {/* # divide the product name into three parts (name, brand, quantity) */}
           {/* Product Name */}
           <div>
             <label htmlFor="productName" className="block text-sm font-semibold text-white">Product Name</label>

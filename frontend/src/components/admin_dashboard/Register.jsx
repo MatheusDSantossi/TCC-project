@@ -1,12 +1,61 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import logo from '../../assets/logo.svg';
+
+import { Icon } from 'react-icons-kit';
+import { eyeOff } from 'react-icons-kit/feather/eyeOff';
+import { eye } from 'react-icons-kit/feather/eye'
+
+import { getCSRFToken } from '../.././utils/CSRFToken';
 
 function Register() {
 
-    const registerEmployee = (userName, email, password, confirmPassword) => {
+    const [fullname, setFullname] = useState("");
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [type, setType] = useState('password');
+    const [icon, setIcon] = useState(eyeOff);
+
+    const handleClickShowPassword = () => {
         
+        if (type==='password'){
+            setIcon(eye);
+            setType('text')
+         } else {
+            setIcon(eyeOff)
+            setType('password')
+         }
+    };
+
+    const handleRegister = (e) => {
+        e.preventDefault();
+        
+        fetch('http://127.0.0.1:8000/register_employee/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken(),
+            },
+            // credentials: 'include',
+            body: JSON.stringify({
+                employeeFullname: fullname.trim(),
+                employeeEmail: email.trim(),
+                employeePassword: password
+            }),
+        })
+        .then((response) => {
+            if (!response.ok) {
+                throw new Error('Failed to register employee');
+            }
+            return response.json();
+        })
+        .then((data) => {
+            console.log('Success:', data);
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+        });
     }
-    
+
     return (
         <div className="flex items-center justify-center min-h-screen p-4">
             <div className="w-full max-w-lg p-8 rounded-lg shadow-xl bg-primary">
@@ -17,13 +66,15 @@ function Register() {
                 <form>
                     <label
                         className="block text-lg font-semibold text-white">
-                        Username:
+                        Fullname:
                     </label>
                     <input
                         type="text"
-                        name="username"
+                        name="fullname"
                         className="w-full p-2 mt-1 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
-                        placeholder='Username'
+                        placeholder='Fullname'
+                        value={fullname}
+                        onChange={(e) => setFullname(e.target.value)}
                     />
                     <label
                         className="block font-semibold text-white text-lm"
@@ -33,32 +84,38 @@ function Register() {
                     <input type="email" name="email"
                         className="w-full p-2 mt-1 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
                         placeholder='Email'
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
                     />
                     <label
                         className="block font-semibold text-white text-lm"
                     >
                         Password:
                     </label>
-                    <input type="password" name="password"
-                        className="w-full p-2 mt-1 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
-                        placeholder='********'
-                    />
-                    <label
-                        className="block font-semibold text-white text-lm"
-                    >
-                        Confirm Password:
-                    </label>
-                    <input type="password" name="confirmPassword"
-                        className="w-full p-2 mt-1 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
-                        placeholder='********'
-                    />
+                    <div className="flex mb-4">
+                        <input
+                            type={type}
+                            name="password"
+                            placeholder="Password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            autoComplete="current-password"
+                            className='w-full p-2 mt-1 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400'
+                        />
+                        <span className="flex items-center justify-around" onClick={handleClickShowPassword}>
+                            <Icon className="absolute mr-10 cursor-pointer hover:text-yellow-400" icon={icon} size={25} />
+                        </span>
+                    </div>
+
                     <button type="button"
                         className="px-4 py-2 mt-4 font-bold text-black transition duration-200 bg-yellow-400 rounded-lg hover:bg-yellow-300"
+                        onClick={handleRegister}
                     >
                         Register
+
                     </button>
                 </form>
-                <p>Have an account? <a href="/login" className='font-medium'>Login</a></p>
+                <p className='mt-4 text-center text-gray-300'>Have an account? <a href="/login" className='font-medium text-yellow-400 hover:underline hover:text-yellow-300'>Login</a></p>
             </div>
         </div>
     )

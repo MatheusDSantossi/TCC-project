@@ -1,5 +1,15 @@
 import { useEffect, useState } from 'react';
 import logo from '../assets/logo.svg';
+import { getCSRFToken } from '../utils/CSRFToken';
+
+// function getCSRFToken() {
+//   const name = 'csrftoken';
+//   const cookieValue = document.cookie
+//       .split('; ')
+//       .find((row) => row.startsWith(name))
+//       ?.split('=')[1];
+//   return cookieValue || '';
+// }
 
 function ProductRegistration() {
   const [productName, setProductName] = useState('');
@@ -33,16 +43,16 @@ function ProductRegistration() {
   }, [productName]);
 
   const registerProduct = (event) => {
-    // TODO: Implement the logic to register the product
     event.preventDefault();
-    console.log('Product registered successfully!');
+
 
     fetch('http://127.0.0.1:8000/cadastrar_produto/', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'X-CSRFToken': getCSRFToken(),
       },
-      credentials: 'include',
+      // credentials: 'include',
       body: JSON.stringify({
         productNameInput: productName.trim(),
         productSectionInput: Number(productSection),

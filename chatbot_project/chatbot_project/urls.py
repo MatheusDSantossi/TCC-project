@@ -7,6 +7,7 @@ from chatbot.views.menu_options_registration import MenuOptionRegistration
 from chatbot.views.menu_options_edit import MenuOptionEdit 
 from chatbot.views.products_view import *
 from chatbot.views.menu_options_edit import MenuOptionEdit 
+from chatbot.views.employee_registration import EmployeeRegistration, EmployeeLogin, EmployeeDetails 
 
 
 urlpatterns = [
@@ -15,7 +16,7 @@ urlpatterns = [
     path("", include("chatbot.urls")),
     
     # path("index/", index.as_view(), name='index'),
-    path("cadastrar_produto/", ProductRegistration.as_view(), name='productRegistration'),
+    path("cadastrar_produto/", ProductRegistration, name='productRegistration'),
     path("products/", ProductListView.as_view(), name='productList'),
     
     path("cadastrar_menu_options/", MenuOptionRegistration.as_view(), name='menuOptionRegistration'),
@@ -26,4 +27,8 @@ urlpatterns = [
     
     path("api/products/", ProductListCreateView.as_view(), name='productListCreate'),
     path("api/products/<int:pk>/", ProductRetrieveUpdateDestroyView.as_view(), name='productRetrieveUpdateDestroy'),
+    
+    path("register_employee/", EmployeeRegistration.as_view(), name='employeeRegistration'),
+    path("login_employee/", EmployeeLogin.as_view(), name='employeeLogin'),
+    path("employee_details/", EmployeeDetails.as_view(), name='employeeDetails'),
 ]

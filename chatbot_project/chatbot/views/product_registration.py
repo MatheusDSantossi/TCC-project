@@ -6,11 +6,15 @@ from django.views import View
 from ..models.product import *
 from django.http import JsonResponse
 
+from django.views.decorators.csrf import csrf_exempt
+
 import json
 
 def is_ajax(request):
     return request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
 
+# DON'T USE THAT IN PROD
+@csrf_exempt
 class ProductRegistration(View):
     
     def get(self, request):

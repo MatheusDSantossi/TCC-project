@@ -1,8 +1,43 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { BsFillBellFill, BsFillEnvelopeFill, BsPersonCircle, BsSearch, BsJustify, BsX, BsXLg }
   from 'react-icons/bs'
 
 function Header({ OpenSidebar, openSidebarToggle }) {
+
+  const [userName, setUsername] = useState("");
+
+  useEffect(() => {
+    
+    getUserName();
+
+    return () => {
+      
+    };
+  }, []);
+
+  const getUserName = () => {
+    const token = localStorage.getItem("access_token");
+    
+    fetch('http://127.0.0.1:8000/employee_details/', {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.name) {
+        const userName = data.name
+        setUsername(userName);
+        console.log(userName);
+      } else {
+        // window.location.href = "/login";
+        console.error("No user logged in");
+      }
+     })
+     .catch((error) => console.error("Error getting the data: ", error));
+  }
+
   return (
     <header className='flex items-center justify-between p-4 shadow-md bg-primary'>
       <div className='menu-icon'>
@@ -17,7 +52,7 @@ function Header({ OpenSidebar, openSidebarToggle }) {
           <BsFillBellFill />
         </span>
         <span className="flex text-xl cursor-pointer hover:text-secondary">
-          <BsPersonCircle /> username
+          <BsPersonCircle /> {userName}
         </span>
       </div>
     </header>

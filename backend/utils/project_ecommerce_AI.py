@@ -239,7 +239,12 @@ products_df = pd.DataFrame(products_list)
 # List of available products (I can keep that in the DB as well)
 products_available = [p["Nome"] for p in products_df.to_dict(orient='records') if p['Disponivel'] > 0]
 
-print("Products available: ", products_available)
+# search_term = "REF"
+
+# matching_products = [name for name in products_available if search_term in name]
+
+# # print("Products available: ", products_available)
+# print("Matching products: ", matching_products)
 
 def for_dividing_prompt_limit():
     products_list_2 = []
@@ -657,17 +662,8 @@ def find_similarity_products(prompt, embeddings_products=None):
         
         print("CHATBOT RETURN: ", prompt)
         
-        # global index_dict 
-        # index_dict += 1
-        # name = f"Question_{index_dict}"
-        # conversation_history[name] = prompt
-        
         new_prompt = prompt.lower()
         new_prompt_without_spaces = new_prompt.strip()
-
-        # new_prompt = prompt.strip()
-        
-        # new_prompt = unicodedata.normalize('NFKD', prompt).encode('ascii', 'ignore').decode('ascii')
         
         products_df['Nome'] = products_df['Nome'].str.lower()
         products_df['Nome'] = products_df['Nome'].apply(lambda x: unicodedata.normalize('NFKD', x).encode('ascii', 'ignore').decode('ascii'))
@@ -1137,10 +1133,21 @@ def chatbot_response(user_prompt):
 
                 detailed_prompt = detailed_prompt = "Gerar uma descrição detalhada para um chatbot de e-commerce dos produtos que se encontram nessa lista: "
                     
+                name_of_product = ""
+                matching_products = []
                 for product in products_list_after_user_input: 
+                    name_of_product = product['Name']
                     detailed_prompt += f"Nome do produto: {product['Name']}\n"
                     detailed_prompt += f"Preço do produto: {product['Price']}\n"
                     detailed_prompt += f"Produto está disponível (False=Não, True=Sim): {product['Available']}\n\n"
+                
+                print("Name of product: ",name_of_product)
+                if (len(name_of_product) > 0):
+                    first_letter_of_product = name_of_product[:4]
+                    
+                    print("Four first letters: ", first_letter_of_product)
+
+                    matching_products = [name for name in products_available if first_letter_of_product.upper() in name]
                 
             # Generate a text stream
             # By default, the model returns a response after 
@@ -1196,7 +1203,11 @@ def chatbot_response(user_prompt):
                 
                 tenha alguma palavra que pareça com lista, por exemplo,
                 'list', liste, listo, listw, gere uma possível lista de compras de acordo 
-                com os produtos disponíveis no mercado que são esses, {products_available}. Repetindo, caso se e somente se
+                com os produtos disponíveis no mercado parecidos com o produto solicitado pelo usário sendo esses:
+                
+                {matching_products} 
+                
+                Repetindo, caso se e somente se
                 a mensagem do usuário contenha alguma palavra que remeta a lista, caso não tenha
                 não gere nenhuma lista apenas a mensagem principal.
 
@@ -1214,7 +1225,11 @@ def chatbot_response(user_prompt):
                 
                 tenha alguma palavra que pareça com lista, por exemplo,
                 'list', liste, listo, listw, gere uma possível lista de compras de acordo 
-                com os produtos disponíveis no mercado que são esses, {products_available}. Repetindo, caso se e somente se
+                com os produtos disponíveis no mercado parecidos com o produto solicitado pelo usário sendo esses:
+                
+                {matching_products} 
+                
+                Repetindo, caso se e somente se
                 a mensagem do usuário contenha alguma palavra que remeta a lista, caso não tenha
                 não gere nenhuma lista apenas a mensagem principal,
                 leve em consideração o produto que ele queria que estava indisponível e gere
@@ -1298,18 +1313,9 @@ def chatbot_response(user_prompt):
                     answer_prompt+=f"{info}\n"
             
 
-        # response = main_chatbot_model.generate_content(answer_prompt)
         response = chat.send_message(answer_prompt)
 
         print(f"ANSWER PROMPT {answer_prompt}")
-
-        # print(response.text)
-
-        # index_dict_answer = index_dict_answer + 1
-        # name = f"Answer_{index_dict_answer}"
-
-        # conversation_history[name] = response.text
-        # print(f"\nCONVERSATION HISTORY - {conversation_history}\n")
         
         # I changed the Gemini chatbot model and now he decorates
         # the conversation history automatically, so it's unnecessary

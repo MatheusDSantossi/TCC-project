@@ -74,52 +74,67 @@ class Product(models.Model):
 class MenuOptionExtended(models.Model):
     
     menu_extended_id = models.AutoField(primary_key=True, db_column="menu_extended_id")
-    menu_option_description = models.CharField(max_length=255, default='')
+    # menu_option_description = models.CharField(max_length=255, default='')
+    menu_option_description = models.CharField(max_length=255, default='', unique=True)
     next_options = models.ManyToManyField('self', blank=True, symmetrical=False)
 
     @staticmethod
+    def create_or_get_option(menu_option_description):
+        """ Retrieve or create an option based on its description"""
+        obj, create = MenuOptionExtended.objects.get_or_create(menu_option_description=menu_option_description)
+        if(create):
+            print(f"Created new menu option: {menu_option_description}")
+        else:
+            print(f"Reused existing menu option: {menu_option_description}")
+        return obj
+
+    @staticmethod
     def createMenusOptions():
-        # First options
-        menu_option1_s1 = MenuOptionExtended.objects.create(menu_option_description='Quero conhecer os produto')
-        # Tudo sobre produto
-        menu_option2_s1 = MenuOptionExtended.objects.create(menu_option_description='Quais os produtos disponíveis')
-        menu_option3_s1 = MenuOptionExtended.objects.create(menu_option_description='Quero saber mais sobre o mercado')
-        menu_option4_s1 = MenuOptionExtended.objects.create(menu_option_description='Quero algumas sugestões de perguntas')
+        # Level 1: Main options
+        menu_option1_s1 = MenuOptionExtended.create_or_get_option(menu_option_description='Tenho dúvida de algum produto específico')
+        menu_option2_s1 = MenuOptionExtended.create_or_get_option(menu_option_description='Me conte algumas informações do {business}')
+        menu_option3_s1 = MenuOptionExtended.create_or_get_option(menu_option_description='Quero saber mais sobre os serviços do {business}')
+        menu_option4_s1 = MenuOptionExtended.create_or_get_option(menu_option_description='Quais os produtos vocês vendem?')
+        menu_option5_s1 = MenuOptionExtended.create_or_get_option(menu_option_description='Você tem alguma promoção especial?')
         # uma lista de perguntas (sugestões de perguntas com interrogação in the end?) uma lista com tudo que it's able to answer
         
-        # Saber mais sobre os produtos
-        menu_option1_s2_o1 = MenuOptionExtended.objects.create(menu_option_description='Digite o nome do produto')
-        # digite seu o nome do produto e reforçar essa ação
-        menu_option1_s2_o2 = MenuOptionExtended.objects.create(menu_option_description='Digite a seção do produto')
-        menu_option1_s2_o3 = MenuOptionExtended.objects.create(menu_option_description='Digite alguma descrição do produto')
-        menu_option1_s2_o4 = MenuOptionExtended.objects.create(menu_option_description='Digite o código do produto')
+        # Level 2: Opções específicas para cada categoria
+        # Opções para "Quero saber mais sobre os serviços do {business}"
+        menu_option1_s2_o1 = MenuOptionExtended.create_or_get_option(menu_option_description='Digitar o nome do produto')
+        menu_option1_s2_o2 = MenuOptionExtended.create_or_get_option(menu_option_description='Digitar a seção do produto')
+        menu_option1_s2_o3 = MenuOptionExtended.create_or_get_option(menu_option_description='Digitar alguma descrição do produto')
+        menu_option1_s2_o4 = MenuOptionExtended.create_or_get_option(menu_option_description='Digitar o código do produto')
         ####
         
-        # Verificar disponibilidade de produtos
-        menu_option2_s2_o1 = MenuOptionExtended.objects.create(menu_option_description='Digitar o nome de um produto especifico')
-        menu_option2_s2_o2 = MenuOptionExtended.objects.create(menu_option_description='Quero saber sobre todos os produtos')
+        # Opções para "Quais os produtos vocês vendem?"
+        menu_option2_s2_o1 = MenuOptionExtended.create_or_get_option(menu_option_description='Lista de categorias disponíveis')
+        menu_option2_s2_o2 = MenuOptionExtended.create_or_get_option(menu_option_description='Quero saber sobre um produto específico')
         ###
         
         # Quero algumas sugestões de perguntas
-        menu_option3_s2_o1 = MenuOptionExtended.objects.create(menu_option_description='Vou escolher a área')
-        menu_option3_s2_o2 = MenuOptionExtended.objects.create(menu_option_description='Sobre a pergunta sobre o mercado')
+        menu_option3_s2_o1 = MenuOptionExtended.create_or_get_option(menu_option_description='Quais são as promoções do dia?')
+        menu_option3_s2_o2 = MenuOptionExtended.create_or_get_option(menu_option_description='Quais são as promoções do dia?')
         ###
         
         # Quero saber mais sobre o mercado
-        menu_option4_s2_o1 = MenuOptionExtended.objects.create(menu_option_description='Nome do gerente')
-        menu_option4_s2_o2 = MenuOptionExtended.objects.create(menu_option_description='Digitar a pergunta sobre o mercado')
+        menu_option4_s2_o1 = MenuOptionExtended.create_or_get_option(menu_option_description='Nome do gerente')
+        menu_option4_s2_o2 = MenuOptionExtended.create_or_get_option(menu_option_description='Digitar a pergunta sobre o mercado')
         ###
         
         # Saber mais sobre os produtos
+        menu_option1_s1.next_options.clear()
         menu_option1_s1.next_options.add(menu_option1_s2_o1, menu_option1_s2_o2, menu_option1_s2_o3, menu_option1_s2_o4)
         ####
         
         # Verificar disponibilidade de produtos
+        menu_option2_s1.next_options.clear()
         menu_option2_s1.next_options.add(menu_option2_s2_o1, menu_option2_s2_o2)
         
         # Quero algumas sugestões de perguntas
+        menu_option3_s1.next_options.clear()
         menu_option3_s1.next_options.add(menu_option3_s2_o1, menu_option3_s2_o2)
         
+        menu_option4_s1.next_options.clear()
         menu_option4_s1.next_options.add(menu_option4_s2_o1, menu_option4_s2_o2)
         
     @staticmethod

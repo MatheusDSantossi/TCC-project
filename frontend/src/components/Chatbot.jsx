@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import logo from "../assets/logo.svg";
 import Typewriter from "./Typewriter";
 import AxiosInstance from "./AxiosInstance";
@@ -25,6 +25,8 @@ function Chatbot() {
   const [isTypingDone, setIsTypingDone] = useState(false);
   const [pendingMenuOptions, setPendingMenuOptions] = useState(null);
 
+  const chatContainerRef = useRef(null);
+
   // Fetch initial menu options from Django backend
   useEffect(() => {
     if (!userName) {
@@ -38,6 +40,13 @@ function Chatbot() {
 
     fetchMenuOptions();
   }, [userName]);
+
+  useEffect(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTo = chatContainerRef.current.scrollHeight;
+    }
+    
+  }, [chatMessages]);
 
   const fetchMenuOptions = () => {
     AxiosInstance.get(`menu-options/get`)
@@ -213,7 +222,7 @@ function Chatbot() {
       </div>
 
       <div className="flex flex-col flex-grow w-full max-w-4xl overflow-hidden bg-white rounded-lg shadow-xl">
-        <div className="flex flex-col flex-grow h-0 p-4 overflow-auto">
+        <div className="flex flex-col flex-grow h-0 p-4 overflow-auto" ref={chatContainerRef}>
           {/* Chat Message */}
           {chatMessages.map((message, index) => (
             <div

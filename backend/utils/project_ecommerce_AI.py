@@ -237,7 +237,9 @@ products_df = pd.DataFrame(products_list)
 # print(products_df)
 
 # List of available products (I can keep that in the DB as well)
-products_available = [p["Nome"] for p in products_df.to_dict(orient='records') if p['Disponivel']]
+products_available = [p["Nome"] for p in products_df.to_dict(orient='records') if p['Disponivel'] > 0]
+
+print("Products available: ", products_available)
 
 def for_dividing_prompt_limit():
     products_list_2 = []

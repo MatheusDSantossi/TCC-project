@@ -24,8 +24,8 @@ function App() {
   };
 
   return (
-    <div>
-      <div className="relative z-10" >
+    <div className="w-full">
+      <div className="absolute top-0 left-0 z-10 w-full h-full" >
         {/* <div className="z-1" > */}
         <Routes>
           <Route exact path="/" element={<Home />} />

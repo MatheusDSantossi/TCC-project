@@ -42,7 +42,7 @@ class ChatbotResponse(viewsets.ViewSet):
 class MenuOptionsView(viewsets.ViewSet):
     permission_classes = [permissions.AllowAny]
     
-    # MenuOptionExtended.createMenusOptions()
+    MenuOptionExtended.createMenusOptions()
     
     @action(detail=False, methods=['post'])
     def post(self, request):
@@ -89,6 +89,7 @@ class MenuOptionsView(viewsets.ViewSet):
         all_options = list(MenuOptionExtended.get_all_menuOptions())
         total_option = len(all_options)  
         all_options_only_4 = all_options[:4]
+        print("All options : ", all_options)
         return Response([
             {'menu_extended_id': option.menu_extended_id, 'menu_option_description': option.menu_option_description} for option in all_options_only_4
             ])

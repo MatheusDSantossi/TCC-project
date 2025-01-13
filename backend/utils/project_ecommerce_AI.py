@@ -14,9 +14,9 @@ from nltk.metrics import edit_distance
 
 import unicodedata
 
-from config.config import SECRET_KEY
-
 from fuzzywuzzy import fuzz
+
+from config.config import SECRET_KEY
 
 import psycopg2
 from config.database_connection import conn
@@ -67,7 +67,7 @@ generate_content_model = genai.GenerativeModel(model_name="gemini-1.5-flash-8b",
 
 # nltk.data.clear_cache()
 
-supermarket_name = "Supermercado Santos"
+business_name = "Supermercado Santos"
 
 # According to Greek mythology, Hecate, the goddess 
 # of magic, crossroads, and the night, is often depicted 
@@ -275,7 +275,7 @@ def process_prompt(prompt):
     print("PROMPT: ", prompt)
     if fuzz.token_set_ratio(prompt.lower(), "quero sair") >= 80:
         # print(process_prompt(user_prompt.lower()))  # Processa antes de sair
-        print(f'Obrigado por vir ao {supermarket_name}. Volte sempre!')
+        print(f'Obrigado por vir ao {business_name}. Volte sempre!')
         return True
     return False
 
@@ -286,7 +286,7 @@ def pre_process_prompt_grammatical(prompt):
     # were returned. Please check the `candidate.safety_ratings` to determine if the response was blocked.
     
     fix_prompt = f"""
-        Correct grammatical and spelling errors in the following text so it becomes understandable to a human reader. Normalize product names, utensils, or any other items to a standard form. Consider that this text is provided by a customer from the store {supermarket_name}, and use this context to make the best possible corrections.
+        Correct grammatical and spelling errors in the following text so it becomes understandable to a human reader. Normalize product names, utensils, or any other items to a standard form. Consider that this text is provided by a customer from the store {business_name}, and use this context to make the best possible corrections.
 
         Keep in mind that words might appear abbreviated, such as "INSET SBP AERO," which means "INSETICIDA SBP AEROSSOL." Research thoroughly what each word might mean, whether abbreviated or not, considering that they are most likely retail products found in any supermarket. Use this assumption to help identify and correct the words accurately.
 
@@ -636,9 +636,6 @@ def encontrar_produtos_similares(semantic_dictionary, threshold=0.5):
     return similar_products
 
 
-
-
-
 # Função para identificar produtos na consulta do usuário
 def find_similarity_products(prompt, embeddings_products=None):
     # in teh answer I have to distinguish between the answers with products and the answerrs without products (Olá, quero saber onde fica a seção 2)
@@ -757,7 +754,7 @@ def create_menu_options_prompts():
                 
                 no lugar de tópico relevantes use as informações abaixo que se adequarem mais a pergunta do cliente.
                 
-                Informações sobre o {supermarket_name}:\n
+                Informações sobre o {business_name}:\n
                 {info_about_the_business}
                 
                 \n
@@ -780,9 +777,6 @@ def create_menu_options_prompts():
             cur.execute(query_add, (response, option[0]))
                
     
-
-
-
 # user_input = "Onde fica o Refrigerante e Detergente e suco"
 
 # user_input_processed = pre_process_prompt(user_input)
@@ -1148,7 +1142,8 @@ def chatbot_response(user_prompt):
                     print("Four first letters: ", first_letter_of_product)
 
                     matching_products = [name for name in products_available if first_letter_of_product.upper() in name]
-                
+                else:
+                    matching_products = products_available[:20]
             # Generate a text stream
             # By default, the model returns a response after 
             # completing the entire text generation process. 
@@ -1164,7 +1159,7 @@ def chatbot_response(user_prompt):
             # if find_product['Disponivel'].item():
             if find_product['Disponivel'].any():
                 answer_prompt = f"""Considerando que o cliente do nosso
-                mercado {supermarket_name} enviou a mensagem:
+                mercado {business_name} enviou a mensagem:
 
                 {pre_process_prompt_grammatical(user_prompt)} 
 
@@ -1189,7 +1184,7 @@ def chatbot_response(user_prompt):
                 apenas a mensagem informando envolvendo algum detalhe do produto usando a descrição acima como guia e a seção que o
                 mesmo se encontra.
                 
-                Além dessas informações sobre o {supermarket_name}:
+                Além dessas informações sobre o {business_name}:
                 """
                 
                 for info in info_about_the_business:
@@ -1203,7 +1198,7 @@ def chatbot_response(user_prompt):
                 
                 tenha alguma palavra que pareça com lista, por exemplo,
                 'list', liste, listo, listw, gere uma possível lista de compras de acordo 
-                com os produtos disponíveis no mercado parecidos com o produto solicitado pelo usário sendo esses:
+                com os produtos disponíveis no mercado possivelmente parecidos com o produto solicitado pelo usário sendo esses:
                 
                 {matching_products} 
                 
@@ -1215,7 +1210,7 @@ def chatbot_response(user_prompt):
                 
             else:
                 answer_prompt = f"""Considerando que o cliente do nosso 
-                mercado {supermarket_name} quer saber {pre_process_prompt_grammatical(user_prompt)} 
+                mercado {business_name} quer saber {pre_process_prompt_grammatical(user_prompt)} 
                 que o produto que ele deseja está atualmente indisponível, 
                 responda com uma frase simples e útil ao cliente.
                 Considere esse texto {generated_detailed_prompt.text} como exemplo e melhore a sua resposta.
@@ -1225,7 +1220,7 @@ def chatbot_response(user_prompt):
                 
                 tenha alguma palavra que pareça com lista, por exemplo,
                 'list', liste, listo, listw, gere uma possível lista de compras de acordo 
-                com os produtos disponíveis no mercado parecidos com o produto solicitado pelo usário sendo esses:
+                com os produtos disponíveis no mercado possivelmente parecidos com o produto solicitado pelo usário sendo esses:
                 
                 {matching_products} 
                 
@@ -1242,7 +1237,7 @@ def chatbot_response(user_prompt):
             if user_prompt == "Saber mais sobre os produtos":
                 answer_prompt = f"""
                     Considerando que o cliente do nosso
-                    mercado {supermarket_name} enviou a mensagem:
+                    mercado {business_name} enviou a mensagem:
 
                     {user_prompt} 
 
@@ -1280,11 +1275,11 @@ def chatbot_response(user_prompt):
             elif user_prompt == "Saber mais sobre nosso mercado":
                 answer_prompt = f"""
                     Considerando que o cliente do nosso
-                    mercado {supermarket_name} enviou a mensagem:
+                    mercado {business_name} enviou a mensagem:
 
                     {user_prompt} 
 
-                    e as informações sobre o {supermarket_name} que temos disponíveis são essas: 
+                    e as informações sobre o {business_name} que temos disponíveis são essas: 
                     \n
                     """
                     
@@ -1300,13 +1295,13 @@ def chatbot_response(user_prompt):
             else:
                 
                 answer_prompt = f"""Considerando que o cliente do nosso 
-                    mercado {supermarket_name} quer saber {pre_process_prompt_grammatical(user_prompt)} 
+                    mercado {business_name} quer saber {pre_process_prompt_grammatical(user_prompt)} 
                     responda com uma frase simples e útil ao cliente. 
                     E por fim gere alguma evento ou ação para o cliente fazer
                     no mercado se vier a o caso, por exemplo, "Queria saber que horas o
                     mercado abre?", resposta, "O mercado abre as 7h e hoje temos uma grande promoção"
                     
-                    Leve em consideração essas informações sobre o {supermarket_name}:
+                    Leve em consideração essas informações sobre o {business_name}:
                     """
                 
                 for info in info_about_the_business:

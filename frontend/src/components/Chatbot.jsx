@@ -121,9 +121,20 @@ function Chatbot() {
         console.log(`menu options data: ${response.data}`);
 
         if (response.data === "No more options available") {
+          let answer = "Digite sua dúvida.";
+          if (response.data === "Digitar o nome do produto") {
+            answer = "Digite o nome do produto.";
+          } else if (response.data === "Digitar a seção do produto") {
+            answer = "Digite a seção do produto.";
+          } else if (response.data === "Digitar alguma descrição do produto") {
+            answer = "Digite alguma descrição do produto.";
+          } else if (response.data === "Digitar o código do produto") {
+            answer = "Digite o código do produto.";
+          } 
+          
           const chatbotAnswer = {
             sender: "Hecate",
-            text: "Digite sua dúvida.",
+            text: answer,
           };
 
           setChatMessages((prevMessages) => [...prevMessages, chatbotAnswer]);
@@ -134,7 +145,7 @@ function Chatbot() {
           // because I think it'll be easier.
           const botConfirmation = {
             sender: "Hecate",
-            text: "Entendi. Selecione uma das opções:",
+            text: "Entendi. Selecione uma das opçõe abaixo:",
           };
           setChatMessages((prevMessages) => [...prevMessages, botConfirmation]);
 

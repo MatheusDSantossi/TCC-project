@@ -1,5 +1,5 @@
 import re
-# from chatbot_test import embeddings_testing
+from changing_db_columns import KNOWN_BRANDS, KNOWN_METRICS
 
 def find_section(text, conn):
     # Define the regular expression to match "section" followed by a letter or a number
@@ -12,8 +12,7 @@ def find_section(text, conn):
     # if a match is found, return the matched section
     if match:
         section = match.group(1)
-        section_correct = "Seção " + section
-        
+                
         # return match.group(1)
         with conn.cursor() as cursor:
             # cursor.execute("SELECT name FROM products_with_embeddings WHERE secao_produto = %s", (match.group(1),))
@@ -21,7 +20,7 @@ def find_section(text, conn):
                            SELECT name FROM products_with_embeddings 
                            WHERE secao_produto = %s
                            LIMIT 30
-                           """, (section_correct,))
+                           """, (section,))
             return cursor.fetchall()
     
     return None
@@ -46,6 +45,80 @@ def find_price(text, conn):
                            """, (price_with_point,))
             return cursor.fetchall()
     
+    return None
+
+def find_brand(text, conn):
+    
+    brand = None
+    
+    # Define the regular expression to match "brand"
+    # Check for known brands
+    for known_brand in KNOWN_BRANDS:
+        if known_brand.lower() in text.lower():
+            brand = known_brand
+            break
+        
+    if brand:
+        with conn.cursor() as cursor:
+            
+            cursor.execute("""
+                            SELECT name FROM products_with_embeddings 
+                            WHERE brand = %s
+                            LIMIT 30
+                            """, (brand,))
+            
+            return cursor.fetchall()
+    
+    return brand
+
+def find_quantity(text, conn):
+
+    metric = None
+    quantity = None
+
+    # Identify quantity (e.x., "6X30", "1X24 500G")
+    quantity_match = re.search(r"\b\d+\s*[Xx]\s*\d+[A-Za-z]*\b|\b\d+\s?(KG|G|ML|L)\b", text, re.IGNORECASE)
+
+    
+    if quantity_match:
+        quantity = quantity_match.group().strip()
+        text = text.replace(quantity, '').strip()
+    
+    # Check for known metrics
+    
+    for known_metric in KNOWN_METRICS:
+        if re.search(rf"\b{known_metric}", text, re.IGNORECASE):
+            metric = known_metric
+            text = re.sub(rf"\b{known_metric}\b", '', flags=re.IGNORECASE).strip()
+            break
+        
+    if metric or quantity:
+        
+       with conn.cursor() as cursor:
+            if metric and quantity:
+                cursor.execute("""
+                    SELECT name FROM products_with_embeddings
+                    WHERE quantity = %s OR unidade_medida = %s
+                    LIMIT 30
+                """, (quantity, metric))
+            elif quantity:
+                cursor.execute("""
+                    SELECT name FROM products_with_embeddings
+                    WHERE quantity = %s
+                    LIMIT 30
+                """, (quantity,))
+            elif metric:
+                cursor.execute("""
+                    SELECT name FROM products_with_embeddings
+                    WHERE unidade_medida = %s
+                    LIMIT 30
+                """, (metric,))
+            
+            # Fetch and return the results
+            results = cursor.fetchall()
+            # return [row[0] for row in results]
+            return results
+
     return None
 
 def find_similar_products_using_input_embeddings(input_embed, conn, np, cosine_similarity):

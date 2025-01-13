@@ -92,8 +92,8 @@ class MenuOptionExtended(models.Model):
     def createMenusOptions():
         # Level 1: Main options
         menu_option1_s1 = MenuOptionExtended.create_or_get_option(menu_option_description='Tenho dúvida de algum produto específico')
-        menu_option2_s1 = MenuOptionExtended.create_or_get_option(menu_option_description='Me conte algumas informações do {business}')
-        menu_option3_s1 = MenuOptionExtended.create_or_get_option(menu_option_description='Quero saber mais sobre os serviços do {business}')
+        menu_option2_s1 = MenuOptionExtended.create_or_get_option(menu_option_description=f'Me conte algumas informações do {business_name}')
+        menu_option3_s1 = MenuOptionExtended.create_or_get_option(menu_option_description=f'Quero saber mais sobre os serviços do {business_name}')
         menu_option4_s1 = MenuOptionExtended.create_or_get_option(menu_option_description='Quais os produtos vocês vendem?')
         menu_option5_s1 = MenuOptionExtended.create_or_get_option(menu_option_description='Você tem alguma promoção especial?')
         # uma lista de perguntas (sugestões de perguntas com interrogação in the end?) uma lista com tudo que it's able to answer
@@ -144,6 +144,10 @@ class MenuOptionExtended(models.Model):
     @staticmethod
     def get_all_menuOptions():
         return MenuOptionExtended.objects.all()
+    
+    def delete_and_recreate_menuOption():
+        MenuOptionExtended.objects.all().delete()
+        MenuOptionExtended.createMenusOptions()
     
     class Meta:
         db_table = 'menu_options_extended'

@@ -43,6 +43,7 @@ class MenuOptionsView(viewsets.ViewSet):
     permission_classes = [permissions.AllowAny]
     
     MenuOptionExtended.createMenusOptions()
+    # MenuOptionExtended.delete_and_recreate_menuOption()
     
     @action(detail=False, methods=['post'])
     def post(self, request):
@@ -198,15 +199,11 @@ class ProductRegistration(viewsets.ViewSet):
             price = data['productPrice']
             metric_unity = data['productMetricUnity']
             available = data['productAvailability']
-            
-            if available == "Yes":
-                available = True
-            else:
-                available = False
-            
+
             products = Product.get_all_products()
             
             product_name = product_name.strip()
+            product_section = "Seção " + product_section
             
             print("V1_PN: ", product_name, product_section, price, metric_unity, available)
             

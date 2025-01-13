@@ -1,15 +1,6 @@
 import re
 import psycopg2
-# from config.database_connection import conn
-
-conn = psycopg2.connect(
-    database= "project_pcc_v3",
-    user="postgres",
-    password="matheus19dev",
-    host="127.0.0.1",
-    port="5432"
-)
-
+from config.database_connection import conn
 conn.autocommit = True
 
 # Load known brands if available

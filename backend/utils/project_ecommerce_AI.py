@@ -1,5 +1,9 @@
 import google.generativeai as genai
 
+from pathlib import Path
+import sys
+import os
+
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 import pandas as pd
@@ -11,6 +15,12 @@ from nltk.tag import pos_tag
 from nltk.chunk import conlltags2tree, tree2conlltags
 from nltk.stem import WordNetLemmatizer
 from nltk.metrics import edit_distance
+
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Ensure the root directory is included
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import unicodedata
 
@@ -30,6 +40,7 @@ from tkinter import scrolledtext
 
 import time
 from prompt_searcher import *
+from prompts import *
 
 # Você: quero um refrige
 
@@ -216,8 +227,6 @@ cur.execute(sql)
 
 rows = cur.fetchall()
 
-# conn.close()
-
 products_list = []
 
 for row in rows:
@@ -234,7 +243,7 @@ for row in rows:
 
 products_df = pd.DataFrame(products_list)
 
-# print(products_df)
+print(products_df)
 
 # List of available products (I can keep that in the DB as well)
 products_available = [p["Nome"] for p in products_df.to_dict(orient='records') if p['Disponivel'] > 0]
@@ -281,46 +290,44 @@ def process_prompt(prompt):
 
 def pre_process_prompt_grammatical(prompt):
     
-    # OBS: The input INSET is being blocked for some reason with the error message:
-    # ValueError: Invalid operation: The `response.text` quick accessor requires the response to contain a valid `Part`, but none 
-    # were returned. Please check the `candidate.safety_ratings` to determine if the response was blocked.
-    
-    fix_prompt = f"""
-        Correct grammatical and spelling errors in the following text so it becomes understandable to a human reader. Normalize product names, utensils, or any other items to a standard form. Consider that this text is provided by a customer from the store {business_name}, and use this context to make the best possible corrections.
+    # fix_prompt = f"""
+    #     Correct grammatical and spelling errors in the following text so it becomes understandable to a human reader. Normalize product names, utensils, or any other items to a standard form. Consider that this text is provided by a customer from the store {business_name}, and use this context to make the best possible corrections.
 
-        Keep in mind that words might appear abbreviated, such as "INSET SBP AERO," which means "INSETICIDA SBP AEROSSOL." Research thoroughly what each word might mean, whether abbreviated or not, considering that they are most likely retail products found in any supermarket. Use this assumption to help identify and correct the words accurately.
+    #     Keep in mind that words might appear abbreviated, such as "INSET SBP AERO," which means "INSETICIDA SBP AEROSSOL." Research thoroughly what each word might mean, whether abbreviated or not, considering that they are most likely retail products found in any supermarket. Use this assumption to help identify and correct the words accurately.
 
-        Here is the text to be corrected:
+    #     Here is the text to be corrected:
         
-        Text:
-        {prompt}
+    #     Text:
+    #     {prompt}
 
-        Maintain the original meaning of the text and correct only spelling and grammatical errors. 
+    #     Maintain the original meaning of the text and correct only spelling and grammatical errors. 
         
-        For example:
+    #     For example:
 
-        "quero um cafezinho" → "Quero um café"
-        "Que dea é heij" → "Que dia é hoje"
-        "Que horas se" → "Que horas são"
-        "Sarveti" → "Sorvete"
-        "Seai" → "Saia"
+    #     "quero um cafezinho" → "Quero um café"
+    #     "Que dea é heij" → "Que dia é hoje"
+    #     "Que horas se" → "Que horas são"
+    #     "Sarveti" → "Sorvete"
+    #     "Seai" → "Saia"
         
-        Pay close attention to text nuances, identifying and correcting errors. Here are more examples of corrections:
+    #     Pay close attention to text nuances, identifying and correcting errors. Here are more examples of corrections:
 
-        "Quanto custa o bisc e o sab" → "Quanto custa o biscoito e o sabão" or "Quanto custa o biscoito e o sabonete"
-        "Aendo figa localezado os tomate e a cebole" → "Onde fica localizado os tomates e a cebola"
-        "Vocês te jel, deterge e saco" → "Vocês têm gel, detergente e saco"
+    #     "Quanto custa o bisc e o sab" → "Quanto custa o biscoito e o sabão" or "Quanto custa o biscoito e o sabonete"
+    #     "Aendo figa localezado os tomate e a cebole" → "Onde fica localizado os tomates e a cebola"
+    #     "Vocês te jel, deterge e saco" → "Vocês têm gel, detergente e saco"
         
-        Be aware that some words might be completely incorrect, abbreviated, or incomplete, such as "refrig." or "q h o mercado abre," which should be corrected to "que horas o mercado abre." Apply this logic to all errors, regardless of how minor.
+    #     Be aware that some words might be completely incorrect, abbreviated, or incomplete, such as "refrig." or "q h o mercado abre," which should be corrected to "que horas o mercado abre." Apply this logic to all errors, regardless of how minor.
 
-        Important Rules for Response:
+    #     Important Rules for Response:
 
-        1. If the text contains retail products or related queries: Correct all spelling, grammatical, and abbreviation errors while maintaining the original meaning. Do not add information or products that are not present in the text. Be as concise as possible.
+    #     1. If the text contains retail products or related queries: Correct all spelling, grammatical, and abbreviation errors while maintaining the original meaning. Do not add information or products that are not present in the text. Be as concise as possible.
         
-        2. If the text is unrelated to retail products or store-related queries (e.g., "Oi, como você está?", "Que horas o mercado fecha?", "Qual é o seu nome?"): Correct only the grammatical and spelling errors and return the text as it is.
-        Return the corrected text in Portuguese, preserving its original intent.
-    """
+    #     2. If the text is unrelated to retail products or store-related queries (e.g., "Oi, como você está?", "Que horas o mercado fecha?", "Qual é o seu nome?"): Correct only the grammatical and spelling errors and return the text as it is.
+    #     Return the corrected text in Portuguese, preserving its original intent.
+    # """
     # In case the product is not in the list, show the message "Produto não está disponível!"
+    
+    fix_prompt = pre_process_prompt_grammatical_fix_prompt(prompt, business_name)
     
     time.sleep(3)
     
@@ -373,204 +380,219 @@ def pre_process_prompt(prompt):
     products_find_in_section = find_section(fix_prompt_v1, conn)
     products_find_with_price = find_price(fix_prompt_v1, conn)
     products_find_using_prompt = find_similar_products_using_input_embeddings(input_embed, conn, np, cosine_similarity)
+    products_find_using_brand = find_brand(fix_prompt_v1, conn)
+    products_find_using_metric_or_quantity = find_quantity(fix_prompt_v1, conn)    
     
     if(products_find_in_section != None):
-        fix_prompt_v2 = f"""
-        Task Description:
+        # fix_prompt_v2 = f"""
+        # Task Description:
 
-        You are a text normalizer and corrector. Your goal is to correct any grammatical and orthographic errors in the provided
-        text while standardizing product names to match the exact names from the given product lists. You must ensure no relevant
-        products are overlooked and avoid returning "Texto RA" unless absolutely no products match the input. Consider that you're talking directly with the client don't return any weird answer.
+        # You are a text normalizer and corrector. Your goal is to correct any grammatical and orthographic errors in the provided
+        # text while standardizing product names to match the exact names from the given product lists. You must ensure no relevant
+        # products are overlooked and avoid returning "Texto RA" unless absolutely no products match the input. Consider that you're talking directly with the client don't return any weird answer.
     
-        Provided Information:
+        # Provided Information:
 
-        1. Products in the same section:
-        {products_find_in_section}
+        # 1. Products in the same section:
+        # {products_find_in_section}
         
-        2. Possible Similar Products:
-        {products_find_using_prompt}
+        # 2. Possible Similar Products:
+        # {products_find_using_prompt}
 
-        3. Standard Product List (Exact Names and Sections):
-        {products_alike}
+        # 3. Standard Product List (Exact Names and Sections):
+        # {products_alike}
         
-        Text to Normalize:
-        "{fix_prompt_v1}"
+        # Text to Normalize:
+        # "{fix_prompt_v1}"
 
-        Normalization Instructions:
+        # Normalization Instructions:
         
-        1.Product Name Matching Rules:
+        # 1.Product Name Matching Rules:
 
-        Match input terms to products in the list based on exact name, abbreviations, partial matches, or phonetic similarity.
-        Variations like "cafe," "CAFÉ," or "Cafe Pilao" should be normalized to "CAFE PILAO ALMOFADA" or another appropriate match from the list.
+        # Match input terms to products in the list based on exact name, abbreviations, partial matches, or phonetic similarity.
+        # Variations like "cafe," "CAFÉ," or "Cafe Pilao" should be normalized to "CAFE PILAO ALMOFADA" or another appropriate match from the list.
         
-        2. Handling Partial or Ambiguous Matches:
+        # 2. Handling Partial or Ambiguous Matches:
 
-        If the input refers to a category or group (e.g., "café" with no additional qualifiers), prioritize the most generic product from the list (e.g., "CAFE PALACIO MOIDO 250G").
+        # If the input refers to a category or group (e.g., "café" with no additional qualifiers), prioritize the most generic product from the list (e.g., "CAFE PALACIO MOIDO 250G").
         
-        3.Text Not Containing Products:
+        # 3.Text Not Containing Products:
 
-        If the text contains no identifiable product names or similar terms, return "Texto RA."
+        # If the text contains no identifiable product names or similar terms, return "Texto RA."
         
-        4. Output Format:
+        # 4. Output Format:
 
-        If a product is identified, list the product(s) in square brackets with their exact names.
-        If multiple products fit, list all relevant matches, separated by commas.
+        # If a product is identified, list the product(s) in square brackets with their exact names.
+        # If multiple products fit, list all relevant matches, separated by commas.
         
-        Example:
-        Input: "cafe" -> Output: [CAFE PILAO ALMOFADA, CAFE PALACIO MOIDO 250G].
+        # Example:
+        # Input: "cafe" -> Output: [CAFE PILAO ALMOFADA, CAFE PALACIO MOIDO 250G].
         
-        5. Contextual Normalization:
+        # 5. Contextual Normalization:
 
-        Consider context and section information when normalizing. For example:
-        If "250G" appears, prioritize matching with products of the same size.
-        If no context (e.g., size or section) is given, use a default or generic match.
+        # Consider context and section information when normalizing. For example:
+        # If "250G" appears, prioritize matching with products of the same size.
+        # If no context (e.g., size or section) is given, use a default or generic match.
         
-        6. Specific Cases:
+        # 6. Specific Cases:
 
-        Abbreviations: Normalize terms like "refri" or "refrigerante" to specific product names like "REFRIG. PEPSI COLA PET 2 EM 1."
-        Plurals or variants: "cafés" -> "CAFE PILAO ALMOFADA."
+        # Abbreviations: Normalize terms like "refri" or "refrigerante" to specific product names like "REFRIG. PEPSI COLA PET 2 EM 1."
+        # Plurals or variants: "cafés" -> "CAFE PILAO ALMOFADA."
         
-        Examples of Substitutions:
+        # Examples of Substitutions:
 
-        Input: "cafe" -> Output: [CAFE PILAO ALMOFADA, CAFE PALACIO MOIDO 250G].
-        Input: "pepsi" -> Output: [REFRIG. PEPSI COLA PET 2 EM 1].
-        Input: "quanto custa o refrigerante" -> Output: quanto custa o [REFRIG. GUARANA PET CACULINHA].
-        Input: "cafe palacio" -> Output: [CAFE PALACIO MOIDO 250G, CAFE PALACIO MOIDO 500G].
+        # Input: "cafe" -> Output: [CAFE PILAO ALMOFADA, CAFE PALACIO MOIDO 250G].
+        # Input: "pepsi" -> Output: [REFRIG. PEPSI COLA PET 2 EM 1].
+        # Input: "quanto custa o refrigerante" -> Output: quanto custa o [REFRIG. GUARANA PET CACULINHA].
+        # Input: "cafe palacio" -> Output: [CAFE PALACIO MOIDO 250G, CAFE PALACIO MOIDO 500G].
         
-        DON'T RETURN any different text just consider the examples above. 
-        Any code in Python or add any new/different text. Consider the products examples and the context to return your answer.
-        """
+        # DON'T RETURN any different text just consider the examples above. 
+        # Any code in Python or add any new/different text. Consider the products examples and the context to return your answer.
+        # """
+        
+        fix_prompt_v2 = products_find_in_section_fix_prompt(products_find_in_section, products_find_using_prompt, products_alike, fix_prompt_v1)
+        
     elif products_find_with_price != None:
-        fix_prompt_v2 = f"""
-        Task Description:
+        # fix_prompt_v2 = f"""
+        # Task Description:
 
-        You are a text normalizer and corrector. Your goal is to correct any grammatical and orthographic errors in the provided
-        text while standardizing product names to match the exact names from the given product lists. You must ensure no relevant
-        products are overlooked and avoid returning "Texto RA" unless absolutely no products match the input.
-        Consider that you're talking directly with the client don't return any weird answer.
+        # You are a text normalizer and corrector. Your goal is to correct any grammatical and orthographic errors in the provided
+        # text while standardizing product names to match the exact names from the given product lists. You must ensure no relevant
+        # products are overlooked and avoid returning "Texto RA" unless absolutely no products match the input.
+        # Consider that you're talking directly with the client don't return any weird answer.
 
-        Provided Information:
+        # Provided Information:
 
-        1. Products with the same price:
-        {products_find_with_price}
+        # 1. Products with the same price:
+        # {products_find_with_price}
         
-        2. Possible Similar Products:
-        {products_find_using_prompt}
+        # 2. Possible Similar Products:
+        # {products_find_using_prompt}
 
-        3. Standard Product List (Exact Names and Sections):
-        {products_alike}
+        # 3. Standard Product List (Exact Names and Sections):
+        # {products_alike}
         
-        Text to Normalize:
-        "{fix_prompt_v1}"
+        # Text to Normalize:
+        # "{fix_prompt_v1}"
         
-        Normalization Instructions:
+        # Normalization Instructions:
         
-        1.Product Name Matching Rules:
+        # 1.Product Name Matching Rules:
 
-        Match input terms to products in the list based on exact name, abbreviations, partial matches, or phonetic similarity.
-        Variations like "cafe," "CAFÉ," or "Cafe Pilao" should be normalized to "CAFE PILAO ALMOFADA" or another appropriate match from the list.
+        # Match input terms to products in the list based on exact name, abbreviations, partial matches, or phonetic similarity.
+        # Variations like "cafe," "CAFÉ," or "Cafe Pilao" should be normalized to "CAFE PILAO ALMOFADA" or another appropriate match from the list.
         
-        2. Handling Partial or Ambiguous Matches:
+        # 2. Handling Partial or Ambiguous Matches:
 
-        If the input refers to a category or group (e.g., "café" with no additional qualifiers), prioritize the most generic product from the list (e.g., "CAFE PALACIO MOIDO 250G").
+        # If the input refers to a category or group (e.g., "café" with no additional qualifiers), prioritize the most generic product from the list (e.g., "CAFE PALACIO MOIDO 250G").
         
-        3.Text Not Containing Products:
+        # 3.Text Not Containing Products:
 
-        If the text contains no identifiable product names or similar terms, return "Texto RA."
+        # If the text contains no identifiable product names or similar terms, return "Texto RA."
         
-        4. Output Format:
+        # 4. Output Format:
 
-        If a product is identified, list the product(s) in square brackets with their exact names.
-        If multiple products fit, list all relevant matches, separated by commas.
+        # If a product is identified, list the product(s) in square brackets with their exact names.
+        # If multiple products fit, list all relevant matches, separated by commas.
         
-        Example:
-        Input: "cafe" -> Output: [CAFE PILAO ALMOFADA, CAFE PALACIO MOIDO 250G].
+        # Example:
+        # Input: "cafe" -> Output: [CAFE PILAO ALMOFADA, CAFE PALACIO MOIDO 250G].
         
-        5. Contextual Normalization:
+        # 5. Contextual Normalization:
 
-        Consider context and section information when normalizing. For example:
-        If "250G" appears, prioritize matching with products of the same size.
-        If no context (e.g., size or section) is given, use a default or generic match.
+        # Consider context and section information when normalizing. For example:
+        # If "250G" appears, prioritize matching with products of the same size.
+        # If no context (e.g., size or section) is given, use a default or generic match.
         
-        6. Specific Cases:
+        # 6. Specific Cases:
 
-        Abbreviations: Normalize terms like "refri" or "refrigerante" to specific product names like "REFRIG. PEPSI COLA PET 2 EM 1."
-        Plurals or variants: "cafés" -> "CAFE PILAO ALMOFADA."
+        # Abbreviations: Normalize terms like "refri" or "refrigerante" to specific product names like "REFRIG. PEPSI COLA PET 2 EM 1."
+        # Plurals or variants: "cafés" -> "CAFE PILAO ALMOFADA."
         
-        Examples of Substitutions:
+        # Examples of Substitutions:
 
-        Input: "cafe" -> Output: [CAFE PILAO ALMOFADA, CAFE PALACIO MOIDO 250G].
-        Input: "pepsi" -> Output: [REFRIG. PEPSI COLA PET 2 EM 1].
-        Input: "quanto custa o refrigerante" -> Output: quanto custa o [REFRIG. GUARANA PET CACULINHA].
-        Input: "cafe palacio" -> Output: [CAFE PALACIO MOIDO 250G, CAFE PALACIO MOIDO 500G].
+        # Input: "cafe" -> Output: [CAFE PILAO ALMOFADA, CAFE PALACIO MOIDO 250G].
+        # Input: "pepsi" -> Output: [REFRIG. PEPSI COLA PET 2 EM 1].
+        # Input: "quanto custa o refrigerante" -> Output: quanto custa o [REFRIG. GUARANA PET CACULINHA].
+        # Input: "cafe palacio" -> Output: [CAFE PALACIO MOIDO 250G, CAFE PALACIO MOIDO 500G].
         
-        DON'T RETURN any different text just consider the examples above. 
-        Any code in Python or add any new/different text. Consider the products examples and the context to return your answer.
-        """
+        # DON'T RETURN any different text just consider the examples above. 
+        # Any code in Python or add any new/different text. Consider the products examples and the context to return your answer.
+        # """
+        
+        fix_prompt_v2 = products_find_with_price_fix_prompt(products_find_with_price, products_find_using_prompt, products_alike, fix_prompt_v1)
+   
+    elif products_find_using_brand != None:
+        fix_prompt_v2 = products_find_with_brand_fix_prompt(products_find_using_brand, products_find_using_prompt, products_alike, fix_prompt_v1)
+    
+    elif products_find_using_metric_or_quantity != None:
+        fix_prompt_v2 = products_find_with_metric_or_quantity_fix_prompt(products_find_using_metric_or_quantity, products_find_using_prompt, products_alike, fix_prompt_v1)
+        
     else:
-        fix_prompt_v2 = f"""
-        Task Description:
+        # fix_prompt_v2 = f"""
+        # Task Description:
 
-        You are a text normalizer and corrector. Your goal is to correct any grammatical and orthographic errors in the provided
-        text while standardizing product names to match the exact names from the given product lists. You must ensure no relevant
-        products are overlooked and avoid returning "Texto RA" unless absolutely no products match the input.
-        Consider that you're talking directly with the client don't return any weird answer.
+        # You are a text normalizer and corrector. Your goal is to correct any grammatical and orthographic errors in the provided
+        # text while standardizing product names to match the exact names from the given product lists. You must ensure no relevant
+        # products are overlooked and avoid returning "Texto RA" unless absolutely no products match the input.
+        # Consider that you're talking directly with the client don't return any weird answer.
 
-        Provided Information:
+        # Provided Information:
 
-        1. Standard Product List (Exact Names and Sections):
-        {products_alike}
+        # 1. Standard Product List (Exact Names and Sections):
+        # {products_alike}
         
-        2. Possible Similar Products:
-        {products_find_using_prompt}
+        # 2. Possible Similar Products:
+        # {products_find_using_prompt}
 
-        Text to Normalize:
-        "{fix_prompt_v1}"
+        # Text to Normalize:
+        # "{fix_prompt_v1}"
 
-        Normalization Instructions:
+        # Normalization Instructions:
         
-        1.Product Name Matching Rules:
+        # 1.Product Name Matching Rules:
 
-        Match input terms to products in the list based on exact name, abbreviations, partial matches, or phonetic similarity.
-        Variations like "cafe," "CAFÉ," or "Cafe Pilao" should be normalized to "CAFE PILAO ALMOFADA" or another appropriate match from the list.
+        # Match input terms to products in the list based on exact name, abbreviations, partial matches, or phonetic similarity.
+        # Variations like "cafe," "CAFÉ," or "Cafe Pilao" should be normalized to "CAFE PILAO ALMOFADA" or another appropriate match from the list.
         
-        2. Handling Partial or Ambiguous Matches:
+        # 2. Handling Partial or Ambiguous Matches:
 
-        If the input refers to a category or group (e.g., "café" with no additional qualifiers), prioritize the most generic product from the list (e.g., "CAFE PALACIO MOIDO 250G").
+        # If the input refers to a category or group (e.g., "café" with no additional qualifiers), prioritize the most generic product from the list (e.g., "CAFE PALACIO MOIDO 250G").
         
-        3.Text Not Containing Products:
+        # 3.Text Not Containing Products:
 
-        If the text contains no identifiable product names or similar terms, return "Texto RA."
+        # If the text contains no identifiable product names or similar terms, return "Texto RA."
         
-        4. Output Format:
+        # 4. Output Format:
 
-        If a product is identified, list the product(s) in square brackets with their exact names.
-        If multiple products fit, list all relevant matches, separated by commas.
+        # If a product is identified, list the product(s) in square brackets with their exact names.
+        # If multiple products fit, list all relevant matches, separated by commas.
         
-        Example:
-        Input: "cafe" -> Output: [CAFE PILAO ALMOFADA, CAFE PALACIO MOIDO 250G].
+        # Example:
+        # Input: "cafe" -> Output: [CAFE PILAO ALMOFADA, CAFE PALACIO MOIDO 250G].
         
-        5. Contextual Normalization:
+        # 5. Contextual Normalization:
 
-        Consider context and section information when normalizing. For example:
-        If "250G" appears, prioritize matching with products of the same size.
-        If no context (e.g., size or section) is given, use a default or generic match.
+        # Consider context and section information when normalizing. For example:
+        # If "250G" appears, prioritize matching with products of the same size.
+        # If no context (e.g., size or section) is given, use a default or generic match.
         
-        6. Specific Cases:
+        # 6. Specific Cases:
 
-        Abbreviations: Normalize terms like "refri" or "refrigerante" to specific product names like "REFRIG. PEPSI COLA PET 2 EM 1."
-        Plurals or variants: "cafés" -> "CAFE PILAO ALMOFADA."
+        # Abbreviations: Normalize terms like "refri" or "refrigerante" to specific product names like "REFRIG. PEPSI COLA PET 2 EM 1."
+        # Plurals or variants: "cafés" -> "CAFE PILAO ALMOFADA."
         
-        Examples of Substitutions:
+        # Examples of Substitutions:
 
-        Input: "cafe" -> Output: [CAFE PILAO ALMOFADA, CAFE PALACIO MOIDO 250G].
-        Input: "pepsi" -> Output: [REFRIG. PEPSI COLA PET 2 EM 1].
-        Input: "quanto custa o refrigerante" -> Output: quanto custa o [REFRIG. GUARANA PET CACULINHA].
-        Input: "cafe palacio" -> Output: [CAFE PALACIO MOIDO 250G, CAFE PALACIO MOIDO 500G].
+        # Input: "cafe" -> Output: [CAFE PILAO ALMOFADA, CAFE PALACIO MOIDO 250G].
+        # Input: "pepsi" -> Output: [REFRIG. PEPSI COLA PET 2 EM 1].
+        # Input: "quanto custa o refrigerante" -> Output: quanto custa o [REFRIG. GUARANA PET CACULINHA].
+        # Input: "cafe palacio" -> Output: [CAFE PALACIO MOIDO 250G, CAFE PALACIO MOIDO 500G].
         
-        DON'T RETURN any different text just consider the examples above. 
-        Any code in Python or add any new/different text. Consider the products examples and the context to return your answer.
-        """
+        # DON'T RETURN any different text just consider the examples above. 
+        # Any code in Python or add any new/different text. Consider the products examples and the context to return your answer.
+        # """
+        fix_prompt_v2 = products_find_general_fix_prompt(products_alike, products_find_using_prompt, fix_prompt_v1)
     
     time.sleep(3) # a little sleep to avoid overflow of questions to Gemini API
     
@@ -679,15 +701,23 @@ def find_similarity_products(prompt, embeddings_products=None):
         # PRE_PROCESSED_PROMPT_PRODUCT:  ['DES.ALMA FLORES SPRAY PCT 1 X 12 90ML', 'DES.ALMA FLORES SPRAY C.BRANCAS CXA 1 X 12 90ML', 'DES.SENADOR SPRAY SEDUCTION CXA 1 X 12 90ML', 'DES.SENADOR SPRAY CLASSIC CXA 1 X 12 90ML']
         
         
-        if (new_prompt_without_spaces not in ['produto na', 'texto ra']):
+        if new_prompt_without_spaces not in ['produto na', 'texto ra']:
             print("new_prompt: ", new_prompt_without_spaces)
             # generate_synonymous(pre_processed_prompt_products_list)
 
             contains_a_product = True
 
+            def preprocess_text(text):
+                text = text.lower()
+                text = re.sub(r'[^\w\s]', '', text)
+                return text.strip()
+            
+            new_prompt_clean = preprocess_text(new_prompt_without_spaces)
+            products_df['Cleaned_Name'] = products_df['Nome'].apply(preprocess_text)
+
             # Using TF-IDF to text comparation
             tfidf_vectorizer = TfidfVectorizer()
-            tfidf_matrix = tfidf_vectorizer.fit_transform([new_prompt] + products_df['Nome'].tolist())  
+            tfidf_matrix = tfidf_vectorizer.fit_transform([new_prompt_clean] + products_df['Cleaned_Name'].tolist())  
 
             similarities = cosine_similarity(tfidf_matrix[0], tfidf_matrix[1:]).flatten()
 
@@ -1335,7 +1365,7 @@ def chatbot_response(user_prompt):
         return response.text
 
 
-# chatbot_response("cafe")
+print(chatbot_response("Quero um biscoito VITARELLA"))
 
 def generate_synonymous(product=None, product_list=None):
     
@@ -1463,112 +1493,3 @@ def generate_synonymous(product=None, product_list=None):
         
             
     return synonymous_list
-    
-    # text = response.text
-    
-    # regex = re.compile(pattern_for_syn, text, re.DOTALL)
-    
-    # matches = re.findall(pattern_for_syn, text, re.DOTALL)
-    
-    # for match in matches:
-    #     print("MATCH: ", match)
-    
-    # match = re.search(pattern_for_syn, text)
-
-    # if match:
-    #     # extracting the correspondent group to the pattern
-    #     product_string = match.group(1)
-    #     print("PRODUCT STRING: ", product_string)
-
-    #     pre_processed_prompt_products_list = [product.strip() for product in product_string.split(',')]
-    
-    # start = fixed_text.find('{')+1
-    # end =fixed_text.find('}')
-    # json_string = fixed_text[start:end]
-    
-    # dictionary = json.loads(json_string)
-    
-    # print("==========================================")
-    
-    # print(pre_processed_prompt_products_list) 
-
-
-
-
-
-# generate_synonymous("NESCAU 2.0 ACTIGEN-E NESTLE CX COM 2")
-
-
-
-# chatbot_response("Qual o noem do mercado de gvoces")
-
-# def send_message():
-#     # user_input = user_entry.get()
-#     # chat_window.insert(tk.END, f"Você: {user_input}\n")
-#     # user_entry.delete(0, tk.END)
-    
-#     # # Get answer from chatbot
-#     # response = chatbot_response(user_input)
-#     # chat_window.insert(tk.END, f"{response}\n")
-
-#     user_input = user_entry.get()
-#     chat_window.insert(tk.END, f"Você: ", "user_bold")
-#     chat_window.insert(tk.END, f"{user_input}\n\n", "user")
-#     user_entry.delete(0, tk.END)
-    
-#     chat_window.insert(tk.END, f"Chatbot está pensando...\n\n", "bot_bold")
-    
-#     print(f"USER INPUT: {user_input}\n")
-    
-#     window.after(100, generate_response, user_input)
-    
-
-# def generate_response(user_input):
-#     chat_window_content = chat_window.get("1.0", tk.END)
-#     chat_window_content = chat_window_content.replace("Chatbot está pensando...\n\n", "") 
-#     chat_window.delete("1.0", tk.END)
-#     chat_window.insert(tk.END, chat_window_content)
-
-#     response = chatbot_response(user_input)
-
-#     chat_window.insert(tk.END, f"{chatbot_name}: ", "bot_bold")
-#     chat_window.insert(tk.END, f"{response}\n\n", "bot")
-    
-# # creating the main window
-# window = tk.Tk()
-# window.title(f"{supermarket_name}")
-
-# chat_window = scrolledtext.ScrolledText(window, wrap=tk.WORD, width=50, height=20)
-# chat_window.pack(padx=10, pady=10)
-
-# # Defining the tags for formatation
-# chat_window.tag_configure("user_bold", font=("Helvetica", 10, "bold"), justify="right", spacing3=10)
-# chat_window.tag_configure("user", justify="right", spacing3=10)
-# chat_window.tag_configure("bot_bold", font=("Helvetica", 10, "bold"), justify="left", spacing3=10)
-# chat_window.tag_configure("bot", justify="left", spacing3=10)
-
-# chat_window.insert(tk.END, f"{chatbot_name}: ", "bot_bold")
-# chat_window.insert(tk.END, f"Olá, me chamo {chatbot_name}. Em que posso lhe ajudar hoje?\n\n", "bot")
-
-# # Entrance of text for the user
-
-# user_entry = tk.Entry(window, width=50)
-# user_entry.pack(padx=10, pady=10)
-
-# # Button to send the message
-# send_button = tk.Button(window, text="Enviar", command=send_message)
-# send_button.pack(padx=10, pady=10)
-    
-# # Start the interface
-# window.mainloop()
-
-# # try:
-# #     with conn.cursor() as cur:
-# #         for record in data_tuples:
-# #             cur.execute(cur.mogrify(sql, record))
-
-# #     
-# # except (Exception, psycopg2.DatabaseError) as error:
-# #     print(error)
-# # finally:
-# #     conn.close()

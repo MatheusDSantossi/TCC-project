@@ -7,13 +7,23 @@ import {
 import Chart from 'react-apexcharts';
 // import { Square3Stack3DIcon } from '@heroicons/react/24/outline';
 
-const chartConfig = {
+function LineChart({ data }) {
+  // Transform data: Get the stock availability of the first 10 products
+  const productNames = data.slice(0, 10).map((product) => product.name);
+  const stockLevels = data.slice(0, 10).map((product) => parseFloat(product.disponivel));
+
+  console.log("Data: ", data);
+  console.log("Product Names: ", productNames);
+  console.log("Stock Levels: ", stockLevels);
+
+  // Chart configuration
+  const chartConfig = {
     type: "line",
     height: 240,
     series: [
       {
-        name: "Sales",
-        data: [50, 40, 300, 320, 500, 350, 200, 230, 500],
+        name: "Stock Availability",
+        data: stockLevels,
       },
     ],
     options: {
@@ -30,19 +40,14 @@ const chartConfig = {
       },
       colors: ["#020617"],
       stroke: {
-        lineCap: "round",
+        // lineCap: "round",
         curve: "smooth",
       },
-      markers: {
-        size: 0,
-      },
+      // markers: {
+      //   size: 0,
+      // },
       xaxis: {
-        axisTicks: {
-          show: false,
-        },
-        axisBorder: {
-          show: false,
-        },
+        categories: productNames,
         labels: {
           style: {
             colors: "#616161",
@@ -51,17 +56,12 @@ const chartConfig = {
             fontWeight: 400,
           },
         },
-        categories: [
-          "Apr",
-          "May",
-          "Jun",
-          "Jul",
-          "Aug",
-          "Sep",
-          "Oct",
-          "Nov",
-          "Dec",
-        ],
+        // axisTicks: {
+        //   show: false,
+        // },
+        // axisBorder: {
+        //   show: false,
+        // },
       },
       yaxis: {
         labels: {
@@ -96,7 +96,6 @@ const chartConfig = {
     },
   };
 
-function LineChart() {
   return (
     <Card>
         <CardHeader
@@ -105,17 +104,17 @@ function LineChart() {
             color="transparent"
             className="flex flex-col gap-4 rounded-none md:flex-row md:items-center"
         >
-            <div className="w-a rounded-lg bg-gray-900 p-5 text-white">
+            <div className="p-5 text-white bg-gray-900 rounded-lg w-a">
                 <p>TESTE</p>
             </div>
             <div>
                 <Typography variant="h" color="blue-gray">
-                    Sales Performance
+                    Stock Availability
                 </Typography>
                 <Typography 
                 variant="small" color="gray"
                 className="max-w-sm font-normal">
-                    Last 12 months
+                    Top 10 Products
                 </Typography>
             </div>
         </CardHeader>

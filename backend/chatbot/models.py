@@ -107,8 +107,8 @@ class MenuOptionExtended(models.Model):
         ####
         
         # Opções para "Quais os produtos vocês vendem?"
-        menu_option2_s2_o1 = MenuOptionExtended.create_or_get_option(menu_option_description='Lista de categorias disponíveis')
-        menu_option2_s2_o2 = MenuOptionExtended.create_or_get_option(menu_option_description='Quero saber sobre um produto específico')
+        menu_option2_s2_o1 = MenuOptionExtended.create_or_get_option(menu_option_description='Nome do gerente')
+        menu_option2_s2_o2 = MenuOptionExtended.create_or_get_option(menu_option_description='Digitar a pergunta sobre o mercado')
         ###
         
         # Quero algumas sugestões de perguntas
@@ -117,8 +117,8 @@ class MenuOptionExtended(models.Model):
         ###
         
         # Quero saber mais sobre o mercado
-        menu_option4_s2_o1 = MenuOptionExtended.create_or_get_option(menu_option_description='Nome do gerente')
-        menu_option4_s2_o2 = MenuOptionExtended.create_or_get_option(menu_option_description='Digitar a pergunta sobre o mercado')
+        menu_option4_s2_o1 = MenuOptionExtended.create_or_get_option(menu_option_description='Lista de categorias disponíveis')
+        menu_option4_s2_o2 = MenuOptionExtended.create_or_get_option(menu_option_description='Quero saber sobre um produto específico')
         ###
         
         # Saber mais sobre os produtos

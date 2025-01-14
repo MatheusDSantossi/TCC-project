@@ -29,7 +29,9 @@ export default function CustomPasswordField(props) {
             formState,
         }) =>(
 
-          <FormControl variant="outlined" className={"myForm"}>
+          <FormControl variant="outlined" className={"myForm"}
+          sx={{ padding: "0.5rem", marginTop:"0.25rem",borderRadius: "0.5rem", borderColor: "#D1D5DB", width: "100%" }}
+          >
           <InputLabel htmlFor="outlined-adornment-password">{label}</InputLabel>
           <OutlinedInput
             id="outlined-adornment-password"

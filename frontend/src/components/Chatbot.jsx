@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import logo from "../assets/logo.svg";
+import hecatePFP from "../assets/hecate_pfp.jpg";
+import test_image from "../assets/test_image.jpg";
 import Typewriter from "./Typewriter";
 import AxiosInstance from "./AxiosInstance";
 // import ReactTyped
@@ -11,13 +13,9 @@ function Capitalize(str) {
 function Chatbot() {
   const [menuOptions, setMenuOptions] = useState([]);
   const [userInput, setUserInput] = useState("");
-  // const [showTextArea, setShowTextArea] = useState(false);
   const [userName, setUserName] = useState("");
   const [isNameEntered, setIsNameEntered] = useState(false);
   const [hasSelectedOption, setHasSelectedOption] = useState(false);
-  // const [chatMessages, setChatMessages] = useState([
-  //   { sender: "Hecate", text: `Olá, me chamo Hecate! Qual é o seu nome?` },
-  // ]);
   const [chatMessages, setChatMessages] = useState([]);
 
   const [isHecateAnswering, setIsHecateAnswering] = useState(false);
@@ -26,7 +24,36 @@ function Chatbot() {
   const [pendingMenuOptions, setPendingMenuOptions] = useState(null);
 
   const chatContainerRef = useRef(null);
+  const [clockFormat, setClockFormat] = useState("24-hour");
+  const [currentTime, setCurrentTime] = useState("");
+  
+  // Update the clock every second
+  useEffect(() => {
+    const updateClock = () => {
+      const now = new Date();
 
+      // Format time based on user's preference
+      if (clockFormat === "24-hour") {
+        const hours = String(now.getHours()).padStart(2, "0");
+        const minutes = String(now.getMinutes()).padStart(2, "0");
+
+        setCurrentTime(`${hours}:${minutes}`);
+      } else if (clockFormat === "12-hour") {
+        const hours = now.getHours() % 12 || 12; // Convert to 12-hour format
+        const minutes = String(now.getMinutes()).padStart(2, "0");
+        const amPm = now.getHours() >= 12 ? "PM" : "AM";
+        setCurrentTime(`${hours}:${minutes} ${amPm}`);
+      }
+    };
+    
+    // Update every second
+    const interval = setInterval(updateClock, 1000);
+
+    // Clean up interval on component unmount
+    return () => clearInterval(interval);
+  }, [clockFormat]);
+      
+  
   // Fetch initial menu options from Django backend
   useEffect(() => {
     if (!userName) {
@@ -49,7 +76,7 @@ function Chatbot() {
   }, [chatMessages]);
 
   const fetchMenuOptions = () => {
-    AxiosInstance.get(`menu-options/get`)
+    AxiosInstance.get(`menu-options/get/`)
       // .then((response) => setMenuOptions(response.data))
       .then((response) => setPendingMenuOptions(response.data))
       .catch((error) => console.error("Error fetching menu options:", error));
@@ -71,16 +98,17 @@ function Chatbot() {
       const response = await AxiosInstance.post(`chatbot/post/`, {
         user_input: message,
       });
-      // TODO: Even with this timeout the return is immediately
-
+      
       setIsHecateAnswering(false);
       const botResponse = { sender: "Hecate", text: response.data.response };
       setChatMessages((prevMessages) => [...prevMessages, botResponse]);
 
-      // console.log("Received response at:", new Date().toISOString());
-      // console.log("Received response: ", response);
+      setHasSelectedOption(false);
+      fetchMenuOptions();
+      
+      const botResponseAfterFirstAnswer = { sender: "Hecate", text: "Posso lhe ajudar em algo mais"};
+      setChatMessages((prevMessages) => [...prevMessages, botResponseAfterFirstAnswer]);
 
-      // console.log("The chatbot return: ", response);
     } catch (error) {
       console.error("Error sending message: ", error);
     }
@@ -119,18 +147,21 @@ function Chatbot() {
       .then((response) => {
         console.log(`Full response: ${response}`);
         console.log(`menu options data: ${response.data}`);
+        console.log(`option Text: ${optionText}`);
 
         if (response.data === "No more options available") {
           let answer = "Digite sua dúvida.";
-          if (response.data === "Digitar o nome do produto") {
+          if (optionText === "Digitar o nome do produto") {
             answer = "Digite o nome do produto.";
-          } else if (response.data === "Digitar a seção do produto") {
+          } else if (optionText === "Digitar a seção do produto") {
             answer = "Digite a seção do produto.";
-          } else if (response.data === "Digitar alguma descrição do produto") {
+          } else if (optionText === "Digitar alguma descrição do produto") {
             answer = "Digite alguma descrição do produto.";
-          } else if (response.data === "Digitar o código do produto") {
+          } else if (optionText === "Digitar o código do produto") {
             answer = "Digite o código do produto.";
-          } 
+          } else if (optionText === "Nome do gerente" || optionText === "Quais são as promoções do dia?" || optionText == "Lista de categorias disponíveis") {
+            sendMessage(optionText);
+          }
           
           const chatbotAnswer = {
             sender: "Hecate",
@@ -145,7 +176,7 @@ function Chatbot() {
           // because I think it'll be easier.
           const botConfirmation = {
             sender: "Hecate",
-            text: "Entendi. Selecione uma das opçõe abaixo:",
+            text: "Entendi. Selecione uma das opções abaixo:",
           };
           setChatMessages((prevMessages) => [...prevMessages, botConfirmation]);
 
@@ -231,6 +262,20 @@ function Chatbot() {
       <div className="absolute top-4 left-4">
         <img className="w-20" src={logo} alt="Logo" />
       </div>
+      <div className="absolute top-4 right-4">
+        <button
+          onClick={() => setClockFormat("24-hour")}
+          className={`px-4 py-2 rounded-md ${clockFormat === "24-hour" ? "bg-blue-600 text-white" : "bg-gray-300"}`}
+        >
+          24-hour
+        </button>
+        <button 
+          onClick={() => setClockFormat("12-hour")}
+          className={`ml-2 px-4 py-2 rounded-md ${clockFormat === "12-hour" ? "bg-blue-600 text-white" : "bg-gray-300"}`}
+        >
+          12-Hour
+        </button>
+      </div>      
 
       <div className="flex flex-col flex-grow w-full max-w-4xl overflow-hidden bg-white rounded-lg shadow-xl">
         <div className="flex flex-col flex-grow h-0 p-4 overflow-auto" ref={chatContainerRef}>
@@ -243,7 +288,10 @@ function Chatbot() {
               }`}
             >
               <div>
-                <div className="flex-shrink-0 w-10 h-10 bg-gray-100 rounded-full"></div>
+                <div className="flex-shrink-0 w-10 h-10 rounded-full">
+                  {message.sender == "Hecate" ? <img src={hecatePFP} alt="Profile picture of Hecate" className="rounded-full" />
+                  : <img src={test_image} alt="Profile picture of user" className="rounded-full" />}
+                </div>
                 <span className="font-semibold text-black">
                   {message.sender == "Você"
                     ? `${Capitalize(userName)}`
@@ -274,8 +322,9 @@ function Chatbot() {
                     />
                   )}
                 </div>
+                {/* Dynamic Time Display */}
                 <span className="font-medium leading-none text-sx text-primary">
-                  2 min ago
+                  {currentTime}
                 </span>
               </div>
             </div>
@@ -286,13 +335,13 @@ function Chatbot() {
               <input
                 className="w-full px-4 py-3 border border-gray-400 rounded-md focus:outline-none focus:ring focus:ring-yellow-500"
                 type="text"
-                placeholder="Digite seu nome?"
+                placeholder="Type your name"
                 value={userInput}
                 onChange={(e) => setUserInput(e.target.value)}
                 onKeyDown={handleKeyPress}
               />
               <button
-                className="flex-shrink-0 px-4 py-2 ml-2 text-white bg-yellow-400 rounded-md hover:bg-yellow-300"
+                className="flex-shrink-0 px-4 py-2 ml-2 font-bold text-black bg-yellow-400 rounded-md hover:bg-yellow-300"
                 onClick={handleNameSubmit}
               >
                 Enviar
@@ -333,7 +382,7 @@ function Chatbot() {
           )}
           {/* Input field */}
           {hasSelectedOption && (
-            <div className="absolute bottom-0 left-0 w-full bg-gray-300">
+            <div className="absolute bottom-0 left-0 w-full bg-primary">
               <form
                 onSubmit={handleSubmit}
                 className="flex items-center px-4 py-3"
@@ -349,7 +398,7 @@ function Chatbot() {
 
                 <button
                   type="submit"
-                  className="h-10 px-6 ml-2 text-white bg-blue-500 hover:bg-blue-600 rounded-r-md"
+                  className="h-10 px-6 ml-2 font-bold text-black bg-yellow-400 hover:bg-yellow-300 rounded-r-md"
                 >
                   Send
                 </button>

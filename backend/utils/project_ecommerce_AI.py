@@ -1163,7 +1163,7 @@ def chatbot_response(user_prompt):
                     name_of_product = product['Name']
                     detailed_prompt += f"Nome do produto: {product['Name']}\n"
                     detailed_prompt += f"Preço do produto: {product['Price']}\n"
-                    detailed_prompt += f"Produto está disponível (False=Não, True=Sim): {product['Available']}\n\n"
+                    detailed_prompt += f"Produto está disponível com {product['Available']} em estoque\n\n"
                 
                 print("Name of product: ",name_of_product)
                 if (len(name_of_product) > 0):
@@ -1201,7 +1201,7 @@ def chatbot_response(user_prompt):
                     answer_prompt += f"Nome do produto: {product['Name']}\n"
                     answer_prompt += f"Preço do produto: {product['Price']}\n"
                     answer_prompt += f"Seção do produto: {product['Section']}\n"
-                    answer_prompt += f"Produto está disponível (False=Não, True=Sim): {product['Available']}\n\n"
+                    answer_prompt += f"Produto está disponível com {product['Available']} em estoque\n\n"
 
                 # {pre_processed_prompt_products_list}.
                 answer_prompt += f"""
@@ -1365,7 +1365,7 @@ def chatbot_response(user_prompt):
         return response.text
 
 
-print(chatbot_response("Quero um biscoito VITARELLA"))
+# print(chatbot_response("Quero um biscoito VITARELLA"))
 
 def generate_synonymous(product=None, product_list=None):
     

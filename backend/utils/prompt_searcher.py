@@ -89,7 +89,7 @@ def find_quantity(text, conn):
     for known_metric in KNOWN_METRICS:
         if re.search(rf"\b{known_metric}", text, re.IGNORECASE):
             metric = known_metric
-            text = re.sub(rf"\b{known_metric}\b", '', flags=re.IGNORECASE).strip()
+            text = re.sub(rf"\b{known_metric}\b", '', text, flags=re.IGNORECASE).strip()
             break
         
     if metric or quantity:

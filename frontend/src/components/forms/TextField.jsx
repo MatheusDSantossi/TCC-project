@@ -25,6 +25,7 @@ export default function CustomTextField(props) {
           className={"myForm"}
           error = {!!error}
           helperText = {error?.message}
+          sx={{ padding: "0.5rem", marginTop:"0.25rem",borderRadius: "0.5rem", borderColor: "#D1D5DB", width: "100%" }}
            />
           
         )

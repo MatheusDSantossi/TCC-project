@@ -366,8 +366,10 @@ def fetch_products_alike(product_name):
 
 def pre_process_prompt(prompt):
     
-    fix_prompt_v1 = pre_process_prompt_grammatical(prompt)
-    print(f"FIXED 1 {fix_prompt_v1}")
+    # fix_prompt_v1 = pre_process_prompt_grammatical(prompt)
+    # print(f"FIXED 1 {fix_prompt_v1}")
+    fix_prompt_v1 = prompt
+    print(f"PROMPT 1 {fix_prompt_v1}")
     
     products_alike = fetch_products_alike(fix_prompt_v1)
 
@@ -1126,13 +1128,16 @@ def chatbot_response(user_prompt):
     global dict_of_client_products
     global products_list_after_user_input
 
-    find_product = generate_and_search(user_prompt)
+    fix_prompt_v1 = pre_process_prompt_grammatical(user_prompt)
+
+    find_product = generate_and_search(fix_prompt_v1)
 
     is_product = isinstance(find_product, pd.DataFrame)
     
     print("USER PROMPT: ", user_prompt)
+    print("Fixed prompt v1: ", fix_prompt_v1)
     
-    if process_prompt(user_prompt):
+    if process_prompt(fix_prompt_v1):
         return
 
     else: 
@@ -1151,10 +1156,8 @@ def chatbot_response(user_prompt):
                         "Price": row['PrecoVenda'],
                         "Available": row['Disponivel'],
                     }            
-                    products_list_after_user_input.append(dict_of_client_products)
-                    
-
-
+                    products_list_after_user_input.append(dict_of_client_products)                
+            
                 detailed_prompt = detailed_prompt = "Gerar uma descrição detalhada para um chatbot de e-commerce dos produtos que se encontram nessa lista: "
                     
                 name_of_product = ""
@@ -1220,7 +1223,7 @@ def chatbot_response(user_prompt):
                 for info in info_about_the_business:
                     print(f"INFO: {info}")
                     answer_prompt+=f"{info}\n"
-                
+         
                 answer_prompt+=f"""
                 E por fim caso a mensagem do usuário: 
                 
@@ -1296,6 +1299,9 @@ def chatbot_response(user_prompt):
                     
                     answer_prompt+=product_info.strip() + "\n"
                 
+                print("Fixed prompt V1: ", fix_prompt_v1)                
+                    
+                
                 answer_prompt+="""
                 Considerando esses produtos que contém os seguintes valores nome do produto, seção do produto, preco de venda e se o mesmo está disponivel 
                 extamente nessa sequência, retorne uma mensagem com alguns produtos que temos para ver se o cliente vai querer algum deles
@@ -1316,12 +1322,6 @@ def chatbot_response(user_prompt):
                 for info in info_about_the_business:
                     answer_prompt+=f"{info}\n"
                 
-                answer_prompt+="""
-                Considerando essas informações retorne uma mensagem com elas e alguma
-                possível ação ou pergunta que o cliente pode fazer agora.
-                retorne a melhor resposta possível.
-                """
-                
             else:
                 
                 answer_prompt = f"""Considerando que o cliente do nosso 
@@ -1338,25 +1338,27 @@ def chatbot_response(user_prompt):
                     answer_prompt+=f"{info}\n"
             
 
+        section_products = find_section(fix_prompt_v1, conn)
+        
+        if section_products:
+            answer_prompt+=f"""
+            Levando em consideração também que esses produtos:
+            
+            {section_products}
+            
+            São os produtos disponíveis na seção que o cliente comentou retorne uma resposta conveniente com alguns exemplos usando esses produtos para o mesmo. Em caso do dado acima ter alguma mensagem parecida com "This section isn't available in our establishment" retorne informando ao cliente sobre esse problema relacionado a seção.
+                    """
+        
+        answer_prompt+="""
+                Considerando essas informações retorne uma mensagem com útil para o cliente e alguma possível ação ou pergunta que o cliente pode fazer agora.
+                retorne a melhor resposta possível.
+                """
+
+
         response = chat.send_message(answer_prompt)
 
         print(f"ANSWER PROMPT {answer_prompt}")
         
-        # I changed the Gemini chatbot model and now he decorates
-        # the conversation history automatically, so it's unnecessary
-        # to keep the conversation history in my DB
-        sql = """INSERT INTO conversation_history (
-            user_input,
-            chatbot_response)
-            VALUES (%s, %s) RETURNING *"""
-        
-        try:
-            with conn.cursor() as cur:
-                cur.execute(sql, (pre_process_prompt_grammatical(user_prompt), response.text))
-            
-            
-        except (Exception, psycopg2.DatabaseError) as error:
-            print(error)
         
         print("-"*80)
         print("RESPONSE: ", response.text)

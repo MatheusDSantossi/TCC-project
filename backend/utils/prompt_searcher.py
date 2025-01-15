@@ -12,17 +12,32 @@ def find_section(text, conn):
     # if a match is found, return the matched section
     if match:
         section = match.group(1)
-                
+        
+        section = "Seção " + section
+        
         # return match.group(1)
         with conn.cursor() as cursor:
             # cursor.execute("SELECT name FROM products_with_embeddings WHERE secao_produto = %s", (match.group(1),))
+            
             cursor.execute("""
-                           SELECT name FROM products_with_embeddings 
-                           WHERE secao_produto = %s
-                           LIMIT 30
-                           """, (section,))
-            return cursor.fetchall()
-    
+                           SELECT DISTINCT secao_produto FROM products_with_embeddings
+                           """)
+            
+            sections_in_database = cursor.fetchall()
+            
+            print("Sections in database: ", sections_in_database)
+            print("Length of Sections in database: ", len(sections_in_database))
+        
+            if section in [s[0] for s in sections_in_database]:
+                print("Section found in database")
+            
+                cursor.execute("""
+                            SELECT name FROM products_with_embeddings 
+                            WHERE secao_produto = %s
+                            LIMIT 30
+                            """, (section,))
+                return cursor.fetchall()
+            return ["This section isn't available in our establishment"]
     return None
 
 def find_price(text, conn):

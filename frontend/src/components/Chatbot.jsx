@@ -27,6 +27,8 @@ function Chatbot() {
   const [clockFormat, setClockFormat] = useState("24-hour");
   const [currentTime, setCurrentTime] = useState("");
   
+  const [showMenuOptionsAfterHecateAnswer, setShowMenuOptionsAfterHecateAnswer] = useState(false);
+  
   // Update the clock every second
   useEffect(() => {
     const updateClock = () => {
@@ -52,21 +54,6 @@ function Chatbot() {
     // Clean up interval on component unmount
     return () => clearInterval(interval);
   }, [clockFormat]);
-      
-  
-  // Fetch initial menu options from Django backend
-  useEffect(() => {
-    if (!userName) {
-      setChatMessages([
-        {
-          sender: "Hecate",
-          text: `Olá me chamo Hecate! Como você se chama?`,
-        },
-      ]);
-    }
-
-    fetchMenuOptions();
-  }, [userName]);
 
   useEffect(() => {
     if (chatContainerRef.current) {
@@ -81,6 +68,20 @@ function Chatbot() {
       .then((response) => setPendingMenuOptions(response.data))
       .catch((error) => console.error("Error fetching menu options:", error));
   };
+
+    // Fetch initial menu options from Django backend
+    useEffect(() => {
+      if (!userName) {
+        setChatMessages([
+          {
+            sender: "Hecate",
+            text: `Olá me chamo Hecate! Como você se chama?`,
+          },
+        ]);
+      }
+  
+      fetchMenuOptions();
+    }, [userName]);
 
   // Send a message to the chatbot
   const sendMessage = async (message) => {
@@ -103,11 +104,13 @@ function Chatbot() {
       const botResponse = { sender: "Hecate", text: response.data.response };
       setChatMessages((prevMessages) => [...prevMessages, botResponse]);
 
-      setHasSelectedOption(false);
-      fetchMenuOptions();
+      setShowMenuOptionsAfterHecateAnswer(true);
       
-      const botResponseAfterFirstAnswer = { sender: "Hecate", text: "Posso lhe ajudar em algo mais"};
-      setChatMessages((prevMessages) => [...prevMessages, botResponseAfterFirstAnswer]);
+      // setHasSelectedOption(false);
+      // fetchMenuOptions();
+      
+      // const botResponseAfterFirstAnswer = { sender: "Hecate", text: "Posso lhe ajudar em algo mais?"};
+      // setChatMessages((prevMessages) => [...prevMessages, botResponseAfterFirstAnswer]);
 
     } catch (error) {
       console.error("Error sending message: ", error);
@@ -129,13 +132,6 @@ function Chatbot() {
   const selectOption = (optionId, optionText) => {
     const userMessage = { sender: "Você", text: optionText };
     setChatMessages((prevMessages) => [...prevMessages, userMessage]);
-
-    // // get this message based on the user menu choice
-    // const botConfirmation = {
-    //   sender: "Hecate",
-    //   text: "Entendi. Selecione uma das opções:",
-    // };
-    // setChatMessages((prevMessages) => [...prevMessages, botConfirmation]);
 
     setMenuOptions([]); // Clear options menu
     setIsTypingDone(false);
@@ -256,6 +252,11 @@ function Chatbot() {
       handleNameSubmit();
     }
   };
+
+  const showingMenuOptions = (e) => {
+    setShowMenuOptionsAfterHecateAnswer(true);
+    fetchMenuOptions();
+  }
 
   return (
     <div className="flex flex-col justify-center items-center w-screen min-h-screen bg-primary p-[72px] relative">
@@ -380,6 +381,13 @@ function Chatbot() {
               Aguarde. Em breve responderei!
             </span>
           )}
+
+          {showMenuOptionsAfterHecateAnswer && isTypingDone && !isHecateAnswering && menuOptions.length <= 0 && 
+            <button className="h-10 px-6 ml-2 font-bold text-black bg-yellow-400 hover:bg-yellow-300 rounded-r-md" >
+              {/* onClick={showingMenuOptions()} */}
+              Mostrar menu com opções
+            </button>
+          }
           {/* Input field */}
           {hasSelectedOption && (
             <div className="absolute bottom-0 left-0 w-full bg-primary">

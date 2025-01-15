@@ -34,6 +34,8 @@ def pre_process_prompt_grammatical_fix_prompt(text, business_name):
         
         2. If the text is unrelated to retail products or store-related queries (e.g., "Oi, como você está?", "Que horas o mercado fecha?", "Qual é o seu nome?"): Correct only the grammatical and spelling errors and return the text as it is.
         Return the corrected text in Portuguese, preserving its original intent.
+        
+        3. Don't return any weird characters like ``` or anything like that, just return the text correctly.
     """
     return prompt
     
@@ -99,9 +101,10 @@ def products_find_in_section_fix_prompt(products_find_in_section, products_find_
         Input: "pepsi" -> Output: [REFRIG. PEPSI COLA PET 2 EM 1].
         Input: "quanto custa o refrigerante" -> Output: quanto custa o [REFRIG. GUARANA PET CACULINHA].
         Input: "cafe palacio" -> Output: [CAFE PALACIO MOIDO 250G, CAFE PALACIO MOIDO 500G].
+        Input: "Seção 2" -> Output: Texto RA
+        Input: "Quero saber sobre a seção 3" -> Output: Texto RA
         
-        DON'T RETURN any different text just consider the examples above. 
-        Any code in Python or add any new/different text. Consider the products examples and the context to return your answer.
+        DON'T RETURN any different text just consider the examples above.   
         """
     return prompt
 
@@ -170,7 +173,7 @@ def products_find_with_price_fix_prompt(products_find_with_price, products_find_
         Input: "cafe palacio" -> Output: [CAFE PALACIO MOIDO 250G, CAFE PALACIO MOIDO 500G].
         
         DON'T RETURN any different text just consider the examples above. 
-        Any code in Python or add any new/different text. Consider the products examples and the context to return your answer.
+        
         """
         
     return prompt
@@ -240,7 +243,7 @@ def products_find_with_brand_fix_prompt(products_find_using_brand, products_find
         Input: "cafe palacio" -> Output: [CAFE PALACIO MOIDO 250G, CAFE PALACIO MOIDO 500G].
         
         DON'T RETURN any different text just consider the examples above. 
-        Any code in Python or add any new/different text. Consider the products examples and the context to return your answer.
+        
         """
         
     return prompt
@@ -310,7 +313,7 @@ def products_find_with_metric_or_quantity_fix_prompt(products_find_using_metric_
         Input: "cafe palacio" -> Output: [CAFE PALACIO MOIDO 250G, CAFE PALACIO MOIDO 500G].
         
         DON'T RETURN any different text just consider the examples above. 
-        Any code in Python or add any new/different text. Consider the products examples and the context to return your answer.
+        
         """
         
     return prompt
@@ -377,6 +380,6 @@ def products_find_general_fix_prompt(products_alike, products_find_using_prompt,
         Input: "cafe palacio" -> Output: [CAFE PALACIO MOIDO 250G, CAFE PALACIO MOIDO 500G].
         
         DON'T RETURN any different text just consider the examples above. 
-        Any code in Python or add any new/different text. Consider the products examples and the context to return your answer.
+        
         """
     return prompt

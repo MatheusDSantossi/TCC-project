@@ -30,30 +30,30 @@ function Chatbot() {
   const [showMenuOptionsAfterHecateAnswer, setShowMenuOptionsAfterHecateAnswer] = useState(false);
   
   // Update the clock every second
-  useEffect(() => {
-    const updateClock = () => {
-      const now = new Date();
+  // useEffect(() => {
+  //   const updateClock = () => {
+  //     const now = new Date();
 
-      // Format time based on user's preference
-      if (clockFormat === "24-hour") {
-        const hours = String(now.getHours()).padStart(2, "0");
-        const minutes = String(now.getMinutes()).padStart(2, "0");
+  //     // Format time based on user's preference
+  //     if (clockFormat === "24-hour") {
+  //       const hours = String(now.getHours()).padStart(2, "0");
+  //       const minutes = String(now.getMinutes()).padStart(2, "0");
 
-        setCurrentTime(`${hours}:${minutes}`);
-      } else if (clockFormat === "12-hour") {
-        const hours = now.getHours() % 12 || 12; // Convert to 12-hour format
-        const minutes = String(now.getMinutes()).padStart(2, "0");
-        const amPm = now.getHours() >= 12 ? "PM" : "AM";
-        setCurrentTime(`${hours}:${minutes} ${amPm}`);
-      }
-    };
+  //       setCurrentTime(`${hours}:${minutes}`);
+  //     } else if (clockFormat === "12-hour") {
+  //       const hours = now.getHours() % 12 || 12; // Convert to 12-hour format
+  //       const minutes = String(now.getMinutes()).padStart(2, "0");
+  //       const amPm = now.getHours() >= 12 ? "PM" : "AM";
+  //       setCurrentTime(`${hours}:${minutes} ${amPm}`);
+  //     }
+  //   };
     
-    // Update every second
-    const interval = setInterval(updateClock, 1000);
+  //   // Update every second
+  //   const interval = setInterval(updateClock, 1000);
 
-    // Clean up interval on component unmount
-    return () => clearInterval(interval);
-  }, [clockFormat]);
+  //   // Clean up interval on component unmount
+  //   return () => clearInterval(interval);
+  // }, [clockFormat]);
 
   useEffect(() => {
     if (chatContainerRef.current) {
@@ -76,6 +76,7 @@ function Chatbot() {
           {
             sender: "Hecate",
             text: `Olá me chamo Hecate! Como você se chama?`,
+            timestamp: new Date().toLocaleTimeString("pt-BR", { hour: '2-digit', minute: '2-digit' }), // Static timestamp
           },
         ]);
       }
@@ -88,7 +89,7 @@ function Chatbot() {
     setIsHecateAnswering(true);
     setIsTypingDone(false);
 
-    const newMessage = { sender: "Você", text: message };
+    const newMessage = { sender: "Você", text: message, timestamp: new Date().toLocaleTimeString("pt-BR", { hour: '2-digit', minute: '2-digit'}) };
     setChatMessages((prevMessages) => [...prevMessages, newMessage]);
 
     console.log("Sending message at:", new Date().toISOString());
@@ -101,11 +102,13 @@ function Chatbot() {
       });
       
       setIsHecateAnswering(false);
-      const botResponse = { sender: "Hecate", text: response.data.response };
+      const botResponse = { sender: "Hecate", text: response.data.response, timestamp: new Date().toLocaleTimeString("pt-BR", { hour: '2-digit', minute: '2-digit'}) };
       setChatMessages((prevMessages) => [...prevMessages, botResponse]);
 
-      setShowMenuOptionsAfterHecateAnswer(true);
+      // setShowMenuOptionsAfterHecateAnswer(true);
       
+      showingMenuOptions();
+
       // setHasSelectedOption(false);
       // fetchMenuOptions();
       
@@ -130,7 +133,7 @@ function Chatbot() {
 
   // Handle option selection
   const selectOption = (optionId, optionText) => {
-    const userMessage = { sender: "Você", text: optionText };
+    const userMessage = { sender: "Você", text: optionText, timestamp: new Date().toLocaleTimeString("pt-BR", { hour: '2-digit', minute: '2-digit'}) };
     setChatMessages((prevMessages) => [...prevMessages, userMessage]);
 
     setMenuOptions([]); // Clear options menu
@@ -161,7 +164,8 @@ function Chatbot() {
           
           const chatbotAnswer = {
             sender: "Hecate",
-            text: answer,
+            text: answer, 
+            timestamp: new Date().toLocaleTimeString("pt-BR", { hour: '2-digit', minute: '2-digit'})
           };
 
           setChatMessages((prevMessages) => [...prevMessages, chatbotAnswer]);
@@ -172,7 +176,8 @@ function Chatbot() {
           // because I think it'll be easier.
           const botConfirmation = {
             sender: "Hecate",
-            text: "Entendi. Selecione uma das opções abaixo:",
+            text: "Entendi. Selecione uma das opções abaixo:", 
+            timestamp: new Date().toLocaleTimeString("pt-BR", { hour: '2-digit', minute: '2-digit'})
           };
           setChatMessages((prevMessages) => [...prevMessages, botConfirmation]);
 
@@ -206,7 +211,8 @@ function Chatbot() {
       // Addding the user's message to the chat
       const userNameMessage = {
         sender: "Você",
-        text: `Me chamo ${newUserName}`,
+        text: `Me chamo ${newUserName}`, 
+        timestamp: new Date().toLocaleTimeString("pt-BR", { hour: '2-digit', minute: '2-digit'})
       };
 
       setChatMessages((prevMessages) => {
@@ -222,7 +228,8 @@ function Chatbot() {
       setTimeout(() => {
         const botResponse = {
           sender: "Hecate",
-          text: `Prazer em conhecê-lo, ${newUserName}! Como posso lhe ajudar hoje?`,
+          text: `Prazer em conhecê-lo, ${newUserName}! Como posso lhe ajudar hoje?`, 
+          timestamp: new Date().toLocaleTimeString("pt-BR", { hour: '2-digit', minute: '2-digit'})
         };
         setChatMessages((prevMessages) => {
           const updatedMessages = [...prevMessages, botResponse];
@@ -325,7 +332,7 @@ function Chatbot() {
                 </div>
                 {/* Dynamic Time Display */}
                 <span className="font-medium leading-none text-sx text-primary">
-                  {currentTime}
+                  {message.timestamp}
                 </span>
               </div>
             </div>

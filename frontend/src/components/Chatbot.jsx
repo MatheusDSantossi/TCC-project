@@ -25,10 +25,13 @@ function Chatbot() {
 
   const chatContainerRef = useRef(null);
   const [clockFormat, setClockFormat] = useState("24-hour");
-  const [currentTime, setCurrentTime] = useState("");
-  
-  const [showMenuOptionsAfterHecateAnswer, setShowMenuOptionsAfterHecateAnswer] = useState(false);
-  
+  const [currentTime, setCurrentTime] = useState("");  
+
+  const [
+    showMenuOptionsAfterHecateAnswer,
+    setShowMenuOptionsAfterHecateAnswer,
+  ] = useState(false);
+
   // Update the clock every second
   // useEffect(() => {
   //   const updateClock = () => {
@@ -47,7 +50,7 @@ function Chatbot() {
   //       setCurrentTime(`${hours}:${minutes} ${amPm}`);
   //     }
   //   };
-    
+
   //   // Update every second
   //   const interval = setInterval(updateClock, 1000);
 
@@ -59,7 +62,6 @@ function Chatbot() {
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTo = chatContainerRef.current.scrollHeight;
     }
-    
   }, [chatMessages]);
 
   const fetchMenuOptions = () => {
@@ -69,29 +71,42 @@ function Chatbot() {
       .catch((error) => console.error("Error fetching menu options:", error));
   };
 
-    // Fetch initial menu options from Django backend
-    useEffect(() => {
-      if (!userName) {
-        setChatMessages([
-          {
-            sender: "Hecate",
-            text: `Olá me chamo Hecate! Como você se chama?`,
-            timestamp: new Date().toLocaleTimeString("pt-BR", { hour: '2-digit', minute: '2-digit' }), // Static timestamp
-          },
-        ]);
-      }
-  
-      fetchMenuOptions();
-    }, [userName]);
+  // Fetch initial menu options from Django backend
+  useEffect(() => {
+    if (!userName) {
+      setChatMessages([
+        {
+          sender: "Hecate",
+          text: `Olá me chamo Hecate! Como você se chama?`,
+          timestamp: new Date().toLocaleTimeString("pt-BR", {
+            hour: "2-digit",
+            minute: "2-digit",
+          }), // Static timestamp
+        },
+      ]);
+    }
+
+    fetchMenuOptions();
+  }, [userName]);
 
   // Send a message to the chatbot
-  const sendMessage = async (message) => {
+  const sendMessage = async (message, showMessage = true) => {
     setIsHecateAnswering(true);
     setIsTypingDone(false);
 
-    const newMessage = { sender: "Você", text: message, timestamp: new Date().toLocaleTimeString("pt-BR", { hour: '2-digit', minute: '2-digit'}) };
-    setChatMessages((prevMessages) => [...prevMessages, newMessage]);
+    const newMessage = {
+      sender: "Você",
+      text: message,
+      timestamp: new Date().toLocaleTimeString("pt-BR", {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+    };
 
+    if (showMessage) {
+      setChatMessages((prevMessages) => [...prevMessages, newMessage]);
+    }
+    
     console.log("Sending message at:", new Date().toISOString());
 
     try {
@@ -100,21 +115,27 @@ function Chatbot() {
       const response = await AxiosInstance.post(`chatbot/post/`, {
         user_input: message,
       });
-      
+
       setIsHecateAnswering(false);
-      const botResponse = { sender: "Hecate", text: response.data.response, timestamp: new Date().toLocaleTimeString("pt-BR", { hour: '2-digit', minute: '2-digit'}) };
+      const botResponse = {
+        sender: "Hecate",
+        text: response.data.response,
+        timestamp: new Date().toLocaleTimeString("pt-BR", {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+      };
       setChatMessages((prevMessages) => [...prevMessages, botResponse]);
 
-      // setShowMenuOptionsAfterHecateAnswer(true);
-      
-      showingMenuOptions();
+      setShowMenuOptionsAfterHecateAnswer(true);
+
+      // showingMenuOptions();
 
       // setHasSelectedOption(false);
       // fetchMenuOptions();
-      
+
       // const botResponseAfterFirstAnswer = { sender: "Hecate", text: "Posso lhe ajudar em algo mais?"};
       // setChatMessages((prevMessages) => [...prevMessages, botResponseAfterFirstAnswer]);
-
     } catch (error) {
       console.error("Error sending message: ", error);
     }
@@ -133,7 +154,14 @@ function Chatbot() {
 
   // Handle option selection
   const selectOption = (optionId, optionText) => {
-    const userMessage = { sender: "Você", text: optionText, timestamp: new Date().toLocaleTimeString("pt-BR", { hour: '2-digit', minute: '2-digit'}) };
+    const userMessage = {
+      sender: "Você",
+      text: optionText,
+      timestamp: new Date().toLocaleTimeString("pt-BR", {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+    };
     setChatMessages((prevMessages) => [...prevMessages, userMessage]);
 
     setMenuOptions([]); // Clear options menu
@@ -158,26 +186,38 @@ function Chatbot() {
             answer = "Digite alguma descrição do produto.";
           } else if (optionText === "Digitar o código do produto") {
             answer = "Digite o código do produto.";
-          } else if (optionText === "Nome do gerente" || optionText === "Quais são as promoções do dia?" || optionText == "Lista de categorias disponíveis") {
-            sendMessage(optionText);
+          } else if (
+            optionText === "Nome do gerente" ||
+            optionText === "Quais são as promoções do dia?" ||
+            optionText == "Lista de categorias disponíveis"
+          ) {
+            answer = "";
+            sendMessage(optionText, false);
           }
-          
+
           const chatbotAnswer = {
             sender: "Hecate",
-            text: answer, 
-            timestamp: new Date().toLocaleTimeString("pt-BR", { hour: '2-digit', minute: '2-digit'})
+            text: answer,
+            timestamp: new Date().toLocaleTimeString("pt-BR", {
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
           };
-
+          if (chatbotAnswer.text.length > 0) {
           setChatMessages((prevMessages) => [...prevMessages, chatbotAnswer]);
-          setHasSelectedOption(true);
+        }
+        setHasSelectedOption(true);
         } else {
           // get this message based on the user menu choice
           // TODO: Get the text based on the menuOption, so I think I have to do this in the view python
           // because I think it'll be easier.
           const botConfirmation = {
             sender: "Hecate",
-            text: "Entendi. Selecione uma das opções abaixo:", 
-            timestamp: new Date().toLocaleTimeString("pt-BR", { hour: '2-digit', minute: '2-digit'})
+            text: "Entendi. Selecione uma das opções abaixo:",
+            timestamp: new Date().toLocaleTimeString("pt-BR", {
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
           };
           setChatMessages((prevMessages) => [...prevMessages, botConfirmation]);
 
@@ -211,8 +251,11 @@ function Chatbot() {
       // Addding the user's message to the chat
       const userNameMessage = {
         sender: "Você",
-        text: `Me chamo ${newUserName}`, 
-        timestamp: new Date().toLocaleTimeString("pt-BR", { hour: '2-digit', minute: '2-digit'})
+        text: `Me chamo ${newUserName}`,
+        timestamp: new Date().toLocaleTimeString("pt-BR", {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
       };
 
       setChatMessages((prevMessages) => {
@@ -228,8 +271,11 @@ function Chatbot() {
       setTimeout(() => {
         const botResponse = {
           sender: "Hecate",
-          text: `Prazer em conhecê-lo, ${newUserName}! Como posso lhe ajudar hoje?`, 
-          timestamp: new Date().toLocaleTimeString("pt-BR", { hour: '2-digit', minute: '2-digit'})
+          text: `Prazer em conhecê-lo, ${newUserName}! Como posso lhe ajudar hoje?`,
+          timestamp: new Date().toLocaleTimeString("pt-BR", {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
         };
         setChatMessages((prevMessages) => {
           const updatedMessages = [...prevMessages, botResponse];
@@ -261,9 +307,9 @@ function Chatbot() {
   };
 
   const showingMenuOptions = (e) => {
-    setShowMenuOptionsAfterHecateAnswer(true);
+    setShowMenuOptionsAfterHecateAnswer(false);
     fetchMenuOptions();
-  }
+  };
 
   return (
     <div className="flex flex-col justify-center items-center w-screen min-h-screen bg-primary p-[72px] relative">
@@ -273,20 +319,27 @@ function Chatbot() {
       <div className="absolute top-4 right-4">
         <button
           onClick={() => setClockFormat("24-hour")}
-          className={`px-4 py-2 rounded-md ${clockFormat === "24-hour" ? "bg-blue-600 text-white" : "bg-gray-300"}`}
+          className={`px-4 py-2 rounded-md ${
+            clockFormat === "24-hour" ? "bg-blue-600 text-white" : "bg-gray-300"
+          }`}
         >
           24-hour
         </button>
-        <button 
+        <button
           onClick={() => setClockFormat("12-hour")}
-          className={`ml-2 px-4 py-2 rounded-md ${clockFormat === "12-hour" ? "bg-blue-600 text-white" : "bg-gray-300"}`}
+          className={`ml-2 px-4 py-2 rounded-md ${
+            clockFormat === "12-hour" ? "bg-blue-600 text-white" : "bg-gray-300"
+          }`}
         >
           12-Hour
         </button>
-      </div>      
+      </div>
 
       <div className="flex flex-col flex-grow w-full max-w-4xl overflow-hidden bg-white rounded-lg shadow-xl">
-        <div className="flex flex-col flex-grow h-0 p-4 overflow-auto" ref={chatContainerRef}>
+        <div
+          className="flex flex-col flex-grow h-0 p-4 overflow-auto"
+          ref={chatContainerRef}
+        >
           {/* Chat Message */}
           {chatMessages.map((message, index) => (
             <div
@@ -297,8 +350,19 @@ function Chatbot() {
             >
               <div>
                 <div className="flex-shrink-0 w-10 h-10 rounded-full">
-                  {message.sender == "Hecate" ? <img src={hecatePFP} alt="Profile picture of Hecate" className="rounded-full" />
-                  : <img src={test_image} alt="Profile picture of user" className="rounded-full" />}
+                  {message.sender == "Hecate" ? (
+                    <img
+                      src={hecatePFP}
+                      alt="Profile picture of Hecate"
+                      className="rounded-full"
+                    />
+                  ) : (
+                    <img
+                      src={test_image}
+                      alt="Profile picture of user"
+                      className="rounded-full"
+                    />
+                  )}
                 </div>
                 <span className="font-semibold text-black">
                   {message.sender == "Você"
@@ -389,14 +453,17 @@ function Chatbot() {
             </span>
           )}
 
-          {showMenuOptionsAfterHecateAnswer && isTypingDone && !isHecateAnswering && menuOptions.length <= 0 && 
-            <button className="h-10 px-6 ml-2 font-bold text-black bg-yellow-400 hover:bg-yellow-300 rounded-r-md" >
-              {/* onClick={showingMenuOptions()} */}
-              Mostrar menu com opções
-            </button>
-          }
+          {showMenuOptionsAfterHecateAnswer &&
+            isTypingDone &&
+            !isHecateAnswering &&
+            menuOptions.length <= 0 && (
+              <button className="h-10 px-6 ml-2 font-bold text-black bg-yellow-400 hover:bg-yellow-300 rounded-r-md" onClick={showingMenuOptions}>
+                {/* onClick={showingMenuOptions()} */}
+                Mostrar menu com opções
+              </button>
+            )}
           {/* Input field */}
-          {hasSelectedOption && (
+          {hasSelectedOption && !isHecateAnswering && menuOptions <= 0 && isTypingDone &&(
             <div className="absolute bottom-0 left-0 w-full bg-primary">
               <form
                 onSubmit={handleSubmit}

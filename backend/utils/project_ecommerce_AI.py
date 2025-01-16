@@ -90,7 +90,8 @@ chatbot_name = "Hecate"
 # My plan is to give the opportunity and way to the client put some information like the ones bellow
 info_about_the_business = ["Nosso mercado abre as 7h e fecha as 22h", 
                            "Nosso mercado tem o valor de sempre atender os clientes com o melhor atendimento possível",
-                           "O nome do nosso gerente é Fulano"
+                           "O nome do nosso gerente é Matheus",
+                           "As promoções do nosso mercado hoje são principalmente no arroz que está 50% mais barato"
                             ]
 
 # conversation_history = {}
@@ -455,73 +456,7 @@ def pre_process_prompt(prompt):
         fix_prompt_v2 = products_find_in_section_fix_prompt(products_find_in_section, products_find_using_prompt, products_alike, fix_prompt_v1)
         
     elif products_find_with_price != None:
-        # fix_prompt_v2 = f"""
-        # Task Description:
-
-        # You are a text normalizer and corrector. Your goal is to correct any grammatical and orthographic errors in the provided
-        # text while standardizing product names to match the exact names from the given product lists. You must ensure no relevant
-        # products are overlooked and avoid returning "Texto RA" unless absolutely no products match the input.
-        # Consider that you're talking directly with the client don't return any weird answer.
-
-        # Provided Information:
-
-        # 1. Products with the same price:
-        # {products_find_with_price}
-        
-        # 2. Possible Similar Products:
-        # {products_find_using_prompt}
-
-        # 3. Standard Product List (Exact Names and Sections):
-        # {products_alike}
-        
-        # Text to Normalize:
-        # "{fix_prompt_v1}"
-        
-        # Normalization Instructions:
-        
-        # 1.Product Name Matching Rules:
-
-        # Match input terms to products in the list based on exact name, abbreviations, partial matches, or phonetic similarity.
-        # Variations like "cafe," "CAFÉ," or "Cafe Pilao" should be normalized to "CAFE PILAO ALMOFADA" or another appropriate match from the list.
-        
-        # 2. Handling Partial or Ambiguous Matches:
-
-        # If the input refers to a category or group (e.g., "café" with no additional qualifiers), prioritize the most generic product from the list (e.g., "CAFE PALACIO MOIDO 250G").
-        
-        # 3.Text Not Containing Products:
-
-        # If the text contains no identifiable product names or similar terms, return "Texto RA."
-        
-        # 4. Output Format:
-
-        # If a product is identified, list the product(s) in square brackets with their exact names.
-        # If multiple products fit, list all relevant matches, separated by commas.
-        
-        # Example:
-        # Input: "cafe" -> Output: [CAFE PILAO ALMOFADA, CAFE PALACIO MOIDO 250G].
-        
-        # 5. Contextual Normalization:
-
-        # Consider context and section information when normalizing. For example:
-        # If "250G" appears, prioritize matching with products of the same size.
-        # If no context (e.g., size or section) is given, use a default or generic match.
-        
-        # 6. Specific Cases:
-
-        # Abbreviations: Normalize terms like "refri" or "refrigerante" to specific product names like "REFRIG. PEPSI COLA PET 2 EM 1."
-        # Plurals or variants: "cafés" -> "CAFE PILAO ALMOFADA."
-        
-        # Examples of Substitutions:
-
-        # Input: "cafe" -> Output: [CAFE PILAO ALMOFADA, CAFE PALACIO MOIDO 250G].
-        # Input: "pepsi" -> Output: [REFRIG. PEPSI COLA PET 2 EM 1].
-        # Input: "quanto custa o refrigerante" -> Output: quanto custa o [REFRIG. GUARANA PET CACULINHA].
-        # Input: "cafe palacio" -> Output: [CAFE PALACIO MOIDO 250G, CAFE PALACIO MOIDO 500G].
-        
-        # DON'T RETURN any different text just consider the examples above. 
-        # Any code in Python or add any new/different text. Consider the products examples and the context to return your answer.
-        # """
-        
+       
         fix_prompt_v2 = products_find_with_price_fix_prompt(products_find_with_price, products_find_using_prompt, products_alike, fix_prompt_v1)
    
     elif products_find_using_brand != None:
@@ -741,7 +676,6 @@ def find_similarity_products(prompt, embeddings_products=None):
 
     contains_a_product = False
     return prompt
-
 
 
 def generate_and_search(prompt):
@@ -1367,7 +1301,7 @@ def chatbot_response(user_prompt):
         return response.text
 
 
-# print(chatbot_response("Quero um biscoito VITARELLA"))
+print(chatbot_response("VITAMASSA"))
 
 def generate_synonymous(product=None, product_list=None):
     
@@ -1405,46 +1339,79 @@ def generate_synonymous(product=None, product_list=None):
     
         new_product = pre_process_prompt_grammatical(product)
         
-        prompt = """Coloque todos os sinônimos possíveis para as palavras abaixo. Leve em
-                    consideração que as palavras podem aparecer abreviadas como "INSET SBP AERO" que 
-                    significa "INSETICIDA SBP AEROSSOL" faça uma pesquisa aprofundada do que cada palavra
-                    pode significada estando abreviada ou não, considerando que muito provavelmente todas 
-                    elas são produtos de varejo encontrados em qualquer supermercado, pense nisso também quando
-                    for tentar identificar as palvras. Não repita os sinônimos e se limita a no máximo 30 sinônimos.
-                    Não adicione nenhum texto ou caracter extra como por exemplo  ```python, ```json  ou ```markdown
-                    ou algo parecido retorne apenas os sinonimos. 
-                    Segue o/os produtos.
+        prompt = """Generate all possible synonyms for the product names listed below. Follow these rules carefully:
+
+        The product names may be abbreviated, e.g., "INSET SBP AERO" means "INSETICIDA SBP AEROSSOL". Analyze each abbreviation to determine its meaning.
+        
+        Assume the products are common retail items found in Brazilian supermarkets. Use this context to identify abbreviations and generate synonyms.
+        
+        Do not repeat synonyms, and limit the list to a maximum of 30 synonyms per product.
+        
+        Return the output strictly as a Python dictionary in the following format:
+        {"NOME_DO_PRODUTO": ["sinônimo1", "sinônimo2", ...], "OUTRO_PRODUTO": ["sinônimo1", "sinônimo2", ...]}
+        
+        The synonyms must be in Brazilian Portuguese, even though this prompt is in English.
+        
+        Do not include any unnecessary text, comments, or formatting such as python, json, markdown, or anything similar. Only return the dictionary.
+        
+        Ensure all synonyms are enclosed in double quotes (e.g., "Caixa de Fósforos", "Palito de Fósforo").
+        
+        Here are the product names:
         \n"""
         
         prompt+=new_product
         
-        prompt += """\n\nRetorne todos os produtos e sinônimos como um dicionário, por exemplo: {'CAFE PILAO ALMOFADA': ['Expresso', 'Cappuccino', 'Mocha', 'Latte', 'Café da Manhã', 'Café Coado', 'Café em Grãos']}
-        lembre-se de abrir a chave { e fechar a mesma chave } retorne apenas o diciónario sem nenhum texto adicional, 
-        ou seja, a sua resposta deve começar com uma { e terminar com o fechamento dela }. Adicione todos os possíveis sinônimos de cada palavra
-        Lembre de colocar as palavras entre aspas duplas, por exemplo, {"Caixa de Fósforos","Palito de Fósforo","Fósforo de Segurança"}
+        prompt += """\n\nOutput example (adjusted for dynamic products):
+        
+        {"bisc. rosq. chocolate": ["biscuit chocolate ring", "cookie chocolate ring", "ring-shaped chocolate biscuit"], "bisc. rosq. leite": ["milk biscuit ring", "milk cookie ring", "ring-shaped milk biscuit"]}
+        
+        Important Notes:
+
+        1. Do not include duplicate synonyms across or within products.
+        
+        2. Do not return any extra characters, comments, or text (e.g., no json, python, or similar formatting).
+        
+        3. The product list may change dynamically. Always adapt to the provided product names.
+        
+        4. ONLY return the synonymous don't return any other text, for example ```python ```json or anything like that, I want the response to start with a { and end with a }, the format that I've just told you about.
         """ 
     else:
-        prompt = """Coloque todos os sinônimos possíveis para as palavras abaixo. Leve em
-                    consideração que as palavras podem aparecer abreviadas como "INSET SBP AERO" que 
-                    significa "INSETICIDA SBP AEROSSOL" faça uma pesquisa aprofundada do que cada palavra
-                    pode significada estando abreviada ou não, considerando que muito provavelmente todas 
-                    elas são produtos de varejo encontrados em qualquer supermercado, pense nisso também quando
-                    for tentar identificar as palavras. Não adicione nenhum texto ou caracter extra como por exemplo  ```python, ```json  ou ```markdown
-                    ou algo parecido retorne apenas os sinonimos. 
-                    Segue o/os produtos.
+        prompt = """Generate all possible synonyms for the product names listed below. Follow these rules carefully:
+
+        The product names may be abbreviated, e.g., "INSET SBP AERO" means "INSETICIDA SBP AEROSSOL". Analyze each abbreviation to determine its meaning.
+        
+        Assume the products are common retail items found in Brazilian supermarkets. Use this context to identify abbreviations and generate synonyms.
+        
+        Do not repeat synonyms, and limit the list to a maximum of 30 synonyms per product.
+        
+        Return the output strictly as a Python dictionary in the following format:
+        {"NOME_DO_PRODUTO": ["sinônimo1", "sinônimo2", ...], "OUTRO_PRODUTO": ["sinônimo1", "sinônimo2", ...]}
+        
+        The synonyms must be in Brazilian Portuguese, even though this prompt is in English.
+        
+        Do not include any unnecessary text, comments, or formatting such as python, json, markdown, or anything similar. Only return the dictionary.
+        
+        Ensure all synonyms are enclosed in double quotes (e.g., "Caixa de Fósforos", "Palito de Fósforo").
+        
+        Here are the product names:
                 \n"""
         
         for product in product_synonymous_list:
             prompt += str(product["Name"]) + "\n"
         
-        prompt += """\n\nRetorne todos os produtos e sinônimos como um dicionário, por exemplo: {'CAFE PILAO ALMOFADA': ['Expresso', 'Cappuccino', 'Mocha', 'Latte', 'Café da Manhã', 'Café Coado', 'Café em Grãos']}
-        lembre-se de abrir a chave { e fechar a mesma chave } retorne apenas o diciónario sem nenhum texto adicional, 
-        ou seja, a sua resposta deve começar com uma { e terminar com o fechamento dela }. Em formato de dicionário em Python
-        não retorne em nenhum outro formato.
-        Em hipotese alguma adicione nenhum texto ou caracter extra como por exemplo  ```python, ```json  ou ```markdown
-        ou algo parecido retorne apenas os sinonimos. 
-        Adicione todos os possíveis sinônimos de cada palavra
-        Lembre de colocar as palavras entre aspas duplas, por exemplo, {"Caixa de Fósforos","Palito de Fósforo","Fósforo de Segurança"}
+        prompt += """\n\nOutput example (adjusted for dynamic products):
+        
+        {"bisc. rosq. chocolate": ["biscuit chocolate ring", "cookie chocolate ring", "ring-shaped chocolate biscuit"], "bisc. rosq. leite": ["milk biscuit ring", "milk cookie ring", "ring-shaped milk biscuit"]}
+        
+        Important Notes:
+
+        1. Do not include duplicate synonyms across or within products.
+        
+        2. Do not return any extra characters, comments, or text (e.g., no json, python, or similar formatting).
+        
+        3. The product list may change dynamically. Always adapt to the provided product names.
+        
+        4. ONLY return the synonymous don't return any other text, for example ```python ```json or anything like that, I want the response to start with a { and end with a }, the format that I've just told you about.
         """ 
 
     
@@ -1458,40 +1425,61 @@ def generate_synonymous(product=None, product_list=None):
     # {'Macarrão Pilsen Médio': ['Macarrão', 'Massa', 
     #                            'Espaguete', 'Talharim', 'Fideli', 'Ninhos', 'Penne', 'Farfalle', 'Spaghetti', 'Macarrão Tipo Pilsen', 'Macarrão Médio', 'Macarrão de Trigo', 'Macarrão Seco', 'Macarrão Cozido', 'Macarrão para Sopa', 'Macarrão para Salada', 'Macarrão para Massa']}
     
-    synonymous_dict = ast.literal_eval(response.text)
-    # synonymous_list = list(synonymous_dict.values())[0]
+    cleaned_response = re.sub(r"^```[a-zA-Z]*\n|```$", "", response.text).strip()
     
-    first_key = next(iter(synonymous_dict))
+    if not cleaned_response:
+         cleaned_response = re.sub(r"^```[a-zA-Z]*\n", "", response.text).strip()
     
-    synonymous_list = synonymous_dict[first_key]
-    # synonymous_dict = dict(synonymous_dict.values())[0]
-    print("Synonymous list: ",synonymous_list)
-    print("Synonymous dict: ",synonymous_dict)
+    print(cleaned_response)
     
-    # for key, value in synonymous_dict.items():
-        # print("synonymous key: ",key, "synonymous value: ", value)
-        # synonymous_list = synonymous_dict[key]
-    
-    # Transform list into the format you want
-    formatted_string = '{' + ', '.join(f'"{syn}"' for syn in synonymous_list) + '}'
-    
-    # synonymous_dict_wrapped = f"'{formatted_string}'"
-    # print("Synonymous dict wrapped: ",synonymous_dict_wrapped)
-    
-    # Escaping special characters in the list and converting it to PostgreSQL's array format
-    # synonymous_list_pg = '{' + ','.join('"' + syn + '"' for syn in synonymous_list) + '}'
-
-    if isinstance(product, dict):
-        print("product: ", product['Name'])
-        product = product['Name']
-
-
-    with conn.cursor() as cursor:
-        cursor.execute("""
-                       UPDATE products_with_embeddings
-                       SET synonymous = %s
-                       WHERE name = %s
-                       """, (formatted_string, original_product))
+    try:
         
+        # Remove unnecessary prefixes and suffixes like ```python and ```
+    
+    
+        synonymous_dict = ast.literal_eval(cleaned_response)
+        
+        first_key = next(iter(synonymous_dict))
+        
+        synonymous_list = synonymous_dict[first_key]
+        
+        # Cleaning the first key
+        sanitized_key = re.sub(r"[^\w\s]", "", first_key).strip()
+        
+        # Cleaning the synonymous list
+        sanitized_synonymous_list = [re.sub(r"[^\w\s]", "", synonym).strip() for synonym in synonymous_list]
+        
+         # Debugging outputs
+        print("Original dict:", synonymous_dict)
+        print("Sanitized key:", sanitized_key)
+        print("Sanitized synonyms:", sanitized_synonymous_list)
+        
+        # Transform list into the format you want
+        # formatted_string = '{' + ', '.join(f'"{syn}"' for syn in synonymous_list) + '}'
+        
+        # synonymous_dict_wrapped = f"'{formatted_string}'"
+        # print("Synonymous dict wrapped: ",synonymous_dict_wrapped)
+        
+        # Escaping special characters in the list and converting it to PostgreSQL's array format
+        # synonymous_list_pg = '{' + ','.join('"' + syn + '"' for syn in synonymous_list) + '}'
+
+        if isinstance(product, dict):
+            print("product: ", product['Name'])
+            product = product['Name']
+
+
+        with conn.cursor() as cursor:
+            cursor.execute("""
+                        UPDATE products_with_embeddings
+                        SET synonymous = %s
+                        WHERE name = %s
+                        """, (sanitized_synonymous_list, original_product))
             
-    return synonymous_list
+                
+        return synonymous_list
+    
+    except Exception as e:
+        print("Error generating synonyms: ", e)
+        return None
+
+# print(generate_synonymous("SUCO  CONCENT. MANGA"))

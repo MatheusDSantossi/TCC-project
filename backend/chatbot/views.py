@@ -42,7 +42,7 @@ class ChatbotResponse(viewsets.ViewSet):
 class MenuOptionsView(viewsets.ViewSet):
     permission_classes = [permissions.AllowAny]
     
-    MenuOptionExtended.createMenusOptions()
+    # MenuOptionExtended.createMenusOptions()
     # MenuOptionExtended.delete_and_recreate_menuOption()
     
     @action(detail=False, methods=['post'])
@@ -203,7 +203,7 @@ class ProductRegistration(viewsets.ViewSet):
             products = Product.get_all_products()
             
             product_name = product_name.strip()
-            product_section = "Seção " + product_section
+            product_section = "Seção " + str(product_section)
             
             print("V1_PN: ", product_name, product_section, price, metric_unity, available)
             
@@ -223,16 +223,32 @@ class ProductRegistration(viewsets.ViewSet):
             else:
                 product_synonymous = Product.get_synonymus(product_name)
                 print("SYNONYMOUS: ", product_synonymous)
+                
+                product = Product.get_product_by_name(product_name)
+                
+                print("Product name: ", product.name)
+                print("Product brand: ", product.brand)
+                print("Product quantity: ", product.quantity)
+                
                 if not product_synonymous:
                     Product.generate_synonymous(product_name)
-                else:
+                    
+                elif not product.brand:
+                    product.brand = product_brand
+                    product.save()
+                elif not product.quantity:
+                    product.quantity = product_quantity_format
+                    product.save()
+                elif product_synonymous:
                     print("PRODUCT ALREADY HAVE SYNONYMOUS: ", product_synonymous)
                     
         except Exception as err:
             print('Error here 2.0: ', err)
-            return JsonResponse({'error': 'An error occured while registering the product: '}, status=500)
+            return Response({'error': 'An error occured while registering the product: '}, status=500)
             
-        return redirect('index')
+        return Response([
+            {'product_id': product.product_id, 'product_name': product.name} for product in products
+            ])
 
 class ProductListView(generic.ListView):
     model = Product

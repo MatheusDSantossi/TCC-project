@@ -201,6 +201,9 @@ def products_find_with_brand_fix_prompt(products_find_using_brand, products_find
         Text to Normalize:
         "{fix_prompt_v1}"
         
+        In case you identify the message is only a brand of a product return a list 
+        and some information about Products with the same brand list it's showed above.
+        
         Normalization Instructions:
         
         1.Product Name Matching Rules:

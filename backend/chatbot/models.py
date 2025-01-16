@@ -27,10 +27,12 @@ class Product(models.Model):
         return Product.objects.all()
     
     @staticmethod
-    def get_product_by_name(name):
-        if name:
-            return Product.objects.filter(nome=name)
-        return Product.get_all_products()
+    def get_product_by_name(product_name):
+        if product_name:
+            # return Product.objects.filter(name=name)
+            return Product.objects.get(name=product_name)
+        # return Product.get_all_products()
+        return None
     
     def get_product_by_section(section):
         if section:
@@ -102,8 +104,8 @@ class MenuOptionExtended(models.Model):
         # Opções para "Quero saber mais sobre os serviços do {business}"
         menu_option1_s2_o1 = MenuOptionExtended.create_or_get_option(menu_option_description='Digitar o nome do produto')
         menu_option1_s2_o2 = MenuOptionExtended.create_or_get_option(menu_option_description='Digitar a seção do produto')
-        menu_option1_s2_o3 = MenuOptionExtended.create_or_get_option(menu_option_description='Digitar alguma descrição do produto')
-        menu_option1_s2_o4 = MenuOptionExtended.create_or_get_option(menu_option_description='Digitar o código do produto')
+        menu_option1_s2_o3 = MenuOptionExtended.create_or_get_option(menu_option_description='Digitar a marca do produto')
+        menu_option1_s2_o4 = MenuOptionExtended.create_or_get_option(menu_option_description='Digitar alguma descrição do produto')
         ####
         
         # Opções para "Quais os produtos vocês vendem?"

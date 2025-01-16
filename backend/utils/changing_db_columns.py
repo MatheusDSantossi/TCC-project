@@ -1,7 +1,16 @@
+from pathlib import Path
+import sys
+import os
+
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Ensure the root directory is included
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import re
 import psycopg2
 from config.database_connection import conn
-conn.autocommit = True
 
 # Load known brands if available
 KNOWN_BRANDS = [ "ANTARCT", "ANTARC", "LOPES", "CAMIL", "FUGINI", "BABY ROGER", "OUROLUX", "AMAFIL", "SORA", "YPE", "PILAO", "BEM TE VI", "PURO SABOR", "GAROTO", "BAYGON", "HELLMANNS", "ASSOLAN", "PALACIO", "COQUEIRO", "POPULAR", "VITAMASSA", "TOBOGA", "BRILUX", "OMO", "POLITRIZ", "ARCOVERDE", "BETANIA", "CAMPONESA", "PRETINHO", "NESTLE", "VITARELLA", "PRIMOR", "DELICIA", "FORTALEZA", "EVEN", "LUX", "PALMOLIVE", "PHEBO", "TANG", "ALMA FLORES", "SENADOR", "ROSA BRANCA", "SEDA", "NIVEA", "LEGO", "KIT KAT", "DOLCE GUSTO", "NUTELLA", "COCO LÁ", "COSMOPOLITAN", "L'OREAL", "SABO", "WONDER", "TRES COROAS", "LEITE COOP", "CERELAC", "FRUTIGRA", "LIVIA", "CALDENTE", "SABORINHO", "ARAGOA", "PANAMERICANA", "PENFOLDS", "SABO" "COSIPA", "CRESIL" "BRASIL CHEESE", "WONDER", "CRESIL" "SABO", "PANAMERICANA", "ARAGOA", "COSIPA" "SABO" "CRESIL", "COSIPA", "PANAMERICANA", "ARAGOA" "CRESIL", "COSIPA", "PANAMERICANA", "ARAGOA" "CRESIL", "COSIPA", "PANAMERICANA", "ARAGOA", "REXONA", "SUAVE", "BARUEL" "STA CLARA", "SANTA CLARA", "MARATA", "LACTA", "CAPRICE", "COLGATE", "TUCS", "DOVE", "CLEAR", "SKALA", "NATHALYA", "TIXAN", "PETINHO", "MILI", "PRIVAX", "YOKI", "FRISCO", "FREEGELLS", "EMARE", "NUTRIMEL", "ARCOR", "TRESEMME", "TABU", "P&G", "SOFRUTA", "PILAR", "SBP", "EMBARE", "SUBLIME", "TRIDENT", "ZERO-CAL", "BIC", "QUAKER", "TRELOSO" "LIFEBUOY" "PIRACANJUBA" "ACONCHEGO", "DISOFLOR", "PARANA", "HALLS", "QUERO", "ELETR", "KOLENE", "FRINENSE", "PETRIBU", "ATOL", "AZULIM", "NINHO", "STA.CLARA", "LACTA", "TORCIDA", "STELLA DORO", "TIO JOAO", "PALMEIRON", "CHOKOLOT", "ITAIPAVA", "CLOSE UP", "MARAJOARA", "BOAVISTENSE", "PINHO SOL", "FARMAX", "BARUEL", "SCALA", "ALIANCA", "LIFEBUOY", "PROTEX", "SORRISO", "ARIEL", "3M", "BRILHUS", "PITU", "PAJEU", "BRILHANTE", "FLORAL", "LISTERINE", "INTIMUS", "SUAVE", "MOLICO", "MONANGE", "PAIXAO", "GALLO" "JOHNSONS BABY", "GELLUS" "CLUB SOCIAL", "KNORR", "PANSONIC", "VELUD", "FREEG", "FREEGELLS", "MAXIMO BRILHO", "IDEAL", "URCA", "WYDA", "FRUCTUS", "DAFRUTA", "MINHOTO", "ITALAC", "GABOARDI", "MUNDIAL", "PANTENE", "MARILAN", "PIRACANJUBA", "OURO VERDE"  # Add more brands as needed
@@ -46,8 +55,15 @@ def changing_db_columns():
                 break
         
         # Identify quantity (e.x., "6X30", "1X24 500G")
-        quantity_match = re.search(r"\b\d+X\d+[A-Za-z]*\b|\b\d+\s?(KG|G|ML|L)\b", product_name, re.IGNORECASE)
-
+        quantity_match = re.search(
+            r"""
+            \b\d+\s?X\s?\d+\s?[A-Za-z]+\b |  # Matches formats like '1 X 24 500G'
+            \b\d+\s?X\s?\d+\b(?:\s?\d+\s?[A-Za-z]+)? | # Matches formats like '1 X 24' with optional units (e.g., '500G')
+            \b\d+\s?(KG|G|ML|L|MT)\b         # Matches standalone units like '500G'
+            """, 
+            product_name, 
+            re.IGNORECASE | re.VERBOSE
+        )
         
         if quantity_match:
             quantity = quantity_match.group()
@@ -116,3 +132,4 @@ def changing_db_columns():
             print(error)
 
 
+# changing_db_columns()

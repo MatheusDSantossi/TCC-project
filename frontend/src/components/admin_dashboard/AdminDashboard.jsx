@@ -3,7 +3,6 @@ import Header from "./Header";
 import Sidebar from "./Sidebar";
 import HomeDashboard from "./HomeDashboard";
 import ProductRegistration from "../ProductRegistration";import Chatbot from "../Chatbot"
-import News from "./News";
 
 import UserList from "./UsersList";
 
@@ -52,7 +51,7 @@ function AdminDashboard({ openSidebarToggle, OpenSidebar }) {
                 return <UserList />;
             
             default:
-                return <News />;
+                return <HomeDashboard />;
                 // return <div>Not found!!!!</div>;
         }
     };

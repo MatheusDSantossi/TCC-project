@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import 
 { BsFillArchiveFill, BsFillGrid3X3GapFill, BsPeopleFill, BsFillBellFill}
  from 'react-icons/bs'
-import LineChart from './charts/LineChart'
+import BasicLineChart from './charts/LineChart'
 import BarChart from './charts/BarChart'
 import AxiosInstance from '../AxiosInstance';
 
@@ -60,7 +60,7 @@ function HomeDashboard() {
         </div>
         <div className="p-6 text-center bg-white rounded-lg shadow-card">
           <p className="text-2xl font-medium text-primary">Stock Availability</p>
-          <LineChart data={products} />
+          <BasicLineChart products_data={products} />
         </div>
       </div>
 

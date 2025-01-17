@@ -27,6 +27,7 @@ const Login = () => {
       .then((response) => {
         console.log("RESPONSE: ", response);
         localStorage.setItem("Token", response.data.token);
+        localStorage.setItem("Email", response.data.user.email);
         navigate(`/admin`);
       })
       .catch((error) => {

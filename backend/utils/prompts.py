@@ -4,6 +4,7 @@ def pre_process_prompt_grammatical_fix_prompt(text, business_name):
         Correct grammatical and spelling errors in the following text so it becomes understandable to a human reader. Normalize product names, utensils, or any other items to a standard form. Consider that this text is provided by a customer from the store {business_name}, and use this context to make the best possible corrections.
 
         Keep in mind that words might appear abbreviated, such as "INSET SBP AERO," which means "INSETICIDA SBP AEROSSOL." Research thoroughly what each word might mean, whether abbreviated or not, considering that they are most likely retail products found in any supermarket. Use this assumption to help identify and correct the words accurately.
+        Also keep in mind that might appear a brand so don't fix words that you are not sure if it's not a brand, for example, "Biscoito treloso" which "Treloso" is a brand.
 
         Here is the text to be corrected:
         
@@ -189,8 +190,9 @@ def products_find_with_brand_fix_prompt(products_find_using_brand, products_find
 
         Provided Information:
 
-        1. Products with the same brand:
+        1. Products and brand with the same brand mentioned by the client:
         {products_find_using_brand}
+        
         
         2. Possible Similar Products:
         {products_find_using_prompt}
@@ -200,9 +202,6 @@ def products_find_with_brand_fix_prompt(products_find_using_brand, products_find
         
         Text to Normalize:
         "{fix_prompt_v1}"
-        
-        In case you identify the message is only a brand of a product return a list 
-        and some information about Products with the same brand list it's showed above.
         
         Normalization Instructions:
         

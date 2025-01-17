@@ -77,7 +77,7 @@ def find_brand(text, conn):
         with conn.cursor() as cursor:
             
             cursor.execute("""
-                            SELECT name FROM products_with_embeddings 
+                            SELECT name, brand FROM products_with_embeddings 
                             WHERE brand = %s
                             LIMIT 30
                             """, (brand,))

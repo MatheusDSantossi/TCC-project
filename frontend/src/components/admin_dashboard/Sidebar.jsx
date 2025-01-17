@@ -93,7 +93,7 @@ function Sidebar({ openSidebarToggle, OpenSidebar, changeComponent }) {
                         <BsMenuButtonWideFill className='mr-2 icon' /> Reports
                     </ListItemButton>
                 </ListItem>
-                <ListItem className='p-2 cursor-pointer color-red hover:text-primary hover:bg-secondary hover:rounded'>
+                <ListItem className='p-2 cursor-pointer color-red hover:bg-red-500 hover:rounded'>
                     <ListItemButton onClick={handleLogout}>
                         <MdLogout className='mr-2 icon' /> Logout
                     </ListItemButton>

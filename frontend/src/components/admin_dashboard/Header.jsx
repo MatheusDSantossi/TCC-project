@@ -14,33 +14,31 @@ import AxiosInstance from "../AxiosInstance";
 function Header({ OpenSidebar, openSidebarToggle }) {
   const [userName, setUsername] = useState("");
 
-  // useEffect(() => {
-
-  //   getUserName();
-
-  //   return () => {
-
-  //   };
-  // }, []);
+  useEffect(() => {
+    getUserName();
+  }, []);
 
   const getUserName = () => {
-    AxiosInstance.get("http://127.0.0.1:8000/employee_details/")
+    AxiosInstance.get(`users/`)
 
       .then((response) => {
-        if (!response.ok) {
-          throw new Error("Failed to fetch user details");
-        }
-        return response.json();
-      })
-      .then((data) => {
-        if (data.employee_name) {
-          const userName = data.employee_name;
-          setUsername(userName);
-          console.log(userName);
-        } else {
-          // window.location.href = "/login";
-          console.error("No user logged in");
-        }
+
+        // for (const user of response.data) {
+        //   console.log("User: ", user['last_login']);
+        //   if (user['last_login']) {
+        //     const userName = user['email'];
+        //     setUsername(userName);
+        //     console.log("Username: ", userName);
+        //   } else {
+        //     // window.location.href = "/login";
+        //     console.error("No user logged in");
+        //   }
+        // }
+
+        const userName = localStorage.getItem("Email");
+        setUsername(userName);
+        console.log("Username: ", userName);
+
       })
       .catch((error) => console.error("Error getting the data: ", error));
     // window.location.href = "/login";
@@ -67,12 +65,12 @@ function Header({ OpenSidebar, openSidebarToggle }) {
         placeholder="Type to search..."
         className="w-1/3 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-secondary"
       />
-      <div className="flex items-center space-x-4">
+      <div className="flex items-center space-x-4 justify-center">
         <span className="text-xl cursor-pointer hover:text-secondary">
           <BsFillBellFill />
         </span>
-        <span className="flex text-xl cursor-pointer hover:text-secondary">
-          <BsPersonCircle /> {userName}
+        <span className="flex text-xl cursor-pointer hover:text-secondary items-center">
+          <BsPersonCircle className="mr-2" /> {userName}
         </span>
       </div>
     </header>

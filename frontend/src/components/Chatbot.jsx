@@ -60,9 +60,9 @@ function Chatbot() {
 
   useEffect(() => {
     if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTo = chatContainerRef.current.scrollHeight;
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
-  }, [chatMessages]);
+  }, [chatMessages, menuOptions]);
 
   const fetchMenuOptions = () => {
     AxiosInstance.get(`menu-options/get/`)
@@ -181,7 +181,7 @@ function Chatbot() {
           if (optionText === "Digitar o nome do produto") {
             answer = "Digite o nome do produto.";
           } else if (optionText === "Digitar a seção do produto") {
-            answer = "Digite a seção do produto.";
+            answer = "Digite a seção do produto. (Ex: Seção 1)";
           } else if (optionText === "Digitar alguma descrição do produto") {
             answer = "Digite alguma descrição do produto.";
           } else if (optionText === "Digitar o código do produto") {

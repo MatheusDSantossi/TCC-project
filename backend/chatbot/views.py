@@ -180,7 +180,7 @@ class ProductRegistration(viewsets.ViewSet):
         if is_ajax(request) and query:
             products = Product.objects.filter(productName__icontains=query) # Query the database
             
-            product_names = list(products.values('name', flat=True).distinct()) # Get a list of product names
+            product_names = list(products.values_list('name', flat=True).distinct()) # Get a list of product names
             print(f"Product names: {product_names}")
             return Response(product_names)
         
@@ -209,6 +209,7 @@ class ProductRegistration(viewsets.ViewSet):
             
             # THE RESULTS WERE REALLY BAD TO THE FIX OF PRODUCTS
             if not Product.objects.filter(name=product_name).exists():
+                print("ENTER HERE")
                 
                 embeddings = Product.generate_emebed(product_name)
 
@@ -216,36 +217,59 @@ class ProductRegistration(viewsets.ViewSet):
                 
                 Product.fetch_products_alike(product_name)
                 
-                product.save()
                 
                 Product.generate_synonymous(product_name)
+                product.save()
                 
             else:
-                product_synonymous = Product.get_synonymus(product_name)
-                print("SYNONYMOUS: ", product_synonymous)
+                print("ENTER THERE")
                 
-                product = Product.get_product_by_name(product_name)
+                products = Product.objects.filter(name=product_name)
                 
-                print("Product name: ", product.name)
-                print("Product brand: ", product.brand)
-                print("Product quantity: ", product.quantity)
-                
-                if not product_synonymous:
-                    Product.generate_synonymous(product_name)
+                if len(products) > 1:
+                    for product in products:
+                        print("Product: ", product)
+                        product_synonymous = Product.get_synonymus(product)
+                        if not product_synonymous:
+                            Product.generate_synonymous(product_list=product)
+                        
+                        
+                        product.brand = product_brand
+                        
+                        print("Product original quantity: ", product.quantity)
+                        print("Product quantity: ", product_quantity_format)
                     
-                elif not product.brand:
+                        product.quantity = product_quantity_format
+                        product.save()
+                else:
+                    product_synonymous = Product.get_synonymus(product_name)
+                    print("SYNONYMOUS: ", product_synonymous)
+                    
+                    product = Product.get_product_by_name(product_name)
+                    
+                    if not product_synonymous:
+                        synonymous_list = Product.generate_synonymous(product_list=product)
+                    
+                    print("Product name: ", product.name)
+                    print("Product brand: ", product.brand)
+                    print("Product quantity: ", product.quantity)
+                    print("Product synonymous: ", product.synonymous)
+            
                     product.brand = product_brand
-                    product.save()
-                elif not product.quantity:
+                    
                     product.quantity = product_quantity_format
+                    product.synonymous = synonymous_list
+                    print("Product synonymous: ", product.synonymous)
+                    
                     product.save()
-                elif product_synonymous:
-                    print("PRODUCT ALREADY HAVE SYNONYMOUS: ", product_synonymous)
+                    
                     
         except Exception as err:
             print('Error here 2.0: ', err)
             return Response({'error': 'An error occured while registering the product: '}, status=500)
-            
+        
+        products = Product.get_all_products()
+        
         return Response([
             {'product_id': product.product_id, 'product_name': product.name} for product in products
             ])

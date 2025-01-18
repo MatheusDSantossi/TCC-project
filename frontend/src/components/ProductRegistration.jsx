@@ -51,8 +51,15 @@ function ProductRegistration() {
     const selectedProduct = suggestions.find((product) => product.name === selectedProductName);
 
     if (selectedProduct) {
+      const numberOfSection = selectedProduct.secao_produto.slice(-1);
+
+      console.log("Number of section: " + numberOfSection);
       setProductBrand(selectedProduct.brand);
       setProductQuantityFormat(selectedProduct.quantity);
+      setProductSection(numberOfSection);
+      setProductPrice(selectedProduct.preco_venda);
+      setProductMetricUnity(selectedProduct.unidade_medida);
+      setProductAvailibility(selectedProduct.disponivel);
     }
   };
 

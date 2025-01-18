@@ -40,8 +40,11 @@ class Product(models.Model):
         return None
     
     @staticmethod
-    def generate_synonymous(product):
-        generate_synonymous(product)
+    def generate_synonymous(product=None, product_list=None):
+        if product_list:
+            return generate_synonymous(product_list=product_list)
+        else:
+            return generate_synonymous(product=product)
 
     @staticmethod
     def fetch_products_alike(product_name):
@@ -66,6 +69,9 @@ class Product(models.Model):
     class Meta:
         db_table = 'products_with_embeddings'
 
+
+    def __str__(self):
+        return super().__str__()
 
 # HERE I WANT TO CREATE A DB TABLE THAT WILL CONTAIN 
 # THE FOUR OPTIONS IN THE CHATBOT, WHAT I MEAN IS IN MY

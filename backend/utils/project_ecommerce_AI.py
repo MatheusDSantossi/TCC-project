@@ -35,8 +35,7 @@ import re
 
 import ast
 
-import tkinter as tk
-from tkinter import scrolledtext
+import json
 
 import time
 from prompt_searcher import *
@@ -1242,16 +1241,45 @@ def chatbot_response(user_prompt):
 
 def generate_synonymous(product=None, product_list=None):
     
-    print("product: ", product)
-    original_product = product
+    if product_list:
+        print("product list: ", product_list)
     
-    # semantic_dictorinary = create_semantic_dictionary(product)
-    products = generate_and_search(product)
+        print("product list name: ", product_list.name)
+        original_product = product_list.name
+        
+        # semantic_dictorinary = create_semantic_dictionary(product)
+        products = generate_and_search(product_list.name)
+        
+        products_dict = {}
+        product_synonymous_list = []
+        
+        print("PRODUCTS SIZE: ", products.size)
+        
+        if products.size > 1:
+            for index, row in products.iterrows():
+
+                products_dict = {
+                    "Name": row['Nome'],
+                    "Section": row['Secao'],
+                    "Price": row['PrecoVenda'],
+                    "Available": row['Disponivel'],
+                }            
+                product_synonymous_list.append(products_dict)
+                # print("GENERATE SYNONYMOUS PRODUCT", products_dict["Name"])
     
-    products_dict = {}
-    product_synonymous_list = []
-    
-    print("PRODUCTS SIZE: ", products.size)
+    else:
+        print("product: ", product)
+        
+        print("product name: ", product)
+        original_product = product
+        
+        # semantic_dictorinary = create_semantic_dictionary(product)
+        products = generate_and_search(product)
+        
+        products_dict = {}
+        product_synonymous_list = []
+        
+        print("PRODUCTS SIZE: ", products.size)
     
     if products.size > 1:
         for index, row in products.iterrows():
@@ -1312,6 +1340,47 @@ def generate_synonymous(product=None, product_list=None):
         
         4. ONLY return the synonymous don't return any other text, for example ```python ```json or anything like that, I want the response to start with a { and end with a }, the format that I've just told you about.
         """ 
+    
+    elif product_list: 
+        new_product = pre_process_prompt_grammatical(product_list.name)
+        
+        prompt = """Generate all possible synonyms for the product names listed below. Follow these rules carefully:
+
+        The product names may be abbreviated, e.g., "INSET SBP AERO" means "INSETICIDA SBP AEROSSOL". Analyze each abbreviation to determine its meaning.
+        
+        Assume the products are common retail items found in Brazilian supermarkets. Use this context to identify abbreviations and generate synonyms.
+        
+        Do not repeat synonyms, and limit the list to a maximum of 30 synonyms per product.
+        
+        Return the output strictly as a Python dictionary in the following format:
+        {"NOME_DO_PRODUTO": ["sinônimo1", "sinônimo2", ...], "OUTRO_PRODUTO": ["sinônimo1", "sinônimo2", ...]}
+        
+        The synonyms must be in Brazilian Portuguese, even though this prompt is in English.
+        
+        Do not include any unnecessary text, comments, or formatting such as python, json, markdown, or anything similar. Only return the dictionary.
+        
+        Ensure all synonyms are enclosed in double quotes (e.g., "Caixa de Fósforos", "Palito de Fósforo").
+        
+        Here are the product names:
+        \n"""
+        
+        prompt+=new_product
+        
+        prompt += """\n\nOutput example (adjusted for dynamic products):
+        
+        {"bisc. rosq. chocolate": ["biscuit chocolate ring", "cookie chocolate ring", "ring-shaped chocolate biscuit"], "bisc. rosq. leite": ["milk biscuit ring", "milk cookie ring", "ring-shaped milk biscuit"]}
+        
+        Important Notes:
+
+        1. Do not include duplicate synonyms across or within products.
+        
+        2. Do not return any extra characters, comments, or text (e.g., no json, python, or similar formatting).
+        
+        3. The product list may change dynamically. Always adapt to the provided product names.
+        
+        4. ONLY return the synonymous don't return any other text, for example ```python ```json or anything like that, I want the response to start with a { and end with a }, the format that I've just told you about.
+        """ 
+     
     else:
         prompt = """Generate all possible synonyms for the product names listed below. Follow these rules carefully:
 
@@ -1370,41 +1439,29 @@ def generate_synonymous(product=None, product_list=None):
     print(cleaned_response)
     
     try:
-        
-        # Remove unnecessary prefixes and suffixes like ```python and ```
-    
-    
+
         synonymous_dict = ast.literal_eval(cleaned_response)
         
         first_key = next(iter(synonymous_dict))
         
         synonymous_list = synonymous_dict[first_key]
         
-        # Cleaning the first key
-        sanitized_key = re.sub(r"[^\w\s]", "", first_key).strip()
+        synonymous_list = json.dumps(synonymous_list, ensure_ascii=False)
         
-        # Cleaning the synonymous list
-        sanitized_synonymous_list = [re.sub(r"[^\w\s]", "", synonym).strip() for synonym in synonymous_list]
+        print("Synonymous list: ", synonymous_list)
         
-         # Debugging outputs
-        print("Original dict:", synonymous_dict)
-        print("Sanitized key:", sanitized_key)
+        sanitized_synonymous_list = str(synonymous_list).replace('[', '{').replace(']', '}')
+        
         print("Sanitized synonyms:", sanitized_synonymous_list)
         
-        # Transform list into the format you want
-        # formatted_string = '{' + ', '.join(f'"{syn}"' for syn in synonymous_list) + '}'
         
-        # synonymous_dict_wrapped = f"'{formatted_string}'"
-        # print("Synonymous dict wrapped: ",synonymous_dict_wrapped)
-        
-        # Escaping special characters in the list and converting it to PostgreSQL's array format
-        # synonymous_list_pg = '{' + ','.join('"' + syn + '"' for syn in synonymous_list) + '}'
-
         if isinstance(product, dict):
             print("product: ", product['Name'])
             product = product['Name']
 
+        original_product = original_product.strip()
 
+        print("original product: ", original_product)
         with conn.cursor() as cursor:
             cursor.execute("""
                         UPDATE products_with_embeddings
@@ -1413,10 +1470,10 @@ def generate_synonymous(product=None, product_list=None):
                         """, (sanitized_synonymous_list, original_product))
             
                 
-        return synonymous_list
+        return sanitized_synonymous_list
     
     except Exception as e:
         print("Error generating synonyms: ", e)
         return None
 
-# print(generate_synonymous("SUCO  CONCENT. MANGA"))
+# print(generate_synonymous("REFRIG. GUARANA  PET"))

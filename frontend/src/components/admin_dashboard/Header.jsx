@@ -45,20 +45,7 @@ function Header({ OpenSidebar, openSidebarToggle }) {
   };
 
   return (
-    <header className="flex items-center justify-between p-4 shadow-md bg-primary">
-      <div className="menu-icon">
-        {openSidebarToggle ? (
-          <BsXLg
-            className="text-xl cursor-pointer hover:text-secondary"
-            onClick={OpenSidebar}
-          />
-        ) : (
-          <BsJustify
-            className="text-xl cursor-pointer hover:text-secondary"
-            onClick={OpenSidebar}
-          />
-        )}
-      </div>
+    <header className="flex items-center justify-end p-4 shadow-md bg-primary">
 
       <div className="flex items-center justify-center space-x-4">
         <span className="flex text-xl cursor-pointer hover:text-secondary">

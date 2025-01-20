@@ -90,7 +90,12 @@ chatbot_name = "Hecate"
 info_about_the_business = ["Nosso mercado abre as 7h e fecha as 22h", 
                            "Nosso mercado tem o valor de sempre atender os clientes com o melhor atendimento possível",
                            "O nome do nosso gerente é Matheus",
-                           "As promoções do nosso mercado hoje são principalmente no arroz que está 50% mais barato"
+                           "As promoções do nosso mercado hoje são principalmente no arroz que está 50% mais barato",
+                           f"""Essas são as categorias por tipo de produto do {business_name}:
+                           Alimentos básicos, como arroz, feijão, cuscuz, macarrão, óleo, sal e açucar.
+                           Frios e laticínios, como queijo qualho, manteigas e queijo de manteiga.
+                           Bebidas, como refrigerantes, sucos em caixa, cervejas, pitú, e nescau liquido.
+                           Produtos de uso diário, como papel higiênico, bombril e outros produtos."""
                             ]
 
 # conversation_history = {}
@@ -243,7 +248,7 @@ for row in rows:
 
 products_df = pd.DataFrame(products_list)
 
-print(products_df)
+# print(products_df)
 
 # List of available products (I can keep that in the DB as well)
 products_available = [p["Nome"] for p in products_df.to_dict(orient='records') if p['Disponivel'] > 0]

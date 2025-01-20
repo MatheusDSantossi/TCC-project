@@ -9,6 +9,8 @@ import AxiosInstance from '../AxiosInstance'
 import { useNavigate, useParams } from 'react-router-dom'
 import CustomMessage from './CustomMessage'
 
+import logo from "../../assets/logo.svg";
+
 const ForgetPasswordReset = () => {
     const navigate = useNavigate()
     const { handleSubmit, control } = useForm()
@@ -32,18 +34,17 @@ const ForgetPasswordReset = () => {
 
     }
     return (
-        <div className={"myBackground"}>
+        <div className="flex items-center justify-center min-h-screen p-4">
 
             {ShowMessage ? <CustomMessage text={"Your password reset was successfully. You will be directed to the login page in a second"} color={'#69C9AB'} /> : null}
-            <form onSubmit={handleSubmit(submission)}>
-
-
+            <form onSubmit={handleSubmit(submission)} className='w-full max-w-lg p-8 rounded-lg shadow-xl bg-primary'>
 
                 <Box className={"whiteBox"}>
-
-                    <Box className={"itemBox"}>
-                        <Box className={"title"}> Reset password </Box>
-                    </Box>
+                    
+                    <div className="flex items-center justify-center mb-5">
+                        <img className="w-20 mr-4" src={logo} alt="" />
+                        <h2 className="mb-6 text-2xl font-semibold text-center left-40"> Reset password </h2>
+                    </div>
 
                     <Box className={"itemBox"}>
                         <CustomPasswordField

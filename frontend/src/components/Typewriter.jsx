@@ -21,7 +21,7 @@ const Typewriter = ({ text, delay, onTypingEnd }) => {
     }
   }, [currentIndex, delay, text, onTypingEnd]);
 
-  return <span>{currentText}</span>;
+  return <span className="text-right">{currentText}</span>;
 };
 
 export default Typewriter;

@@ -316,28 +316,10 @@ function Chatbot() {
       <div className="absolute top-4 left-4">
         <img className="w-20" src={logo} alt="Logo" />
       </div>
-      <div className="absolute top-4 right-4">
-        <button
-          onClick={() => setClockFormat("24-hour")}
-          className={`px-4 py-2 rounded-md ${
-            clockFormat === "24-hour" ? "bg-blue-600 text-white" : "bg-gray-300"
-          }`}
-        >
-          24-hour
-        </button>
-        <button
-          onClick={() => setClockFormat("12-hour")}
-          className={`ml-2 px-4 py-2 rounded-md ${
-            clockFormat === "12-hour" ? "bg-blue-600 text-white" : "bg-gray-300"
-          }`}
-        >
-          12-Hour
-        </button>
-      </div>
-
+  
       <div className="flex flex-col flex-grow w-full max-w-4xl overflow-hidden bg-white rounded-lg shadow-xl">
         <div
-          className="flex flex-col flex-grow h-0 p-4 overflow-auto"
+          className="flex flex-col flex-grow h-0 p-4 overflow-auto text-left"
           ref={chatContainerRef}
         >
           {/* Chat Message */}
@@ -375,15 +357,15 @@ function Chatbot() {
                 <div
                   className={`${
                     message.sender === "Você"
-                      ? "bg-blue-600 text-white"
+                      ? "bg-black text-white"
                       : "bg-gray-200 text-black"
                   } p-3 rounded-lg`}
                 >
                   {message.sender == "Você" ? (
-                    <p className="text-sm">{message.text}</p>
+                    <p className="text-sm text-right">{message.text}</p>
                   ) : (
                     <Typewriter
-                      className="text-sm"
+                      className="text-sm text-right"
                       text={`${message.text}`}
                       delay={30}
                       onTypingEnd={

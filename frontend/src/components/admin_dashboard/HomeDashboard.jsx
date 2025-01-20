@@ -15,6 +15,8 @@ function HomeDashboard() {
   const availableProducts = products.filter((p) => parseFloat(p.disponivel) > 0).length;
   const averagePrice = products.reduce((sum, product) => sum + parseFloat(product.preco_venda || 0), 0) / totalProducts || 0;
 
+  const [numberOfRows, setNumberofRows] = useState(10);
+
   const fetchProductsData = () => {
 
     AxiosInstance.get(`api/products/`)
@@ -82,7 +84,7 @@ function HomeDashboard() {
               <tr>
                 <td colSpan="5" className="text-center">Loading...</td>
               </tr>
-            ) : (products.slice(0, 10).map((product) => (
+            ) : (products.slice(0, numberOfRows).map((product) => (
             <tr className="border-b">
               <td className="p-2">{product.name}</td>
               <td className="p-2">{product.brand}</td>
@@ -92,6 +94,7 @@ function HomeDashboard() {
             </tr>
             ))
           )}
+          <button className="flex-shrink-0 px-4 py-2 ml-2 font-bold text-black bg-yellow-400 rounded-md hover:bg-yellow-300" onClick={() => {setNumberofRows(numberOfRows+10)}}>Show more options</button>
           </tbody>
         </table>
       </div>

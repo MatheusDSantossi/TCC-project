@@ -59,17 +59,13 @@ function Header({ OpenSidebar, openSidebarToggle }) {
           />
         )}
       </div>
-      <input
-        type="text"
-        name="search"
-        placeholder="Type to search..."
-        className="w-1/3 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-secondary"
-      />
-      <div className="flex items-center space-x-4 justify-center">
-        <span className="text-xl cursor-pointer hover:text-secondary">
+
+      <div className="flex items-center justify-center space-x-4">
+        <span className="flex text-xl cursor-pointer hover:text-secondary">
           <BsFillBellFill />
+          <span className="text-xs">3</span>
         </span>
-        <span className="flex text-xl cursor-pointer hover:text-secondary items-center">
+        <span className="flex items-center text-xl cursor-pointer hover:text-secondary">
           <BsPersonCircle className="mr-2" /> {userName}
         </span>
       </div>

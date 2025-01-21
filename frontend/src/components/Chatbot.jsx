@@ -327,7 +327,7 @@ function Chatbot() {
             <div
               key={index}
               className={`flex w-full mt-2 space-x-3 max-w-xs ${
-                message.sender === "Você" ? "ml-auto justify-end" : ""
+                message.sender === "Você" ? "ml-auto justify-end text-left" : ""
               }`}
             >
               <div>
@@ -362,10 +362,10 @@ function Chatbot() {
                   } p-3 rounded-lg`}
                 >
                   {message.sender == "Você" ? (
-                    <p className="text-sm text-right">{message.text}</p>
+                    <p className="text-sm">{message.text}</p>
                   ) : (
                     <Typewriter
-                      className="text-sm text-right"
+                      className="text-sm"
                       text={`${message.text}`}
                       delay={30}
                       onTypingEnd={

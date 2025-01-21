@@ -63,8 +63,9 @@ function ProductRegistration() {
     }
   };
 
-  const registerProduct = () => {
-    
+  const registerProduct = (e) => {
+    e.preventDefault();
+
     AxiosInstance.post(`register-product/post/`, {
         productName: productName.trim(),
         productBrand: productBrand.trim(),
@@ -75,14 +76,18 @@ function ProductRegistration() {
         productAvailability: productAvailability,
       })
       .then((response) => {
-        if (!response.ok) {
+        if (!response) {
           throw new Error("Failed to register the product");
         }
-        return response.json();
-      })
-      .then((data) => {
-        console.log("Product registered succesfully: ", data);
-        alert("Product registered succesfully!");
+        console.log("Response: ", response);
+        setProductName("");
+        setProductBrand("");
+        setProductQuantityFormat("");
+        setProductSection(0);
+        setProductPrice("");
+        setProductMetricUnity("");
+        setProductAvailibility("");
+        // return response;
       })
       .catch((error) => {
         console.error("Error registering the product: ", error);
@@ -98,7 +103,7 @@ function ProductRegistration() {
             Products Registration
           </h2>
         </div>
-        <form action="" className="grid grid-cols-1 gap-6">
+        <form className="grid grid-cols-1 gap-6">
           {/* # divide the product name into three parts (name, brand, quantity) */}
           {/* Product Name */}
           <div>

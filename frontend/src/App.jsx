@@ -1,11 +1,10 @@
 import { Routes, Route } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import Home from "./components/Home";
 import Chatbot from "./components/Chatbot";
-import ProductRegistration from "./components/ProductRegistration";
 
-import { RocketCanvas, StarsCanvas } from "./components/canvas";
+import { StarsCanvas } from "./components/canvas";
 
 import AdminDashboard from "./components/admin_dashboard/AdminDashboard";
 import Login from "./components/admin_dashboard/Login";

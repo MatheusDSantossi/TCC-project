@@ -1245,6 +1245,8 @@ def chatbot_response(user_prompt):
 # print(chatbot_response("VITAMASSA"))
 
 def generate_synonymous(product=None, product_list=None):
+    products_dict = {}
+    product_synonymous_list = []
     
     if product_list:
         print("product list: ", product_list)
@@ -1253,10 +1255,8 @@ def generate_synonymous(product=None, product_list=None):
         original_product = product_list.name
         
         # semantic_dictorinary = create_semantic_dictionary(product)
-        products = generate_and_search(product_list.name)
+        products = generate_and_search(original_product)
         
-        products_dict = {}
-        product_synonymous_list = []
         
         print("PRODUCTS SIZE: ", products.size)
         
@@ -1281,9 +1281,6 @@ def generate_synonymous(product=None, product_list=None):
         # semantic_dictorinary = create_semantic_dictionary(product)
         products = generate_and_search(product)
         
-        products_dict = {}
-        product_synonymous_list = []
-        
         print("PRODUCTS SIZE: ", products.size)
     
     if products.size > 1:
@@ -1298,6 +1295,9 @@ def generate_synonymous(product=None, product_list=None):
             product_synonymous_list.append(products_dict)
             # print("GENERATE SYNONYMOUS PRODUCT", products_dict["Name"])
     
+    print("Products synonymous list: ", product_synonymous_list)
+    print("Products dict list: ", products_dict)
+
     # print("""PRODUCTS: """, products)
     
     # ```python
@@ -1307,8 +1307,9 @@ def generate_synonymous(product=None, product_list=None):
     
     if not products_dict:
     
-        new_product = pre_process_prompt_grammatical(product)
+        new_product = pre_process_prompt_grammatical(original_product)
         
+        print("New product: ", new_product)
         prompt = """Generate all possible synonyms for the product names listed below. Follow these rules carefully:
 
         The product names may be abbreviated, e.g., "INSET SBP AERO" means "INSETICIDA SBP AEROSSOL". Analyze each abbreviation to determine its meaning.
@@ -1347,7 +1348,7 @@ def generate_synonymous(product=None, product_list=None):
         """ 
     
     elif product_list: 
-        new_product = pre_process_prompt_grammatical(product_list.name)
+        new_product = pre_process_prompt_grammatical(original_product)
         
         prompt = """Generate all possible synonyms for the product names listed below. Follow these rules carefully:
 

@@ -11,7 +11,7 @@ import {
 
 import AxiosInstance from "../AxiosInstance";
 
-function Header({ OpenSidebar, openSidebarToggle }) {
+function Header() {
   const [userName, setUsername] = useState("");
 
   useEffect(() => {

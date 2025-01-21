@@ -1,14 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   BsChatFill,
   BsGrid1X2Fill,
   BsFillArchiveFill,
-  BsPeopleFill,
-  BsListCheck,
-  BsAlarm,
   BsJustify,
   BsXLg,
-  BsAppIndicator,
   BsBookmark,
 } from "react-icons/bs";
 
@@ -21,9 +17,6 @@ import { useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 
 import {
-  Accordion,
-  AccordionBody,
-  AccordionHeader,
   Alert,
   Card,
   Chip,
@@ -37,12 +30,12 @@ import {
   Typography,
 } from "@material-tailwind/react";
 
-function Sidebar({ openSidebarToggle, OpenSidebar, changeComponent }) {
+function Sidebar({ onSidebarToggle, changeComponent }) {
   const navigate = useNavigate();
 
-  const [open, setOpen] = React.useState(0);
-  const [openAlert, setOpenAlert] = React.useState(true);
-  const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
+  const [open, setOpen] = useState(0);
+  const [openAlert, setOpenAlert] = useState(true);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   const handleLogout = () => {
     AxiosInstance.post(`logoutall/`, {}).then(() => {
@@ -57,20 +50,31 @@ function Sidebar({ openSidebarToggle, OpenSidebar, changeComponent }) {
   const handleOpen = (value) => {
     setOpen(open === value ? 0 : value);
   };
+  
+  const toggleDrawer = () => {
+    console.log("IsDrawerOpen: ", isDrawerOpen);
+    setIsDrawerOpen(!isDrawerOpen);
+    onSidebarToggle(!isDrawerOpen);
+  };
 
-  const openDrawer = () => setIsDrawerOpen(true);
-  const closeDrawer = () => setIsDrawerOpen(false);
+  // const openDrawer = () => {
+  //   setIsDrawerOpen(true);
+  // };
+  // const closeDrawer = () => {
+  //   setIsDrawerOpen(false);
+  // };
 
   return (
     <div className="absolute z-10 bg-primary">
-      <IconButton variant="text" size="lg" onClick={openDrawer}>
-        {isDrawerOpen ? (
-          <BsXLg className="text-xl cursor-pointer hover:text-secondary" />
-        ) : (
-          <BsJustify className="text-xl cursor-pointer hover:text-secondary" />
-        )}
+      <IconButton
+        variant="text"
+        size="lg"
+        onClick={toggleDrawer}
+        className="text-xl cursor-pointer hover:text-secondary"
+      >
+        {isDrawerOpen ? <BsXLg /> : <BsJustify />}
       </IconButton>
-      <Drawer open={isDrawerOpen} onClose={closeDrawer}>
+      <Drawer open={isDrawerOpen} onClose={toggleDrawer}>
         <Card
           color="transparent"
           shadow={false}
@@ -86,7 +90,7 @@ function Sidebar({ openSidebarToggle, OpenSidebar, changeComponent }) {
                 className="flex p-2 cursor-pointer hover:text-primary hover:bg-secondary hover:rounded"
                 onClick={(e) => {
                   changeComponent("dashboard");
-                  closeDrawer();
+                  toggleDrawer();
                   e.preventDefault();
                 }}
               >
@@ -107,7 +111,7 @@ function Sidebar({ openSidebarToggle, OpenSidebar, changeComponent }) {
               <ListItemPrefix
                 onClick={(e) => {
                   changeComponent("productRegistration");
-                  closeDrawer();
+                  toggleDrawer();
                   e.preventDefault();
                 }}
                 className="flex p-2 cursor-pointer hover:text-primary hover:bg-secondary hover:rounded"
@@ -120,7 +124,7 @@ function Sidebar({ openSidebarToggle, OpenSidebar, changeComponent }) {
               <ListItemPrefix
                 onClick={(e) => {
                   changeComponent("chatbot");
-                  closeDrawer();
+                  toggleDrawer();
                   e.preventDefault();
                 }}
                 className="flex p-2 cursor-pointer hover:text-primary hover:bg-secondary hover:rounded"
@@ -130,7 +134,10 @@ function Sidebar({ openSidebarToggle, OpenSidebar, changeComponent }) {
               </ListItemPrefix>
             </ListItem>
             <ListItem>
-              <ListItemPrefix onClick={handleLogout} className="flex p-2 cursor-pointer hover:text-primary hover:bg-red-500 hover:rounded">
+              <ListItemPrefix
+                onClick={handleLogout}
+                className="flex p-2 cursor-pointer hover:text-primary hover:bg-red-500 hover:rounded"
+              >
                 <MdLogout className="w-5 h-5 mr-3" />
                 Log Out
               </ListItemPrefix>

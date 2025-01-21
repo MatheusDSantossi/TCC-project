@@ -55,3 +55,13 @@
   border-color: 'gray.300';
   border-radius: '0.5rem';
 }
+
+/* Sidebar behavior */
+
+.bg-overlay {
+  filter: brightness(0.8); /* Dim the background slightly */
+}
+
+.bg-black {
+  transition: background 0.3s ease-in-out;
+}

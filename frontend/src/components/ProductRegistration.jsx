@@ -1,16 +1,6 @@
 import { useEffect, useState } from "react";
 import logo from "../assets/logo.svg";
-import { getCSRFToken } from "../utils/CSRFToken";
 import AxiosInstance from "./AxiosInstance";
-
-// function getCSRFToken() {
-//   const name = 'csrftoken';
-//   const cookieValue = document.cookie
-//       .split('; ')
-//       .find((row) => row.startsWith(name))
-//       ?.split('=')[1];
-//   return cookieValue || '';
-// }
 
 function ProductRegistration() {
   const [productName, setProductName] = useState("");

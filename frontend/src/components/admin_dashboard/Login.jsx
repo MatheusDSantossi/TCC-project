@@ -13,24 +13,31 @@ import logo from "../../assets/logo.svg";
 
 import '../../App.css'
 
+import ReactiveButton from 'reactive-button';
+
 const Login = () => {
   const navigate = useNavigate();
   const { handleSubmit, control } = useForm();
   const [ShowMessage, setShowMessage] = useState(false);
+  const [buttonState, setButtonState] = useState('idle');
 
   const submission = (data) => {
+    setButtonState('loading');
+    
     AxiosInstance.post(`login/`, {
       email: data.email,
       password: data.password,
     })
 
       .then((response) => {
+        setButtonState('success');
         console.log("RESPONSE: ", response);
         localStorage.setItem("Token", response.data.token);
         localStorage.setItem("Email", response.data.user.email);
         navigate(`/admin`);
       })
       .catch((error) => {
+        setButtonState('error');
         setShowMessage(true);
         console.error("Error during login", error);
       });
@@ -73,12 +80,26 @@ const Login = () => {
             />
           </Box>
 
-          <div className='flex items-center p-3 space-x-32'>
-            <CustomButton
+          <div className='flex items-center justify-center p-3 space-x-32'>
+            {/* <CustomButton
               className="px-4 py-2 mt-4 font-bold text-black transition duration-200 bg-yellow-400 rounded-lg hover:bg-yellow-300"
               label={"Login"}
               type={"submit"}
-            />
+            /> */}
+            <ReactiveButton
+              className="text-primary hover:bg-yellow-300"
+              buttonState={buttonState}
+              color="yellow"
+              type={"submit"}
+              loadingText="Loading..."
+              successText={"Login successful"}
+              idleText={"Login"} 
+              animation="true"
+              rounded="true"
+              width={80}
+              height={40}
+              size="large"
+              />
           </div>
     
           <Box className={"itemBox"} sx={{ flexDirection: "column" }}>

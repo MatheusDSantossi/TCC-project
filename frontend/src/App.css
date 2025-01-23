@@ -65,3 +65,13 @@
 .bg-black {
   transition: background 0.3s ease-in-out;
 }
+
+.burger-icon {
+  fill: none;
+  stroke: white; /* Set the desired default color */
+  transition: stroke 0.3s ease-in-out; /* Optional smooth color change */
+}
+
+.burger-icon:hover {
+  stroke: #F0FF3D; /* Set the hover color */
+}

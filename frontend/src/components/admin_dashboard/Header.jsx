@@ -6,11 +6,27 @@ import {
   BsArrowDownSquare,
 } from "react-icons/bs";
 
+import AxiosInstance from "../AxiosInstance";
+import { MdLogout } from "react-icons/md";
+import { useNavigate } from "react-router-dom";
+
 import { businessName } from "../../utils/BusinessInfo";
+import { ListItemPrefix } from "@material-tailwind/react";
 
 function Header() {
   const [userName, setUsername] = useState("");
   const [isClicked, setIsClicked] = useState(false);
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    AxiosInstance.post(`logoutall/`, {}).then(() => {
+      // Clear user session data and navigate to login pagel
+      localStorage.removeItem("Token");
+
+      // Navigate to login page
+      navigate("/login");
+    });
+  };
 
   useEffect(() => {
     getUserName();
@@ -47,10 +63,15 @@ function Header() {
           {/* Dropdown Menu */}
           {isClicked && (
             <div className="absolute right-0 p-4 mt-2 transition-all duration-300 ease-in-out transform rounded-lg shadow-md bg-tertiary">
-              <p
-                className="text-sm font-medium"
-              >
+              <p className="text-sm font-medium">
                 <span className="font-bold">Logged in as:</span> {userName}
+                <ListItemPrefix 
+                className="flex p-2 mt-4 cursor-pointer hover:bg-red-500 hover:rounded justify-center"
+                onClick={handleLogout}
+                >
+                  <MdLogout className="w-5 h-5 mr-3" />
+                  Log Out
+                </ListItemPrefix>
               </p>
             </div>
           )}

@@ -330,152 +330,127 @@ def pre_process_prompt(prompt):
     products_find_with_price = find_price(fix_prompt_v1, conn)
     products_find_using_prompt = find_similar_products_using_input_embeddings(input_embed, conn, np, cosine_similarity)
     products_find_using_brand = find_brand(fix_prompt_v1, conn)
-    products_find_using_metric_or_quantity = find_quantity(fix_prompt_v1, conn)    
+    products_find_using_metric_or_quantity = find_quantity(fix_prompt_v1, conn)
     
-    if(products_find_in_section != None):
-        # fix_prompt_v2 = f"""
-        # Task Description:
-
-        # You are a text normalizer and corrector. Your goal is to correct any grammatical and orthographic errors in the provided
-        # text while standardizing product names to match the exact names from the given product lists. You must ensure no relevant
-        # products are overlooked and avoid returning "Texto RA" unless absolutely no products match the input. Consider that you're talking directly with the client don't return any weird answer.
+    fix_prompt_v2 = fix_prompt_v1
     
-        # Provided Information:
+    if (products_find_in_section is not None 
+    and products_find_with_price is not None 
+    and products_find_using_brand is not None 
+    and products_find_using_metric_or_quantity is not None):
+        # Match all conditions
+        fix_prompt_v2 = products_match_all_conditions(
+            products_find_in_section, 
+            products_find_with_price, 
+            products_find_using_brand, 
+            products_find_using_metric_or_quantity, 
+            products_find_using_prompt, 
+            products_alike, 
+            fix_prompt_v1
+        )
 
-        # 1. Products in the same section:
-        # {products_find_in_section}
-        
-        # 2. Possible Similar Products:
-        # {products_find_using_prompt}
+    elif (products_find_in_section is not None 
+        and products_find_with_price is not None 
+        and products_find_using_brand is not None):
+        # Match section, price, and brand
+        fix_prompt_v2 = products_match_section_price_and_brand(
+            products_find_in_section, 
+            products_find_with_price, 
+            products_find_using_brand, 
+            products_find_using_prompt, 
+            products_alike, 
+            fix_prompt_v1
+        )
 
-        # 3. Standard Product List (Exact Names and Sections):
-        # {products_alike}
-        
-        # Text to Normalize:
-        # "{fix_prompt_v1}"
+    elif (products_find_in_section is not None 
+        and products_find_with_price is not None):
+        # Match section and price
+        fix_prompt_v2 = products_match_section_and_price(
+            products_find_in_section, 
+            products_find_with_price, 
+            products_find_using_prompt, 
+            products_alike, 
+            fix_prompt_v1
+        )
+    elif (products_find_in_section is not None and products_find_using_brand is not None):
+        products_match_section_and_brand(products_find_in_section, products_find_using_brand, products_find_using_prompt, products_alike, fix_prompt_v1)
 
-        # Normalization Instructions:
-        
-        # 1.Product Name Matching Rules:
+    elif (products_find_in_section is not None and products_find_using_metric_or_quantity is not None):
+        products_match_section_and_metric_or_quantity(products_find_in_section, products_find_using_metric_or_quantity, products_find_using_prompt, products_alike, fix_prompt_v1)
 
-        # Match input terms to products in the list based on exact name, abbreviations, partial matches, or phonetic similarity.
-        # Variations like "cafe," "CAFÉ," or "Cafe Pilao" should be normalized to "CAFE PILAO ALMOFADA" or another appropriate match from the list.
-        
-        # 2. Handling Partial or Ambiguous Matches:
 
-        # If the input refers to a category or group (e.g., "café" with no additional qualifiers), prioritize the most generic product from the list (e.g., "CAFE PALACIO MOIDO 250G").
-        
-        # 3.Text Not Containing Products:
+    elif (products_find_with_price is not None 
+        and products_find_using_brand is not None 
+        and products_find_using_metric_or_quantity is not None):
+        # Match price, brand, and metric
+        fix_prompt_v2 = products_match_price_brand_and_metric(
+            products_find_with_price, 
+            products_find_using_brand, 
+            products_find_using_metric_or_quantity, 
+            products_find_using_prompt, 
+            products_alike, 
+            fix_prompt_v1
+        )
 
-        # If the text contains no identifiable product names or similar terms, return "Texto RA."
-        
-        # 4. Output Format:
-
-        # If a product is identified, list the product(s) in square brackets with their exact names.
-        # If multiple products fit, list all relevant matches, separated by commas.
-        
-        # Example:
-        # Input: "cafe" -> Output: [CAFE PILAO ALMOFADA, CAFE PALACIO MOIDO 250G].
-        
-        # 5. Contextual Normalization:
-
-        # Consider context and section information when normalizing. For example:
-        # If "250G" appears, prioritize matching with products of the same size.
-        # If no context (e.g., size or section) is given, use a default or generic match.
-        
-        # 6. Specific Cases:
-
-        # Abbreviations: Normalize terms like "refri" or "refrigerante" to specific product names like "REFRIG. PEPSI COLA PET 2 EM 1."
-        # Plurals or variants: "cafés" -> "CAFE PILAO ALMOFADA."
-        
-        # Examples of Substitutions:
-
-        # Input: "cafe" -> Output: [CAFE PILAO ALMOFADA, CAFE PALACIO MOIDO 250G].
-        # Input: "pepsi" -> Output: [REFRIG. PEPSI COLA PET 2 EM 1].
-        # Input: "quanto custa o refrigerante" -> Output: quanto custa o [REFRIG. GUARANA PET CACULINHA].
-        # Input: "cafe palacio" -> Output: [CAFE PALACIO MOIDO 250G, CAFE PALACIO MOIDO 500G].
-        
-        # DON'T RETURN any different text just consider the examples above. 
-        # Any code in Python or add any new/different text. Consider the products examples and the context to return your answer.
-        # """
-        
-        fix_prompt_v2 = products_find_in_section_fix_prompt(products_find_in_section, products_find_using_prompt, products_alike, fix_prompt_v1)
-        
-    elif products_find_with_price != None:
-       
-        fix_prompt_v2 = products_find_with_price_fix_prompt(products_find_with_price, products_find_using_prompt, products_alike, fix_prompt_v1)
-   
-    elif products_find_using_brand != None:
-        fix_prompt_v2 = products_find_with_brand_fix_prompt(products_find_using_brand, products_find_using_prompt, products_alike, fix_prompt_v1)
+    elif (products_find_with_price is not None 
+        and products_find_using_brand is not None):
+        # Match price and brand
+        fix_prompt_v2 = products_match_price_and_brand(
+            products_find_with_price, 
+            products_find_using_brand, 
+            products_find_using_prompt, 
+            products_alike, 
+            fix_prompt_v1
+        )
     
-    elif products_find_using_metric_or_quantity != None:
-        fix_prompt_v2 = products_find_with_metric_or_quantity_fix_prompt(products_find_using_metric_or_quantity, products_find_using_prompt, products_alike, fix_prompt_v1)
-        
+    elif (products_find_with_price is not None 
+        and products_find_using_metric_or_quantity is not None):
+        # Match price and brand
+        fix_prompt_v2 = products_match_price_and_quantity_or_metric(products_find_with_price, products_find_using_metric_or_quantity, products_find_using_prompt, products_alike, fix_prompt_v1)
+
+    elif products_find_in_section is not None:
+        # Only match section
+        fix_prompt_v2 = products_find_in_section_fix_prompt(
+            products_find_in_section, 
+            products_find_using_prompt, 
+            products_alike, 
+            fix_prompt_v1
+        )
+
+    elif products_find_with_price is not None:
+        # Only match price
+        fix_prompt_v2 = products_find_with_price_fix_prompt(
+            products_find_with_price, 
+            products_find_using_prompt, 
+            products_alike, 
+            fix_prompt_v1
+        )
+
+    elif products_find_using_brand is not None:
+        # Only match brand
+        fix_prompt_v2 = products_find_with_brand_fix_prompt(
+            products_find_using_brand, 
+            products_find_using_prompt, 
+            products_alike, 
+            fix_prompt_v1
+        )
+
+    elif products_find_using_metric_or_quantity is not None:
+        # Only match metric or quantity
+        fix_prompt_v2 = products_find_with_metric_or_quantity_fix_prompt(
+            products_find_using_metric_or_quantity, 
+            products_find_using_prompt, 
+            products_alike, 
+            fix_prompt_v1
+        )
+
     else:
-        # fix_prompt_v2 = f"""
-        # Task Description:
-
-        # You are a text normalizer and corrector. Your goal is to correct any grammatical and orthographic errors in the provided
-        # text while standardizing product names to match the exact names from the given product lists. You must ensure no relevant
-        # products are overlooked and avoid returning "Texto RA" unless absolutely no products match the input.
-        # Consider that you're talking directly with the client don't return any weird answer.
-
-        # Provided Information:
-
-        # 1. Standard Product List (Exact Names and Sections):
-        # {products_alike}
-        
-        # 2. Possible Similar Products:
-        # {products_find_using_prompt}
-
-        # Text to Normalize:
-        # "{fix_prompt_v1}"
-
-        # Normalization Instructions:
-        
-        # 1.Product Name Matching Rules:
-
-        # Match input terms to products in the list based on exact name, abbreviations, partial matches, or phonetic similarity.
-        # Variations like "cafe," "CAFÉ," or "Cafe Pilao" should be normalized to "CAFE PILAO ALMOFADA" or another appropriate match from the list.
-        
-        # 2. Handling Partial or Ambiguous Matches:
-
-        # If the input refers to a category or group (e.g., "café" with no additional qualifiers), prioritize the most generic product from the list (e.g., "CAFE PALACIO MOIDO 250G").
-        
-        # 3.Text Not Containing Products:
-
-        # If the text contains no identifiable product names or similar terms, return "Texto RA."
-        
-        # 4. Output Format:
-
-        # If a product is identified, list the product(s) in square brackets with their exact names.
-        # If multiple products fit, list all relevant matches, separated by commas.
-        
-        # Example:
-        # Input: "cafe" -> Output: [CAFE PILAO ALMOFADA, CAFE PALACIO MOIDO 250G].
-        
-        # 5. Contextual Normalization:
-
-        # Consider context and section information when normalizing. For example:
-        # If "250G" appears, prioritize matching with products of the same size.
-        # If no context (e.g., size or section) is given, use a default or generic match.
-        
-        # 6. Specific Cases:
-
-        # Abbreviations: Normalize terms like "refri" or "refrigerante" to specific product names like "REFRIG. PEPSI COLA PET 2 EM 1."
-        # Plurals or variants: "cafés" -> "CAFE PILAO ALMOFADA."
-        
-        # Examples of Substitutions:
-
-        # Input: "cafe" -> Output: [CAFE PILAO ALMOFADA, CAFE PALACIO MOIDO 250G].
-        # Input: "pepsi" -> Output: [REFRIG. PEPSI COLA PET 2 EM 1].
-        # Input: "quanto custa o refrigerante" -> Output: quanto custa o [REFRIG. GUARANA PET CACULINHA].
-        # Input: "cafe palacio" -> Output: [CAFE PALACIO MOIDO 250G, CAFE PALACIO MOIDO 500G].
-        
-        # DON'T RETURN any different text just consider the examples above. 
-        # Any code in Python or add any new/different text. Consider the products examples and the context to return your answer.
-        # """
-        fix_prompt_v2 = products_find_general_fix_prompt(products_alike, products_find_using_prompt, fix_prompt_v1)
+        # Fallback if no conditions match
+        fix_prompt_v2 = products_find_general_fix_prompt(
+            products_alike, 
+            products_find_using_prompt, 
+            fix_prompt_v1
+        )
     
     time.sleep(3) # a little sleep to avoid overflow of questions to Gemini API
     
@@ -487,7 +462,7 @@ def pre_process_prompt(prompt):
 
 # pre_process_prompt("quais produtos custam 2.30")
 
-# pre_process_prompt("Quanto custa o café")
+# print(pre_process_prompt("Quero um cafe que custa 12 reais que está na seção 1 qual o nome desse cafe?"))
 
 
 def create_semantic_dictionary(user_input):

@@ -13,6 +13,8 @@ import { useNavigate } from "react-router-dom";
 import { businessName } from "../../utils/BusinessInfo";
 import { ListItemPrefix } from "@material-tailwind/react";
 
+import * as motion from "motion/react-client";
+
 function Header() {
   const [userName, setUsername] = useState("");
   const [isClicked, setIsClicked] = useState(false);
@@ -62,18 +64,28 @@ function Header() {
 
           {/* Dropdown Menu */}
           {isClicked && (
-            <div className="absolute right-0 p-4 mt-2 transition-all duration-300 ease-in-out transform rounded-lg shadow-md bg-tertiary">
+            <motion.div className="absolute right-0 z-10 p-4 mt-2 transition-all duration-300 ease-in-out transform rounded-lg shadow-md bg-tertiary"
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.5}}
+            transition={{
+              duration: 0.1,
+              delay:0.1,
+              ease: "easeInOut",
+              type: "tween"
+            }}
+            >
               <p className="text-sm font-medium">
                 <span className="font-bold">Logged in as:</span> {userName}
                 <ListItemPrefix 
-                className="flex p-2 mt-4 cursor-pointer hover:bg-red-500 hover:rounded justify-center"
+                className="flex justify-center p-2 mt-4 cursor-pointer hover:bg-red-500 hover:rounded"
                 onClick={handleLogout}
                 >
                   <MdLogout className="w-5 h-5 mr-3" />
                   Log Out
                 </ListItemPrefix>
               </p>
-            </div>
+            </motion.div>
           )}
         </div>
       </div>

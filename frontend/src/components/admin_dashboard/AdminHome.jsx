@@ -1,4 +1,3 @@
-import React, { useEffect } from 'react';
 import logo from '../../assets/logo.svg';
 import { useNavigate } from 'react-router-dom';
 
@@ -6,9 +5,8 @@ const AdminHome = () => {
     const navigate = useNavigate();
 
     const handleClick = (e) => {
-        const button_text = e.target.innerHTML;
         
-        navigate(`/${button_text.toLowerCase()}`);
+        navigate("/register");
     }
 
     return (

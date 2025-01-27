@@ -231,16 +231,18 @@ class ProductRegistration(viewsets.ViewSet):
                         print("Product: ", product)
                         product_synonymous = Product.get_synonymus(product)
                         if not product_synonymous:
-                            Product.generate_synonymous(product_list=product)
+                            synonymous = Product.generate_synonymous(product_list=product)
                         
                         
                         product.brand = product_brand
-                        
+                        product.synonymous = synonymous
                         print("Product original quantity: ", product.quantity)
                         print("Product quantity: ", product_quantity_format)
+                        print("Product brand: ", product.brand)
                     
                         product.quantity = product_quantity_format
                         product.save()
+                        
                 else:
                     product_synonymous = Product.get_synonymus(product_name)
                     print("SYNONYMOUS: ", product_synonymous)

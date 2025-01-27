@@ -14,6 +14,7 @@ import { businessName } from "../../utils/BusinessInfo";
 import { ListItemPrefix } from "@material-tailwind/react";
 
 import * as motion from "motion/react-client";
+import { AnimatePresence } from "motion/react";
 
 function Header() {
   const [userName, setUsername] = useState("");
@@ -54,16 +55,17 @@ function Header() {
         </span>
 
         <div className="relative">
-          <span
+          <motion.span
             className="flex items-center text-xl cursor-pointer hover:text-secondary"
             onClick={toggleDropdown}
+            whileTap={{ y: 1 }}
           >
             <BsPersonCircle className="mr-2" />
             {isClicked ? <BsArrowDownSquare /> : <BsArrowDownRightSquare />}
-          </span>
+          </motion.span>
 
           {/* Dropdown Menu */}
-          {isClicked && (
+          {/* {isClicked && (
             <motion.div className="absolute right-0 z-10 p-4 mt-2 transition-all duration-300 ease-in-out transform rounded-lg shadow-md bg-tertiary"
             initial={{ opacity: 0, scale: 0.5 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -86,7 +88,35 @@ function Header() {
                 </ListItemPrefix>
               </p>
             </motion.div>
-          )}
+          )} */}
+
+          <AnimatePresence initial={false}>
+            {isClicked ? (
+            <motion.div
+              className="absolute right-0 z-10 p-4 mt-2 text-black transition-all duration-300 ease-in-out transform rounded-lg shadow-md bg-secondary"
+              initial={{ opacity: 0, scale: 0.5 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0 }}
+              transition={{
+                duration: 0.1,
+                delay: 0.1,
+                ease: "easeInOut",
+                type: "tween",
+              }}
+            >
+              <p className="text-sm font-medium">
+                <span className="font-bold">Logged in as:</span> {userName}
+                <ListItemPrefix
+                  className="flex justify-center p-2 mt-4 cursor-pointer hover:bg-red-500 hover:rounded"
+                  onClick={handleLogout}
+                >
+                  <MdLogout className="w-5 h-5 mr-3" />
+                  Log Out
+                </ListItemPrefix>
+              </p>
+            </motion.div>
+            ) : null}
+          </AnimatePresence>
         </div>
       </div>
     </header>

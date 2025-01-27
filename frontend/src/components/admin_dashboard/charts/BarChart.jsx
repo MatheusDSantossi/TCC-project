@@ -13,8 +13,8 @@ function BarChart({ data }) {
         return acc;
     }, {});
 
-    const brands = Object.keys(brandCounts);
-    const counts = Object.values(brandCounts);
+    const brands = Object.keys(brandCounts).slice(0, 10);
+    const counts = Object.values(brandCounts).slice(0, 10);
     
     const chartConfig = {
         type: "bar",

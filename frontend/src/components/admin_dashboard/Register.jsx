@@ -66,8 +66,7 @@ const Register = () => {
           <div className="flex items-center justify-center mb-5">
             <img className="w-20 mr-4" src={logo} alt="" />
             <h2 className="mb-6 text-2xl font-semibold text-center left-40">
-              {" "}
-              User registration{" "}
+              Employee registration
             </h2>
           </div>
 
@@ -105,7 +104,7 @@ const Register = () => {
                             label={"Register"}
                         /> */}
             <ReactiveButton
-              className="text-primary hover:bg-yellow-300"
+              className="font-bold text-primary hover:bg-yellow-300"
               buttonState={buttonState}
               color="yellow"
               type={"submit"}

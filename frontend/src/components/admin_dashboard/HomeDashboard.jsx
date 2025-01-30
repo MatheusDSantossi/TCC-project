@@ -5,6 +5,7 @@ import
 import BasicPieChart from './charts/PieChart'
 import BarChart from './charts/BarChart'
 import AxiosInstance from '../AxiosInstance';
+import DataGridDemo from './charts/Table';
 
 function HomeDashboard() {
   
@@ -68,34 +69,17 @@ function HomeDashboard() {
 
       {/* Recent Products */}
       <div className="p-6 bg-white rounded-lg shadow-card text-primary">
-        <h3 className="mb-4 text-lg font-medium">Recent Products</h3>
+        <h3 className="text-2xl font-medium text-primary mb-4">Products</h3>
         <table className="w-full text-left border-collapse">
-          <thead>
-            <tr className="border-b">
-              <th className="p-2">Product</th>
-              <th className="p-2">Brand</th>
-              <th className="p-2">Price</th>
-              <th className="p-2">Stock</th>
-              <th className="p-2">Unit</th>
-            </tr>
-          </thead>
-          <tbody>
+          
             {loading ? (
               <tr>
                 <td colSpan="5" className="text-center">Loading...</td>
               </tr>
-            ) : (products.slice(0, numberOfRows).map((product) => (
-            <tr className="border-b">
-              <td className="p-2">{product.name}</td>
-              <td className="p-2">{product.brand}</td>
-              <td className="p-2">{product.preco_venda}</td>
-              <td className="p-2">{product.disponivel}</td>
-              <td className="p-2">{product.unidade_medida}</td>
-            </tr>
-            ))
+            ) : (
+              <DataGridDemo products_data={products} />
           )}
           <button className="flex-shrink-0 px-4 py-2 ml-2 font-bold text-black bg-yellow-400 rounded-md hover:bg-yellow-300" onClick={() => {setNumberofRows(numberOfRows+10)}}>Show more options</button>
-          </tbody>
         </table>
       </div>
     </div>

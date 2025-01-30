@@ -3,6 +3,7 @@ import google.generativeai as genai
 from pathlib import Path
 import sys
 import os
+from dotenv import load_dotenv
 
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity

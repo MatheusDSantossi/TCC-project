@@ -1,14 +1,18 @@
 # Backend
 backend/venv/
-backend/config/
+# backend/config/
 backend/test_imports.py
 
 melhorias.md
 synonimus_test.py
 TCC-project/
 **/settings.py
-chabot_project/config.py
-chabot_project/database_connection.py
+# chabot_project/config.py
+# chabot_project/database_connection.py
+
+# ENV
+/*/.env
+/*/.env.local
 
 # Frontend
 

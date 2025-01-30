@@ -182,6 +182,8 @@ function Chatbot() {
             answer = "Digite o nome do produto.";
           } else if (optionText === "Digitar a seção do produto") {
             answer = "Digite a seção do produto. (Ex: Seção 1)";
+          } else if (optionText === "Digitar a marca do produto") {
+            answer = "Digite a marca do produto. (Ex: Vitamassa)";
           } else if (optionText === "Digitar alguma descrição do produto") {
             answer = "Digite alguma descrição do produto.";
           } else if (optionText === "Digitar o código do produto") {

@@ -56,7 +56,7 @@ export default function DataGridDemo({ products_data }) {
     //   ];
       
     return (
-        <Box sx={{ height: 400, width: '100%' }}>
+        <Box sx={{ height: 400, width: 700 }}>
             <DataGrid 
             rows={products_data} 
             columns={columns} 

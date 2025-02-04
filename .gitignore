@@ -1,4 +1,5 @@
 # Backend
+/backend copy/venv 
 backend/venv/
 # backend/config/
 backend/test_imports.py
@@ -13,6 +14,7 @@ TCC-project/
 # ENV
 /*/.env
 /*/.env.local
+.env
 
 # Frontend
 

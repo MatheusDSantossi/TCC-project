@@ -1,0 +1,40 @@
+services:
+  backend:
+    build: ./backend
+    command: sh -c "python manage.py migrate --noinput && python manage.py collectstatic --noinput && gunicorn --bind 0.0.0.0:8000 chatbot_project.wsgi"
+    volumes:
+      - ./backend:/app
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+    env_file:
+      - .env
+    depends_on:
+      - db
+    environment:
+      - POSTGRES_DB=${DATABASE_DB}
+      - POSTGRES_USER=${DATABASE_USER}
+      - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
+      - POSTGRES_HOST=${DATABASE_HOST}
+      - POSTGRES_PORT=${DATABASE_PORT}
+
+  frontend:
+    build: 
+      context: .
+      dockerfile: frontend/Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+  db:
+    image: postgres:13
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_DB=project_pcc_v3
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=matheus19dev
+volumes:
+  postgres_data:
+  static_volume:
+  media_volume:

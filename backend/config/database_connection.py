@@ -1,18 +1,20 @@
 import os
-from dotenv import load_dotenv
 import psycopg2
+from dotenv import load_dotenv
 
 # Loading environment variables from .env file
-load_dotenv()
+load_dotenv(encoding="UTF-8")
 
-database_password = os.getenv('DATABASE_PASSWORD')
+def get_db_connection():
+    conn = psycopg2.connect(
+            database= os.environ.get("DATABASE_DB"),
+            user=os.environ.get("DATABASE_USER"),
+            password=os.environ.get("DATABASE_PASSWORD"),
+            host=os.environ.get("DATABASE_HOST"),
+            port=os.environ.get("DATABASE_PORT")
+        )
+    conn.autocommit = True
+    
+    return conn
 
-conn = psycopg2.connect(
-    database= "project_pcc_v3",
-    user="postgres",
-    password=database_password,
-    host="127.0.0.1",
-    port="5432"
-)
-
-conn.autocommit = True
+conn = get_db_connection()

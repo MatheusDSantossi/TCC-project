@@ -5,7 +5,7 @@ import
 import BasicPieChart from './charts/PieChart'
 import BarChart from './charts/BarChart'
 import AxiosInstance from '../AxiosInstance';
-import DataGridDemo from './charts/Table';
+import ProductsTable from './charts/Table';
 
 function HomeDashboard() {
   
@@ -57,30 +57,27 @@ function HomeDashboard() {
 
       {/* Charts Section */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <div className="p-6 text-center bg-white rounded-lg shadow-card">
+        <div className="w-full p-6 text-center bg-white rounded-lg shadow-card">
           <p className="text-2xl font-medium text-primary">Products by brand</p>
           <BarChart data={products} />
         </div>
-        <div className="p-6 text-center bg-white rounded-lg shadow-card">
+        <div className="w-full p-6 text-center bg-white rounded-lg shadow-card">
           <p className="text-2xl font-medium text-primary">Stock Availability by Section</p>
           <BasicPieChart products_data={products} />
         </div>
       </div>
 
       {/* Recent Products */}
-      <div className="p-6 bg-white rounded-lg shadow-card text-primary">
-        <h3 className="text-2xl font-medium text-primary mb-4">Products</h3>
-        <table className="w-full text-left border-collapse">
+      <div className="w-full p-6 bg-white rounded-lg shadow-card text-primary">
+        <h3 className="mb-4 text-2xl font-medium text-primary">Products</h3>
           
             {loading ? (
-              <tr>
-                <td colSpan="5" className="text-center">Loading...</td>
-              </tr>
+              <div className="text-center">
+              Loading...
+              </div>
             ) : (
-              <DataGridDemo products_data={products} />
+              <ProductsTable products_data={products} />
           )}
-          <button className="flex-shrink-0 px-4 py-2 ml-2 font-bold text-black bg-yellow-400 rounded-md hover:bg-yellow-300" onClick={() => {setNumberofRows(numberOfRows+10)}}>Show more options</button>
-        </table>
       </div>
     </div>
   );

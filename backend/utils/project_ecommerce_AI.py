@@ -52,6 +52,8 @@ from prompts import *
 GOOGLE_API_KEY = SECRET_KEY
 genai.configure(api_key=GOOGLE_API_KEY)
 
+
+
 # Generate a text stream
 # response = model.generate_content(prompt, stream=True)
 generation_config = {

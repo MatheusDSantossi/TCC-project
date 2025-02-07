@@ -994,6 +994,7 @@ def chatbot_response(user_prompt):
     
     print("USER PROMPT: ", user_prompt)
     print("Fixed prompt v1: ", fix_prompt_v1)
+    print("Find products: ", find_product)
 
     if is_product:
         count_row = find_product.shape[0]

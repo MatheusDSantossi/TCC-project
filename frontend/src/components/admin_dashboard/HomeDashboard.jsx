@@ -3,7 +3,7 @@ import
 { BsFillArchiveFill, BsFillGrid3X3GapFill, BsPeopleFill, BsFillBellFill}
  from 'react-icons/bs'
 import BasicPieChart from './charts/PieChart'
-import BarChart from './charts/BarChart'
+import SimpleBarChart from './charts/BarChart'
 import AxiosInstance from '../AxiosInstance';
 import ProductsTable from './charts/Table';
 
@@ -59,7 +59,7 @@ function HomeDashboard() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <div className="w-full p-6 text-center bg-white rounded-lg shadow-card">
           <p className="text-2xl font-medium text-primary">Products by brand</p>
-          <BarChart data={products} />
+          <SimpleBarChart data={products} />
         </div>
         <div className="w-full p-6 text-center bg-white rounded-lg shadow-card">
           <p className="text-2xl font-medium text-primary">Stock Availability by Section</p>
@@ -68,7 +68,7 @@ function HomeDashboard() {
       </div>
 
       {/* Recent Products */}
-      <div className="w-full p-6 bg-white rounded-lg shadow-card text-primary">
+      <div className="flex flex-col items-center justify-center w-full p-6 bg-white rounded-lg shadow-card text-primary">
         <h3 className="mb-4 text-2xl font-medium text-primary">Products</h3>
           
             {loading ? (

@@ -4,9 +4,13 @@ import { useNavigate } from 'react-router-dom';
 const AdminHome = () => {
     const navigate = useNavigate();
 
-    const handleClick = (e) => {
-        
-        navigate("/register");
+    const handleClick = (e, state) => {
+        console.log("E.value: ", state);
+        if (state === "Login"){
+            navigate("/login");
+        } else {
+            navigate("/register");
+        }
     }
 
     return (
@@ -16,16 +20,16 @@ const AdminHome = () => {
                     <img src={logo} alt="logo" className='h-20' />
                 </div>
                 <div className='text-center'>
-                    <h1 className='mb-4 text-4xl font-bold'>Ferramentas administrativas</h1>
+                    <h1 className='mb-4 text-4xl font-bold'>Ferramentas Administrativas</h1>
                     {/* <p className='mb-8'>Selecione a opção que melhor lhe atende</p> */}
                     <div className='flex justify-center space-x-4'>
                         <button className='px-6 py-3 font-bold text-black transition bg-yellow-400 rounded-lg hover:bg-yellow-300'
-                        onClick={(e) => handleClick(e)}
+                        onClick={(e) => handleClick(e, "Login")}
                         >Login</button>
                         <button className='px-6 py-3 font-bold text-black transition bg-yellow-400 rounded-lg hover:bg-yellow-300'
                         onClick={(e) => handleClick(e)}
                         >
-                            Signup
+                            Cadastrar
                         </button>
                     </div>
                 </div>

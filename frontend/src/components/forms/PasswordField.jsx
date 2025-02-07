@@ -30,7 +30,22 @@ export default function CustomPasswordField(props) {
         }) =>(
 
           <FormControl variant="outlined" className={"myForm"}
-          sx={{ padding: "0.5rem", marginTop:"0.25rem",borderRadius: "0.5rem", borderColor: "#D1D5DB", width: "100%" }}
+          sx={{ 
+            padding: "0.5rem", 
+            marginTop:"0.25rem",
+            borderRadius: "0.5rem", 
+            borderColor: "#D1D5DB", 
+            width: "100%",  
+            "& .MuiOutlinedInput-root": {
+            color: "#FFFFFFFF",
+            "& .MuiOutlinedInput-notchedOutline": {
+              borderColor: "#F0FF3D",
+            },
+          },
+          "& .MuiInputLabel-outlined": {
+            color: "#FFFFFFFF",
+            fonteweigth: "bold",
+          } }}
           >
           <InputLabel htmlFor="outlined-adornment-password">{label}</InputLabel>
           <OutlinedInput
@@ -47,7 +62,11 @@ export default function CustomPasswordField(props) {
                   onMouseDown={handleMouseDownPassword}
                   edge="end"
                 >
-                  {showPassword ? <VisibilityOff /> : <Visibility />}
+                  {showPassword ? <VisibilityOff sx={{
+                    color: "#F0FF3D"
+                  }} /> : <Visibility sx={{
+                    color: "#F0FF3D"
+                  }} />}
                 </IconButton>
               </InputAdornment>
             }

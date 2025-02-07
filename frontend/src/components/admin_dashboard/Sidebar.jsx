@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { BsChatFill, BsGrid1X2Fill, BsFillArchiveFill } from "react-icons/bs";
+import { BsChatFill, BsGrid1X2Fill, BsFillArchiveFill,  BsArrowRightCircleFill } from "react-icons/bs";
 
 import logo from "../../assets/logo.svg";
 
@@ -69,9 +69,16 @@ const listItemsNav = {
     icon: <BsGrid1X2Fill />,
     component: "dashboard",
   }, // Add your desired icons here
-  Product: {
+  Produtos: {
     icon: <BsFillArchiveFill />,
-    component: "productRegistration",
+    subitems: {
+      Cadastro: {
+        component: "productRegistration",
+      },
+      Lista: {
+        component: "productList",
+      },
+    },
   },
   Chatbot: {
     icon: <BsChatFill />,
@@ -86,22 +93,50 @@ const listItemsNav = {
   // },
 };
 
-const Navigation = ({ changeComponent }) => (
-  <motion.ul style={list} variants={navVariants}>
-    {Object.entries(listItemsNav).map(([label, { icon, component }], i) => (
-      <MenuItem
-        key={i}
-        label={label}
-        icon={icon}
-        onClick={(e) => {
-          e.preventDefault();
-          console.log("Change component: ", changeComponent);
-          changeComponent(component);
-        }}
-      />
-    ))}
-  </motion.ul>
-);
+const Navigation = ({ changeComponent }) => {
+  const [openSubmenu, setOpenSubmenu] = useState(null);
+
+  return (
+    <motion.ul style={list} variants={navVariants}>
+      {Object.entries(listItemsNav).map(([label, item, icon], i) => (
+        <div key={i}>
+          <MenuItem
+            label={label}
+            icon={item.icon}
+            hasSubitems={!!item.subitems}
+            isOpen={openSubmenu === label}
+            onClick={(e) => {
+              e.preventDefault();
+              console.log("Change component: ", changeComponent);
+              if (item.subitems) {
+                setOpenSubmenu(openSubmenu === label ? null : label);
+              } else {
+                changeComponent(item.component);
+              }
+            }}
+          />
+          {item.subitems && openSubmenu === label && <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+          >
+            {Object.entries(item.subitems).map(([subLabel, subItem], j) => (
+              <SubMenuItem 
+                key={j}
+                label={subLabel}
+                onClick={(e) => {
+                  e.preventDefault();
+                  changeComponent(subItem.component);
+                }}
+              />
+               
+            ))}
+          </motion.div>}
+        </div>
+      ))}
+    </motion.ul>
+  );
+};
 
 const itemVariants = {
   open: {
@@ -118,23 +153,65 @@ const itemVariants = {
       y: { stiffness: 1000 },
     },
   },
+  submenu: {
+    y: 0,
+    opacity: 1,
+    transition: {
+      delay: 0.1,
+      duration: 0.2,
+    },
+  }
 };
 
 const colors = ["#FF008C", "#D309E1", "#9C1AFF", "#7700FF", "#4400FF"];
 
-const MenuItem = ({ label, icon, onClick }) => {
+const MenuItem = ({ label, icon, onClick, hasSubitems, isOpen }) => {
   // const border = `2px solid ${colors[i]}`;
   return (
     <motion.li
       style={listItem}
       variants={itemVariants}
-      whileHover={{ scale: 1.1 }}
-      whileTap={{ scale: 0.95 }}
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
       onClick={onClick}
     >
       <div style={iconPlaceholder}>{icon}</div>
-      <div style={textPlaceholder}>
+      <div style={{...textPlaceholder, position: 'relative'}}>
         <span style={{ color: "white", fontWeight: "bold" }}>{label}</span>
+        {hasSubitems && (
+          <motion.span 
+            style={{
+              position: "absolute",
+              top: 3,
+              right: 0,
+              color: "white",
+              transform: isOpen ? 'rotate(90deg)' : 'rotate(0deg)',
+            }}
+            initial={{ rotate: 0 }}
+            animate={{ rotate: isOpen? 90 : 0 }}
+          >
+            <BsArrowRightCircleFill />
+          </motion.span>
+        )}
+      </div>
+    </motion.li>
+  );
+};
+
+const SubMenuItem = ({ label, onClick }) => {
+  return (
+    <motion.li
+      style={{ ...listItem, 
+        marginLeft: "30px",
+        padding: "8px 25px 8px 45px"
+      }}
+      variants={itemVariants}
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.99 }}
+      onClick={onClick}
+    >
+      <div style={textPlaceholder}>
+        <span style={{ color: "white", fontWeight: "normal" }}>{label}</span>
       </div>
     </motion.li>
   );
@@ -189,11 +266,10 @@ const container = {
   flex: 1,
   width: 210,
   maxWidth: "100%",
-  minHeight: "100vh",
+  minHeight: "109vh",
   height: "auto",
   // backgroundColor: "var(--accent)",
   backgroundColor: "#012921",
-  borderRadius: 20,
   overflow: "hidden",
   flexDirection: "column",
 };
@@ -226,22 +302,23 @@ const toggleContainer = {
 
 const list = {
   listStyle: "none",
-  padding: 25,
+  padding: "25px 0",
   margin: 0,
-  position: "absolute",
-  top: 80,
-  width: 230,
+  position: "relative",
+  top: -80,
+  width: "100%",
 };
 
 const listItem = {
   display: "flex",
   alignItems: "center",
-  justifyContent: "center",
-  padding: 0,
+  justifyContent: "flex-start",
+  padding: "8px 25px",
   margin: 0,
   listStyle: "none",
-  marginBottom: 20,
+  marginBottom: 8,
   cursor: "pointer",
+  width: "100%",
 };
 
 const iconPlaceholder = {
@@ -253,12 +330,13 @@ const iconPlaceholder = {
   borderRadius: "50%",
   flex: "10x 0",
   marginRight: 10,
+  color: "white",
 };
 
 const textPlaceholder = {
   borderRadius: 5,
   width: 200,
-  height: 20,
+  height: "auto",
   flex: 1,
 };
 

@@ -59,21 +59,14 @@ const Login = () => {
             <img className="w-20 mr-4" src={logo} alt="" />
             <h2 className="mb-6 text-2xl font-semibold text-center left-40">Login</h2>
           </div>
-
-          <label className="block text-lg font-semibold text-left text-white">
-            Email
-          </label>
-          <Box className={"itemBox"}>
+          <Box className={"itemBox mb-3"}>
             <CustomTextField 
             label={"Email"} name={"email"} control={control} />
           </Box>
 
-          <label className="block text-lg font-semibold text-left text-white">
-            Password
-          </label>
           <Box className={"itemBox"}>
             <CustomPasswordField
-              label={"Password"}
+              label={"Senha"}
               name={"password"}
               control={control}
             />
@@ -90,8 +83,8 @@ const Login = () => {
               buttonState={buttonState}
               color="yellow"
               type={"submit"}
-              loadingText="Loading..."
-              successText={"Login successful"}
+              loadingText="Carregando..."
+              successText={"Logado com sucesso"}
               idleText={"Login"} 
               animation="true"
               rounded="true"
@@ -102,10 +95,11 @@ const Login = () => {
           </div>
     
           <Box className={"itemBox"} sx={{ flexDirection: "column" }}>
-            <Link className='mt-4 text-center text-gray-300' to="/register"> No account yet? <span className='font-medium text-yellow-400 hover:underline hover:text-yellow-300'>Please register!</span> </Link>
+            <Link className='mt-4 text-center text-gray-300' to="/register"> Não possui conta? <span className='font-medium text-yellow-400 hover:underline hover:text-yellow-300'>Por favor se cadastre!</span> </Link>
+            <br/>
             <Link className='mt-4 text-center text-gray-300' to="/request/password_reset">
               {" "}
-              Password forgotten? <span className='font-medium text-yellow-400 hover:underline hover:text-yellow-300'>Click here</span>{" "}
+              Esqueceu a senha? <span className='font-medium text-yellow-400 hover:underline hover:text-yellow-300'>Clique aqui</span>{" "}
             </Link>
           </Box>
 

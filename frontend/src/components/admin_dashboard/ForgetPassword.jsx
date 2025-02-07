@@ -9,19 +9,24 @@ import AxiosInstance from "../AxiosInstance";
 import { useNavigate } from "react-router-dom";
 import CustomMessage from "./CustomMessage";
 
+import ReactiveButton from "reactive-button";
+
 import logo from "../../assets/logo.svg";
 
 const ForgetPassword = () => {
   const navigate = useNavigate();
   const { handleSubmit, control } = useForm();
+  const [buttonState, setButtonState] = useState("idle");
 
   const [ShowMessage, setShowMessage] = useState(false);
 
   const submission = (data) => {
+
     AxiosInstance.post(`api/password_reset/`, {
       email: data.email,
     })
     .then((response) => {
+
       setShowMessage(true);
     });
   };
@@ -42,19 +47,34 @@ const ForgetPassword = () => {
         <Box className={"whiteBox"}>
           <div className="flex items-center justify-center mb-5">
             <img className="w-20 mr-4" src={logo} alt="" />
-            <h2 className="mb-6 text-2xl font-semibold text-center left-40">Request password reset</h2>
+            <h2 className="mb-6 text-2xl font-semibold text-center left-40">Redefinir Senha</h2>
           </div>
         
-          <label className="block text-lg font-semibold text-left text-white">
-            Type your registered email
+          <label className="block mb-3 text-lg font-semibold text-left text-white">
+            Digite o email cadastrado
           </label>
           <Box className={"itemBox"}>
             <CustomTextField label={"Email"} name={"email"} control={control} />
           </Box>
 
-          <div className='flex items-center p-3 space-x-32'>
+          <ReactiveButton
+              className="font-bold text-primary hover:bg-yellow-300"
+              buttonState={buttonState}
+              color="yellow"
+              type={"submit"}
+              loadingText="Carregando..."
+              successText={"Sucesso!"}
+              idleText={"Solicitar redefinição de senha"}
+              animation="true"
+              rounded="true"
+              width={250}
+              height={40}
+              size="large"
+            />
+
+          {/* <div className='flex items-center p-3 space-x-32'>
             <CustomButton label={"Request password reset"} type={"submit"} />
-          </div>
+          </div> */}
 
           <Box className={"itemBox"} sx={{ flexDirection: "column" }}></Box>
         </Box>

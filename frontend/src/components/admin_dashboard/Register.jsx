@@ -21,36 +21,36 @@ const Register = () => {
   const schema = yup.object({
     email: yup
       .string()
-      .email("Field expects an email adress")
-      .required("Email is a required field"),
+      .email("Esse campo espera um e-mail válido")
+      .required("Email é um campo obrigatório"),
     password: yup
       .string()
-      .required("Password is a required field")
-      .min(8, "Password must be at least 8 characters")
-      .matches(/[A-Z]/, "Password must contain at least one uppercase letter")
-      .matches(/[a-z]/, "Password must contain at least one lower case letter")
-      .matches(/[0-9]/, "Password must contain at least one number")
+      .required("Senha é um campo obrigatório")
+      .min(8, "Senha deve ter pelo menos 8 caracteres")
+      .matches(/[A-Z]/, "Senha deve ter pelo menos uma letra maiúscula")
+      .matches(/[a-z]/, "Senha deve ter pelo menos uma letra minuscúla")
+      .matches(/[0-9]/, "Senha deve ter pelo menos um número")
       .matches(
         /[!@#$%^&*(),.?":;{}|<>+]/,
-        "Password must contain at least one special character"
+        "Senha deve ter pelo menos um caracter especial"
       ),
     password2: yup
       .string()
-      .required("Password confirmation is a required field")
-      .oneOf([yup.ref("password"), null], "Passwords must match"),
+      .required("O campo de confirmação de senha é obrigatorio")
+      .oneOf([yup.ref("password"), null], "As senhas devem ser iguais"),
   });
 
   const { handleSubmit, control } = useForm({ resolver: yupResolver(schema) });
 
   const submission = (data) => {
-    setButtonState("loading");
+    setButtonState("Carregando...");
 
     AxiosInstance.post(`register/`, {
       email: data.email,
       password: data.password,
     }).then(() => {
       setTimeout(() => {
-        setButtonState("success");
+        setButtonState("Sucesso!");
       }, 2000);
       navigate(`/admin`);
     });
@@ -66,34 +66,25 @@ const Register = () => {
           <div className="flex items-center justify-center mb-5">
             <img className="w-20 mr-4" src={logo} alt="" />
             <h2 className="mb-6 text-2xl font-semibold text-center left-40">
-              Employee registration
+              Cadastro
             </h2>
           </div>
 
-          <label className="block text-lg font-semibold text-left text-white">
-            Email
-          </label>
-          <Box className={"itemBox"}>
+          <Box className={"itemBox mb-3"}>
             <CustomTextField label={"Email"} name={"email"} control={control} />
           </Box>
-
-          <label className="block text-lg font-semibold text-left text-white">
-            Password
-          </label>
-          <Box className={"itemBox"}>
+          
+          <Box className={"itemBox  mb-3"}>
             <CustomPasswordField
-              label={"Password"}
+              label={"Senha"}
               name={"password"}
               control={control}
             />
           </Box>
 
-          <label className="block text-lg font-semibold text-left text-white">
-            Confirm password
-          </label>
           <Box className={"itemBox"}>
             <CustomPasswordField
-              label={"Confirm password"}
+              label={"Confirmar Senha"}
               name={"password2"}
               control={control}
             />
@@ -109,8 +100,8 @@ const Register = () => {
               color="yellow"
               type={"submit"}
               loadingText="Loading..."
-              successText={"Registered successful"}
-              idleText={"Register"}
+              successText={"Cadastrador com sucesso"}
+              idleText={"Cadastrar"}
               animation="true"
               rounded="true"
               width={80}
@@ -122,9 +113,9 @@ const Register = () => {
           <Box className={"itemBox"}>
             <Link className="mt-4 text-center text-gray-300" to="/login">
               {" "}
-              Already registered?{" "}
+              Já possui cadastro?{" "}
               <span className="font-medium text-yellow-400 hover:underline hover:text-yellow-300">
-                Please login!
+                Por favor, faça login!
               </span>{" "}
             </Link>
           </Box>

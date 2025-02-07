@@ -55,7 +55,7 @@ export default function ProductsTable({ products_data }) {
   //   ];
 
   return (
-    <div className="w-full overflow-x-auto">
+    <div className="flex items-center justify-center w-full overflow-x-auto">
       <Box sx={{ height: 400, width: 700
        }}>
         <DataGrid

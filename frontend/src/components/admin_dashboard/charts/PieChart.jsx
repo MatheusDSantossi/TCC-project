@@ -39,8 +39,8 @@ function BasicPieChart({ products_data }) {
       listDict.push(dictionary);
     });
 
-    let sortedAscending = listDict.sort((a, b) => {
-      return a.value - b.value;
+    let sortedAscending = Object.values(listDict).sort((a, b) => {
+      return b.value - a.value;
     });
 
     // console.log("Sorted ascending: ", sortedAscending);

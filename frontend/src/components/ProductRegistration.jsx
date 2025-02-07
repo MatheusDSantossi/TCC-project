@@ -100,7 +100,7 @@ function ProductRegistration() {
         <div className="flex items-center justify-center mb-5">
           <img className="w-20 mr-4" src={logo} alt="" />
           <h2 className="mb-6 text-2xl font-semibold text-center left-40">
-            Products Registration
+            Cadastro de Produtos
           </h2>
         </div>
         <form onSubmit={registerProduct}>
@@ -111,7 +111,7 @@ function ProductRegistration() {
               htmlFor="productName"
               className="block text-sm font-semibold text-white"
             >
-              Product Name
+              Nome do Produto
             </label>
             <input
               type="text"
@@ -140,7 +140,7 @@ function ProductRegistration() {
                 htmlFor="productBrand"
                 className="block text-sm font-semibold text-white"
               >
-                Product Brand
+                Marca do Produto
               </label>
               <input
                 type="text"
@@ -160,7 +160,7 @@ function ProductRegistration() {
                 htmlFor="productQuantityFormat"
                 className="block text-sm font-semibold text-white"
               >
-                Product Quantity Format
+                Formato Quantidade do Produto
               </label>
               <input
                 type="text"
@@ -180,7 +180,7 @@ function ProductRegistration() {
                 htmlFor="productSection"
                 className="block text-sm font-semibold text-white"
               >
-                Product Section
+                Seção do Produto
               </label>
               <input
                 type="number"
@@ -200,7 +200,7 @@ function ProductRegistration() {
                 htmlFor="productPrice"
                 className="block text-sm font-semibold text-white"
               >
-                Product Price
+                Preço do Produto
               </label>
               <input
                 type="text"
@@ -218,18 +218,27 @@ function ProductRegistration() {
                 htmlFor="productMetricUnity"
                 className="block text-sm font-semibold text-white"
               >
-                Product Metric Unity
+                Unidade de Medida do Produto
               </label>
-              <input
-                type="text"
+              <select
                 id="productMetricUnity"
                 name="productMetricUnity"
                 required
                 className="w-full p-2 mt-1 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
                 value={productMetricUnity}
                 onChange={(e) => setProductMetricUnity(e.target.value)}
-                placeholder="UN"
-              />
+              >
+                <option value="">Selecione uma opção</option>
+                <option value="CX">CX</option>
+                <option value="UN">UN</option>
+                <option value="KG">KG</option>
+                <option value="L">L</option>
+                <option value="M">M</option>
+                <option value="PC">PC</option>
+                <option value="PT">PT</option>
+                <option value="PCT">PCT</option>
+                <option value="PR">PR</option>
+              </select>
             </div>
             {/* Product Availability */}
             <div>
@@ -237,7 +246,7 @@ function ProductRegistration() {
                 htmlFor="productAvailability"
                 className="block text-sm font-semibold text-white"
               >
-                Product Availability
+                Produtos em Estoque
               </label>
               <input
                 type="text"
@@ -264,9 +273,9 @@ function ProductRegistration() {
             buttonState={buttonState}
             color="yellow"
             type={"submit"}
-            loadingText="Loading..."
-            successText={"Registered successful"}
-            idleText={"Register product"}
+            loadingText="Carregando..."
+            successText={"Cadastrado com sucesso"}
+            idleText={"Cadastrar produto"}
             animation={true}
             rounded={true}
             width="120"

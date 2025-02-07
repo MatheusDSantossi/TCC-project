@@ -10,6 +10,8 @@ function Capitalize(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
+// TODO: Capitalize the name of the user
+
 function Chatbot() {
   const [menuOptions, setMenuOptions] = useState([]);
   const [userInput, setUserInput] = useState("");
@@ -253,7 +255,7 @@ function Chatbot() {
       // Addding the user's message to the chat
       const userNameMessage = {
         sender: "Você",
-        text: `Me chamo ${newUserName}`,
+        text: `${newUserName}`,
         timestamp: new Date().toLocaleTimeString("pt-BR", {
           hour: "2-digit",
           minute: "2-digit",
@@ -273,7 +275,7 @@ function Chatbot() {
       setTimeout(() => {
         const botResponse = {
           sender: "Hecate",
-          text: `Prazer em conhecê-lo, ${newUserName}! Como posso lhe ajudar hoje?`,
+          text: `Prazer em conhecê-lo, ${newUserName}! Como posso lhe ajudar hoje? Selecione uma das opções abaixo:`,
           timestamp: new Date().toLocaleTimeString("pt-BR", {
             hour: "2-digit",
             minute: "2-digit",
@@ -433,7 +435,7 @@ function Chatbot() {
           {/* Put as the chatbot is saying that instead of a simple span */}
           {isHecateAnswering && (
             <span className="text-2xl font-bold text-primary">
-              Aguarde. Em breve responderei!
+              Estou processando. Aguarde um instante.
             </span>
           )}
 
@@ -443,7 +445,7 @@ function Chatbot() {
             menuOptions.length <= 0 && (
               <button className="h-10 px-6 ml-2 font-bold text-black bg-yellow-400 hover:bg-yellow-300 rounded-r-md" onClick={showingMenuOptions}>
                 {/* onClick={showingMenuOptions()} */}
-                Mostrar menu com opções
+                Voltar para a lista de opções
               </button>
             )}
           {/* Input field */}

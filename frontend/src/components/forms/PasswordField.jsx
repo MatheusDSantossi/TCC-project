@@ -1,17 +1,17 @@
-import * as React from 'react';
-import IconButton from '@mui/material/IconButton';
-import OutlinedInput from '@mui/material/OutlinedInput';
-import InputLabel from '@mui/material/InputLabel';
-import InputAdornment from '@mui/material/InputAdornment';
-import FormControl from '@mui/material/FormControl';
-import Visibility from '@mui/icons-material/Visibility';
-import VisibilityOff from '@mui/icons-material/VisibilityOff';
-import { FormHelperText } from '@mui/material';
-import {Controller} from 'react-hook-form'
+import * as React from "react";
+import IconButton from "@mui/material/IconButton";
+import OutlinedInput from "@mui/material/OutlinedInput";
+import InputLabel from "@mui/material/InputLabel";
+import InputAdornment from "@mui/material/InputAdornment";
+import FormControl from "@mui/material/FormControl";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import { FormHelperText } from "@mui/material";
+import { Controller } from "react-hook-form";
 
 export default function CustomPasswordField(props) {
   const [showPassword, setShowPassword] = React.useState(false);
-  const {label, name, control} = props
+  const { label, name, control } = props;
 
   const handleClickShowPassword = () => setShowPassword((show) => !show);
 
@@ -21,39 +21,48 @@ export default function CustomPasswordField(props) {
 
   return (
     <Controller
-        name = {name}
-        control = {control}
-        render = {({
-            field:{onChange, value}, 
-            fieldState : {error},
-            formState,
-        }) =>(
-
-          <FormControl variant="outlined" className={"myForm"}
-          sx={{ 
-            padding: "0.5rem", 
-            marginTop:"0.25rem",
-            borderRadius: "0.5rem", 
-            borderColor: "#D1D5DB", 
-            width: "100%",  
+      name={name}
+      control={control}
+      render={({
+        field: { onChange, value },
+        fieldState: { error },
+        formState,
+      }) => (
+        <FormControl
+          variant="outlined"
+          className={"myForm"}
+          sx={{
+            padding: "0.5rem",
+            marginTop: "0.25rem",
+            borderRadius: "0.5rem",
+            borderColor: "#D1D5DB",
+            width: "100%",
             "& .MuiOutlinedInput-root": {
-            color: "#FFFFFFFF",
-            "& .MuiOutlinedInput-notchedOutline": {
+              color: "#FFFFFFFF",
+              "& .MuiOutlinedInput-notchedOutline": {
+                borderColor: "#F0FF3D",
+              },
+            },
+            "& .MuiInputLabel-outlined": {
+              color: "#FFFFFFFF",
+              fonteweigth: "bold",
+            },
+            "& .Mui-focused": {
               borderColor: "#F0FF3D",
             },
-          },
-          "& .MuiInputLabel-outlined": {
-            color: "#FFFFFFFF",
-            fonteweigth: "bold",
-          } }}
-          >
+            "& .MuiFormHelperText-root": {
+              color: "#5D76D3",
+              fontWeight: "bold"
+            }
+          }}
+        >
           <InputLabel htmlFor="outlined-adornment-password">{label}</InputLabel>
           <OutlinedInput
             id="outlined-adornment-password"
             onChange={onChange}
             value={value}
-            error = {!!error}
-            type={showPassword ? 'text' : 'password'}
+            error={!!error}
+            type={showPassword ? "text" : "password"}
             endAdornment={
               <InputAdornment position="end">
                 <IconButton
@@ -62,27 +71,31 @@ export default function CustomPasswordField(props) {
                   onMouseDown={handleMouseDownPassword}
                   edge="end"
                 >
-                  {showPassword ? <VisibilityOff sx={{
-                    color: "#F0FF3D"
-                  }} /> : <Visibility sx={{
-                    color: "#F0FF3D"
-                  }} />}
+                  {showPassword ? (
+                    <VisibilityOff
+                      sx={{
+                        color: "#F0FF3D",
+                      }}
+                    />
+                  ) : (
+                    <Visibility
+                      sx={{
+                        color: "#F0FF3D",
+                      }}
+                    />
+                  )}
                 </IconButton>
               </InputAdornment>
             }
             label={label}
           />
 
-        <FormHelperText sx={{color:"#d32f2f"}}> {error?.message} </FormHelperText>
-
+          <FormHelperText sx={{ color: "#d32f2f" }}>
+            {" "}
+            {error?.message}{" "}
+          </FormHelperText>
         </FormControl>
-
-        
-    )
-  }
- 
- />
-
-       
+      )}
+    />
   );
 }

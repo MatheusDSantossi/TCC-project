@@ -57,12 +57,12 @@ function SimpleBarChart({ data }) {
     }],
     yAxis: [
       {
-        label: "brand",
+        label: "Quantidade",
       },
     ],
     series: [{
       dataKey: "count",
-      label: "Product per Brand",
+      label: "Marca",
       highlightScope
     }],
     height: 300,
@@ -79,21 +79,6 @@ function SimpleBarChart({ data }) {
         dataset={topBrands}
         barLabel="value"
         {...chartSetting}
-      />
-      <Typography
-        className="text-primary"
-        id="input-series-number"
-        gutterBottom
-      >
-        Number of Series
-      </Typography>
-      <Slider
-        values={seriesNb}
-        onChange={handleSeriesNbChange}
-        valueLabelDisplay="auto"
-        min={1}
-        max={10}
-        aria-labelledby="input-series-number"
       />
     </div>
   );

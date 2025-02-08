@@ -105,13 +105,13 @@ function Header() {
               }}
             >
               <p className="text-sm font-medium">
-                <span className="font-bold">Logged in as:</span> {userName}
+                <span className="font-bold">Logado como:</span> {userName}
                 <ListItemPrefix
                   className="flex justify-center p-2 mt-4 cursor-pointer hover:bg-red-500 hover:rounded"
                   onClick={handleLogout}
                 >
                   <MdLogout className="w-5 h-5 mr-3" />
-                  Log Out
+                  Sair
                 </ListItemPrefix>
               </p>
             </motion.div>

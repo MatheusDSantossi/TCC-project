@@ -38,19 +38,19 @@ function HomeDashboard() {
       {/* Stats cards */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
         <div className="p-4 text-center bg-white rounded-lg shadow-card">
-          <h3 className="text-lg text-primary">Total Products</h3>
+          <h3 className="text-lg text-primary">Quantidade Total de Produtos</h3>
           <p className="text-2xl font-bold text-primary">{loading ? 'Loading...' : totalProducts}</p>
         </div>
         <div className="p-4 text-center bg-white rounded-lg shadow-card">
-          <h3 className="text-lg text-primary">Available Products</h3>
+          <h3 className="text-lg text-primary">Quantidade de produtos disponíveis</h3>
           <p className="text-2xl font-bold text-primary">{loading ? 'Loading...' : availableProducts}</p>
         </div>
         <div className="p-4 text-center bg-white rounded-lg shadow-card">
-          <h3 className="text-lg text-primary">Average Price</h3>
+          <h3 className="text-lg text-primary">Preço Médio</h3>
           <p className="text-2xl font-bold text-primary">{loading ? 'Loading...' : `${averagePrice.toFixed(2)}`}</p>
         </div>
         <div className="p-4 text-center bg-white rounded-lg shadow-card">
-          <h3 className="text-lg text-primary">Low Stock (-10)</h3>
+          <h3 className="text-lg text-primary">Produtos com estoque abaixo de 10</h3>
           <p className="text-2xl font-bold text-primary">{loading ? 'Loading...' : products.filter((p) => parseFloat(p.disponivel) < 10).length}</p>
         </div>
       </div>
@@ -58,18 +58,18 @@ function HomeDashboard() {
       {/* Charts Section */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <div className="w-full p-6 text-center bg-white rounded-lg shadow-card">
-          <p className="text-2xl font-medium text-primary">Products by brand</p>
+          <p className="text-2xl font-medium text-primary">Produtos por Marca</p>
           <SimpleBarChart data={products} />
         </div>
         <div className="w-full p-6 text-center bg-white rounded-lg shadow-card">
-          <p className="text-2xl font-medium text-primary">Stock Availability by Section</p>
+          <p className="text-2xl font-medium text-primary">Produtos Disponíveis por Seção</p>
           <BasicPieChart products_data={products} />
         </div>
       </div>
 
       {/* Recent Products */}
       <div className="flex flex-col items-center justify-center w-full p-6 bg-white rounded-lg shadow-card text-primary">
-        <h3 className="mb-4 text-2xl font-medium text-primary">Products</h3>
+        <h3 className="mb-4 text-2xl font-medium text-primary">Produtos</h3>
           
             {loading ? (
               <div className="text-center">

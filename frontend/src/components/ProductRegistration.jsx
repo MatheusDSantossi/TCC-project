@@ -12,6 +12,7 @@ function ProductRegistration() {
   const [productPrice, setProductPrice] = useState("");
   const [productMetricUnity, setProductMetricUnity] = useState("");
   const [productAvailability, setProductAvailibility] = useState("");
+  const [productSynonyms, setproductSynonyms] = useState("");
 
   const [suggestions, setSuggestions] = useState([]);
 
@@ -260,6 +261,24 @@ function ProductRegistration() {
               />
             </div>
           </div>
+            <div>
+              <label
+                htmlFor="productSynonymous"
+                className="block text-sm font-semibold text-white"
+              >
+                Sinonimos para o Produto
+              </label>
+              <input
+                type="text"
+                id="productSynonymous"
+                name="productSynonymous"
+                required
+                className="w-full p-2 mt-1 mb-5 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                value={productSynonyms}
+                onChange={(e) => setproductSynonyms(e.target.value)}
+                placeholder="Bateria, Pilha..."
+              />
+            </div>
 
           {/* <button
             className="px-4 py-2 mt-4 font-bold text-black transition duration-200 bg-yellow-400 rounded-lg hover:bg-yellow-300"

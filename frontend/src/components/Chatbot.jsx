@@ -248,7 +248,7 @@ function Chatbot() {
 
     if (userInput.trim()) {
       setUserName(value);
-      const newUserName = value;
+      const newUserName = Capitalize(value);
       setIsNameEntered(true);
       console.log(newUserName);
 
@@ -393,7 +393,7 @@ function Chatbot() {
               <input
                 className="w-full px-4 py-3 border border-gray-400 rounded-md focus:outline-none focus:ring focus:ring-yellow-500"
                 type="text"
-                placeholder="Type your name"
+                placeholder="Digite seu nome"
                 value={userInput}
                 onChange={(e) => setUserInput(e.target.value)}
                 onKeyDown={handleKeyPress}
@@ -468,7 +468,7 @@ function Chatbot() {
                   type="submit"
                   className="h-10 px-6 ml-2 font-bold text-black bg-yellow-400 hover:bg-yellow-300 rounded-r-md"
                 >
-                  Send
+                  Enviar
                 </button>
               </form>
             </div>

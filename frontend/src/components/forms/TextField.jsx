@@ -41,14 +41,21 @@ export default function CustomTextField(props) {
             borderRadius: "0.5rem",
             width: "100%",
             "& .MuiOutlinedInput-root": {
-              color: "#FFFFFFFF",
+              color: "white",
               "& .MuiOutlinedInput-notchedOutline": {
                 borderColor: "#F0FF3D",
               },
             },
             "& .MuiInputLabel-outlined": {
-              color: "#FFFFFFFF",
+              color: "white",
               fonteweigth: "bold",
+            },
+            "& .Mui-focused": {
+              borderColor: "#F0FF3D",
+            },
+            "& .MuiFormHelperText-root": {
+              color: "#5D76D3",
+              fontWeight: "bold"
             }
           }}
         />

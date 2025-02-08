@@ -9,22 +9,22 @@ const columns = [
   },
   {
     field: "name",
-    headerName: <strong>Product</strong>,
+    headerName: <strong>Produto</strong>,
     width: 150,
   },
   {
     field: "brand",
-    headerName: <strong>Brand</strong>,
+    headerName: <strong>Marca</strong>,
     width: 150,
   },
   {
     field: "quantity",
-    headerName: <strong>Quantity</strong>,
-    width: 110,
+    headerName: <strong>Formato da Quantidade</strong>,
+    width: 180,
   },
   {
     field: "secao_produto",
-    headerName: <strong>Section</strong>,
+    headerName: <strong>Seção</strong>,
     width: 100,
   },
 ];

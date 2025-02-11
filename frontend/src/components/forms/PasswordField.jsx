@@ -42,18 +42,24 @@ export default function CustomPasswordField(props) {
               "& .MuiOutlinedInput-notchedOutline": {
                 borderColor: "#F0FF3D",
               },
+              "& .Mui-focused": {
+                borderColor: "#F0FF3D",
+              },
             },
             "& .MuiInputLabel-outlined": {
               color: "#FFFFFFFF",
               fonteweigth: "bold",
+              "& .Mui-focused": {
+                borderColor: "#F0FF3D",
+              },
             },
             "& .Mui-focused": {
               borderColor: "#F0FF3D",
             },
             "& .MuiFormHelperText-root": {
               color: "#5D76D3",
-              fontWeight: "bold"
-            }
+              fontWeight: "bold",
+            },
           }}
         >
           <InputLabel htmlFor="outlined-adornment-password">{label}</InputLabel>

@@ -23,6 +23,9 @@ from rest_framework import viewsets, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+def is_ajax(request):
+    return request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
+
 class ChatbotResponse(viewsets.ViewSet):
     permission_classes = [permissions.AllowAny]
     
@@ -95,10 +98,6 @@ class MenuOptionsView(viewsets.ViewSet):
             {'menu_extended_id': option.menu_extended_id, 'menu_option_description': option.menu_option_description} for option in all_options_only_4
             ])
 
-
-def is_ajax(request):
-    return request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
-
 class MenuOptionEdit(viewsets.ViewSet):
     permission_classes = [permissions.AllowAny]
     
@@ -164,10 +163,6 @@ class MenuOptionEdit(viewsets.ViewSet):
         return JsonResponse({'success': False, 'error': 'Invalid request method'})
 
 # PRODUCTS VIEWS
-
-def is_ajax(request):
-    return request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
-
 class ProductRegistration(viewsets.ViewSet):
     permission_classes = [permissions.AllowAny]
     
@@ -199,6 +194,9 @@ class ProductRegistration(viewsets.ViewSet):
             price = data['productPrice']
             metric_unity = data['productMetricUnity']
             available = data['productAvailability']
+            synonyms = data['productSynonyms'] # Array with some synonyms the employee choose
+
+            print("Synonyms: ", synonyms)
 
             products = Product.get_all_products()
             
@@ -218,7 +216,7 @@ class ProductRegistration(viewsets.ViewSet):
                 Product.fetch_products_alike(product_name)
                 
                 
-                Product.generate_synonymous(product_name)
+                Product.generate_synonymous(product=product_name, synonyms=synonyms)
                 product.save()
                 
             else:
@@ -231,7 +229,7 @@ class ProductRegistration(viewsets.ViewSet):
                         print("Product: ", product)
                         product_synonymous = Product.get_synonymus(product)
                         if not product_synonymous:
-                            synonymous = Product.generate_synonymous(product_list=product)
+                            synonymous = Product.generate_synonymous(product_list=product, synonyms=synonyms)
                         
                         
                         product.brand = product_brand
@@ -250,7 +248,7 @@ class ProductRegistration(viewsets.ViewSet):
                     product = Product.get_product_by_name(product_name)
                     
                     if not product_synonymous:
-                        synonymous_list = Product.generate_synonymous(product_list=product)
+                        synonymous_list = Product.generate_synonymous(product_list=product, synonyms=synonyms)
                     else:
                         synonymous_list = Product.get_synonymus(product_name)
                         
@@ -277,6 +275,26 @@ class ProductRegistration(viewsets.ViewSet):
         return Response([
             {'product_id': product.product_id, 'product_name': product.name} for product in products
             ])
+
+class ProductUpdate(viewsets.ViewSet):
+    @action(detail=True, methods=['put'], url_path='update-product/(?P<pk>[^/.]+)')
+    def update_product(self, request, pk):
+        try:
+            product = Product.objects.get(product_id=pk)
+            data = request.data
+            print("Data product: ", data)
+            product.name = data.get('productName', product.name)
+            product.brand = data.get('productBrand', product.brand)
+            product.quantity = data.get('productQuantityFormat', product.quantity)
+            product.secao_produto = data.get('productSection', product.secao_produto)
+            print("Product brand: ", product.brand)
+            
+            product.save()
+            
+            return Response({'message': 'Product updated successfully'}, status=201)
+        
+        except Product.DoesNotExist:
+            return Response({'error': 'Product not found'}, status=404)
 
 class ProductListView(generic.ListView):
     model = Product

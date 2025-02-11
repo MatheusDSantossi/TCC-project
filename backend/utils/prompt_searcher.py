@@ -191,7 +191,7 @@ def find_similar_products_using_input_embeddings(input_embed, conn, np, cosine_s
                 # "similarity": similarity
             })
             
-        return product_details
+        return product_details[:15]
 
 # Test cases
 # print(find_section("I want the product from seção B"))  

@@ -3,6 +3,7 @@ import logo from "../assets/logo.svg";
 import AxiosInstance from "./AxiosInstance";
 
 import ReactiveButton from "reactive-button";
+import SynonymDetails from "./SynonymsDetails";
 
 function ProductRegistration() {
   const [productName, setProductName] = useState("");
@@ -12,7 +13,8 @@ function ProductRegistration() {
   const [productPrice, setProductPrice] = useState("");
   const [productMetricUnity, setProductMetricUnity] = useState("");
   const [productAvailability, setProductAvailibility] = useState("");
-  const [productSynonyms, setproductSynonyms] = useState("");
+  const [productSynonyms, setProductSynonyms] = useState([]);
+  const [resetKey, setResetKey] = useState(0);
 
   const [suggestions, setSuggestions] = useState([]);
 
@@ -61,6 +63,8 @@ function ProductRegistration() {
 
     setButtonState("loading");
 
+    console.log("Product synonyms: ", productSynonyms);
+
     AxiosInstance.post(`register-product/post/`, {
       productName: productName.trim(),
       productBrand: productBrand.trim(),
@@ -69,6 +73,7 @@ function ProductRegistration() {
       productPrice: productPrice,
       productMetricUnity: productMetricUnity.trim(),
       productAvailability: productAvailability,
+      productSynonyms: productSynonyms,
     })
       .then((response) => {
         if (!response) {
@@ -87,7 +92,8 @@ function ProductRegistration() {
         setProductPrice("");
         setProductMetricUnity("");
         setProductAvailibility("");
-        // return response;
+        setProductSynonyms([]);
+        setResetKey(prev => prev + 1);
       })
       .catch((error) => {
         setButtonState("error");
@@ -171,7 +177,7 @@ function ProductRegistration() {
                 className="w-full p-2 mt-1 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
                 value={productQuantityFormat}
                 onChange={(e) => setProductQuantityFormat(e.target.value)}
-                placeholder="6x12"
+                placeholder="24X200G"
               />
             </div>
 
@@ -262,13 +268,8 @@ function ProductRegistration() {
             </div>
           </div>
             <div>
-              <label
-                htmlFor="productSynonymous"
-                className="block text-sm font-semibold text-white"
-              >
-                Sinonimos para o Produto
-              </label>
-              <input
+              <SynonymDetails setProductSynonyms={setProductSynonyms} resetKey={resetKey} />
+              {/* <input
                 type="text"
                 id="productSynonymous"
                 name="productSynonymous"
@@ -277,7 +278,7 @@ function ProductRegistration() {
                 value={productSynonyms}
                 onChange={(e) => setproductSynonyms(e.target.value)}
                 placeholder="Bateria, Pilha..."
-              />
+              /> */}
             </div>
 
           {/* <button

@@ -532,10 +532,6 @@ def find_similarity_products(prompt, embeddings_products=None):
     global pattern
     global contains_a_product
 
-
-    # if not process_prompt(prompt):
-        
-
     fix_response = pre_process_prompt(prompt)
 
     prompt = fix_response
@@ -1070,13 +1066,11 @@ def chatbot_response(user_prompt):
             e responda com uma frase simples e útil levando em conta todos os produtos e informações disponibilizadas. Não acrescente mais nenhum texto ou caracter desnecessário 
             apenas a mensagem informando envolvendo algum detalhe do produto usando a descrição acima como guia e a seção que o
             mesmo se encontra.
-            
-            Além dessas informações sobre o {business_name}:
             """
             
-            for info in info_about_the_business:
-                print(f"INFO: {info}")
-                answer_prompt+=f"{info}\n"
+            # for info in info_about_the_business:
+            #     print(f"INFO: {info}")
+            #     answer_prompt+=f"{info}\n"
         
             answer_prompt+=f"""
             E por fim caso a mensagem do usuário: 
@@ -1204,8 +1198,7 @@ def chatbot_response(user_prompt):
                 """
     
     answer_prompt+="""
-            Considerando essas informações retorne uma mensagem com útil para o cliente e alguma possível ação ou pergunta que o cliente pode fazer agora.
-            retorne a melhor resposta possível.
+            Considerando essas informações retorne uma mensagem com útil para o cliente e alguma possível ação ou pergunta que o cliente pode fazer agora. Retorne a melhor resposta possível. Não faça nenhum comentário desnecessário, no final da sua resposta pergunte se pode ajudar com algo mais ou alguma outra pergunta do genêro.
             """
 
 
@@ -1221,9 +1214,9 @@ def chatbot_response(user_prompt):
     return response.text
 
 
-# print(chatbot_response("VITAMASSA"))
+print(chatbot_response("seção 3"))
 
-def generate_synonymous(product=None, product_list=None):
+def generate_synonymous(product=None, product_list=None, synonyms=None):
     products_dict = {}
     product_synonymous_list = []
     
@@ -1405,6 +1398,10 @@ def generate_synonymous(product=None, product_list=None):
         4. ONLY return the synonymous don't return any other text, for example ```python ```json or anything like that, I want the response to start with a { and end with a }, the format that I've just told you about.
         """ 
 
+    if (synonyms):
+        prompt+= f"consider these are some examples of synonyms for the product that the employee choose: {synonyms} \n"
+        
+        prompt+= f"add these synonyms in your final answer and take them as example to return all synonyms."
     
     print("GENERATE SYNONYMOUS PROMPT: ", prompt)
     print("==========================================")

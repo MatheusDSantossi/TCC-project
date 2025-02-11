@@ -8,6 +8,7 @@ import Chatbot from "../Chatbot";
 import UserList from "./UsersList";
 
 import "../../App.css";
+import ProductList from "../ProductList";
 
 function AdminDashboard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -58,6 +59,8 @@ function AdminDashboard() {
         return <Chatbot />;
       case "userList":
         return <UserList />;
+      case "productList":
+        return <ProductList />;
 
       default:
         return <HomeDashboard />;

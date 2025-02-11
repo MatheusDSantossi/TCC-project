@@ -81,3 +81,23 @@ html, body {
 .burger-icon:hover {
   stroke: #F0FF3D; /* Set the hover color */
 }
+
+/* Product Registration CSS */
+.synonym-input-container {
+  min-height: 45px;
+  padding: 8px;
+}
+
+.synonym-tag {
+  transition: background-color 0.2s;
+}
+
+.synonym-tag:hover {
+  background-color: #f6e05e;
+}
+
+#synonym-input {
+  border: none;
+  min-width: 100px;
+  outline: none;
+}

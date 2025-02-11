@@ -17,12 +17,22 @@ export default {
       boxShadow: {
         card: "0px 35px 120px -15px #013D31",
       },
-      screes: {
+      screens: {
         xs: "450px",
         sm: "640px",
         md: "768px",
         lg: "1024px",
         xl: "1280px",
+      },
+      fontSize: {
+        tiny: '.875rem',
+        base: '1rem',
+        lg: '1.125rem',
+        xl: '1.25rem',
+        '2xl': '1.5rem',
+        '5xl': '3rem',
+        '6xl': '4rem',
+        '7xl': '5rem',
       },
       backgroundImage: {
         "logo": "url('/src/assets/logo.svg')",

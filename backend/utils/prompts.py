@@ -98,68 +98,54 @@ def products_find_with_price_fix_prompt(products_find_with_price, products_find_
     prompt = f"""
         Task Description:
 
-        You are a text normalizer and corrector. Your goal is to correct any grammatical and orthographic errors in the provided
-        text while standardizing product names to match the exact names from the given product lists. You must ensure no relevant
-        products are overlooked and avoid returning "Texto RA" unless absolutely no products match the input.
-        Consider that you're talking directly with the client don't return any weird answer.
+        You are a product price normalizer and matcher. Your goal is to correct any grammatical and orthographic errors in the 
+        provided text and return a list of products that match the specified price from the given product lists. You must ensure 
+        no relevant products are overlooked and avoid returning "Texto RA" unless absolutely no products match the input.
 
         Provided Information:
 
-        1. Products with the same price:
+        1. Products with the specified price:
         {products_find_with_price}
-        
+
         2. Possible Similar Products:
         {products_find_using_prompt}
 
-        3. Standard Product List (Exact Names and Sections):
+        3. Standard Product List (Exact Names and Prices):
         {products_alike}
-        
+
         Text to Normalize:
         "{fix_prompt_v1}"
-        
+
         Normalization Instructions:
-        
-        1.Product Name Matching Rules:
 
-        Match input terms to products in the list based on exact name, abbreviations, partial matches, or phonetic similarity.
-        Variations like "cafe," "CAFÉ," or "Cafe Pilao" should be normalized to "CAFE PILAO ALMOFADA" or another appropriate match from the list.
-        
-        2. Handling Partial or Ambiguous Matches:
+        1. **Price Matching Rules:**
+        - Correct any spelling or formatting mistakes in the input.
+        - Match the input price exactly with the provided product list.
+        - Ensure that all products listed at the specified price are included.
 
-        If the input refers to a category or group (e.g., "café" with no additional qualifiers), prioritize the most generic product from the list (e.g., "CAFE PALACIO MOIDO 250G").
-        
-        3.Text Not Containing Products:
+        2. **Returning Products for the Price:**
+        - Identify and return all products that match the given price.
+        - If multiple products match, list them all, separated by commas, within square brackets, using their exact names.
 
-        If the text contains no identifiable product names or similar terms, return "Texto RA."
-        
-        4. Output Format:
+        3. **Handling Ambiguity:**
+        - If the input price does not match any available products, return "Texto RA."
+        - If the input price is formatted incorrectly (e.g., missing decimals), assume the closest valid price.
 
-        If a product is identified, list the product(s) in square brackets with their exact names.
-        If multiple products fit, list all relevant matches, separated by commas.
-        
-        Example:
-        Input: "cafe" -> Output: [CAFE PILAO ALMOFADA, CAFE PALACIO MOIDO 250G].
-        
-        5. Contextual Normalization:
+        4. **Output Format:**
+        - The output **must** be a Python-style list in square brackets `[ ]`, containing the exact product names.
+        - **Do not include any extra text, code block formatting, or additional symbols.**
+        - If no products match, return `"Texto RA"` instead of an empty list.
 
-        Consider context and section information when normalizing. For example:
-        If "250G" appears, prioritize matching with products of the same size.
-        If no context (e.g., size or section) is given, use a default or generic match.
-        
-        6. Specific Cases:
+        Examples:
+        - Input: "12.00" → Output: [SARD. COQ TOMATE, MASSA P/TAPIOCA, CAFE MOIDO]
+        - Input: "5.20" → Output: [SABAO PDC NEUTRO, MACARRAO PARAFUSO, SALG. QUEIJO]
+        - Input: "9.00" → Output: [FRALDA DESC. G, DESINF.]
+        - Input: "6.00" → Output: [BISC. DOCE, INSET. AERO A.TOTAL, ALGODAO]
+        - Input: "9999.9999" → Output: "Texto RA"
 
-        Abbreviations: Normalize terms like "refri" or "refrigerante" to specific product names like "REFRIG. PEPSI COLA PET 2 EM 1."
-        Plurals or variants: "cafés" -> "CAFE PILAO ALMOFADA."
-        
-        Examples of Substitutions:
-
-        Input: "cafe" -> Output: [CAFE PILAO ALMOFADA, CAFE PALACIO MOIDO 250G].
-        Input: "pepsi" -> Output: [REFRIG. PEPSI COLA PET 2 EM 1].
-        Input: "quanto custa o refrigerante" -> Output: quanto custa o [REFRIG. GUARANA PET CACULINHA].
-        Input: "cafe palacio" -> Output: [CAFE PALACIO MOIDO 250G, CAFE PALACIO MOIDO 500G].
-        
-        DON'T RETURN any different text just consider the examples above. 
-        
+        Important:
+        - Do not return any different text, additional comments, or formatting.
+        - Always return a list or "Texto RA." An empty list (`[]`) is not allowed.
         """
         
     return prompt
@@ -217,78 +203,62 @@ def products_find_with_brand_fix_prompt(products_find_using_brand, products_find
         Input: "even" → Output: [SAB. CHA VERDE/LIMAO, SAB. EXTRATO FLORES]
         Input: "tang" → Output: [REFR.PO ABACAXI CXT, REFR.PO MANGA CXT, REFR.PO UVA, REFR.PO GUARANA]
         
-        DON'T RETURN any different text just consider the examples above. 
-        
+        Important:
+        - Do not return any different text, additional comments, or formatting.
+        - Always return a list or "Texto RA." An empty list (`[]`) is not allowed.
         """
         
     return prompt
 
 def products_find_with_metric_or_quantity_fix_prompt(products_find_using_metric_or_quantity, products_find_using_prompt, products_alike, fix_prompt_v1):
     prompt = f"""
-        Task Description:
+            Task Description:
 
-        You are a text normalizer and corrector. Your goal is to correct any grammatical and orthographic errors in the provided
-        text while standardizing product names to match the exact names from the given product lists. You must ensure no relevant
-        products are overlooked and avoid returning "Texto RA" unless absolutely no products match the input.
-        Consider that you're talking directly with the client don't return any weird answer.
+            You are a product quantity and metric unit normalizer. Your goal is to correct any grammatical and orthographic errors in the provided text while ensuring that product names match exactly with the given product lists. You must ensure no relevant products are overlooked and avoid returning "Texto RA" unless absolutely no products match the input.
 
-        Provided Information:
+            Provided Information:
 
-        1. Products with the same metric unity or quantity description:
-        {products_find_using_metric_or_quantity}
-        
-        2. Possible Similar Products:
-        {products_find_using_prompt}
+            1. Products with the same metric unit or quantity description:
+            {products_find_using_metric_or_quantity}
 
-        3. Standard Product List (Exact Names and Sections):
-        {products_alike}
-        
-        Text to Normalize:
-        "{fix_prompt_v1}"
-        
-        Normalization Instructions:
-        
-        1.Product Name Matching Rules:
+            2. Possible Similar Products:
+            {products_find_using_prompt}
 
-        Match input terms to products in the list based on exact name, abbreviations, partial matches, or phonetic similarity.
-        Variations like "cafe," "CAFÉ," or "Cafe Pilao" should be normalized to "CAFE PILAO ALMOFADA" or another appropriate match from the list.
-        
-        2. Handling Partial or Ambiguous Matches:
+            3. Standard Product List (Exact Names and Metrics):
+            {products_alike}
 
-        If the input refers to a category or group (e.g., "café" with no additional qualifiers), prioritize the most generic product from the list (e.g., "CAFE PALACIO MOIDO 250G").
-        
-        3.Text Not Containing Products:
+            Text to Normalize:
+            "{fix_prompt_v1}"
 
-        If the text contains no identifiable product names or similar terms, return "Texto RA."
-        
-        4. Output Format:
+            Normalization Instructions:
 
-        If a product is identified, list the product(s) in square brackets with their exact names.
-        If multiple products fit, list all relevant matches, separated by commas.
-        
-        Example:
-        Input: "cafe" -> Output: [CAFE PILAO ALMOFADA, CAFE PALACIO MOIDO 250G].
-        
-        5. Contextual Normalization:
+            1. **Metric and Quantity Matching Rules:**
+            - Correct any spelling or formatting mistakes in the input.
+            - Match the input term (e.g., weight, volume, package size) to the provided product list based on:
+                - Exact numeric values (e.g., "250G" → "CAFE PALACIO MOIDO 250G")
+                - Multipack quantities (e.g., "1 X 12 500G" → "REFRIG. PEPSI COLA PET 2 EM 1")
+                - Abbreviations and variations (e.g., "350ML" → "CAFE PALACIO MOIDO 250G")
 
-        Consider context and section information when normalizing. For example:
-        If "250G" appears, prioritize matching with products of the same size.
-        If no context (e.g., size or section) is given, use a default or generic match.
-        
-        6. Specific Cases:
+            2. **Handling Partial or Ambiguous Matches:**
+            - If the input includes a size without a specific product (e.g., "250G"), return the most relevant products with that size.
+            - If multiple products match, list them all in square brackets, separated by commas.
+            - If no valid metric or quantity is found, return "Texto RA."
 
-        Abbreviations: Normalize terms like "refri" or "refrigerante" to specific product names like "REFRIG. PEPSI COLA PET 2 EM 1."
-        Plurals or variants: "cafés" -> "CAFE PILAO ALMOFADA."
-        
-        Examples of Substitutions:
+            3. **Output Format:**
+            - The response must be a Python-style list in square brackets `[ ]`, containing the exact product names.
+            - No extra text, explanations, or symbols should be included.
+            - If no products match, return `"Texto RA"` instead of an empty list.
 
-        Input: "cafe" -> Output: [CAFE PILAO ALMOFADA, CAFE PALACIO MOIDO 250G].
-        Input: "pepsi" -> Output: [REFRIG. PEPSI COLA PET 2 EM 1].
-        Input: "quanto custa o refrigerante" -> Output: quanto custa o [REFRIG. GUARANA PET CACULINHA].
-        Input: "cafe palacio" -> Output: [CAFE PALACIO MOIDO 250G, CAFE PALACIO MOIDO 500G].
-        
-        DON'T RETURN any different text just consider the examples above. 
-        
+            Examples:
+            - Input: "1 X 24 250G" → Output: [CAFE PILAO ALMOFADA, CAFE PALACIO MOIDO 250G]
+            - Input: "1 X 12 500G" → Output: [REFRIG. PEPSI COLA PET 2 EM 1]
+            - Input: "250G" → Output: [REFRIG. GUARANA PET CACULINHA]
+            - Input: "1 X 6 350ML" → Output: [CAFE PALACIO MOIDO 250G, CAFE PALACIO MOIDO 500G]
+            - Input: "999G" → Output: "Texto RA"
+
+            Important:
+            - Do not return any different text or formatting.
+            - Always return a valid product list or "Texto RA."
         """
         
     return prompt

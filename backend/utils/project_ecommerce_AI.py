@@ -1042,9 +1042,9 @@ def chatbot_response(user_prompt):
         # if find_product['Disponivel'].item():
         if find_product['Disponivel'].any():
             answer_prompt = f"""Considerando que o cliente do nosso
-            mercado {business_name} enviou a mensagem:
+            comércio {business_name} enviou a mensagem:
 
-            {pre_process_prompt_grammatical(user_prompt)} 
+            {fix_prompt_v1} 
 
             e os possíveis produtos que ele deseja são esses 
             
@@ -1068,14 +1068,10 @@ def chatbot_response(user_prompt):
             mesmo se encontra.
             """
             
-            # for info in info_about_the_business:
-            #     print(f"INFO: {info}")
-            #     answer_prompt+=f"{info}\n"
-        
             answer_prompt+=f"""
             E por fim caso a mensagem do usuário: 
             
-            {pre_process_prompt_grammatical(user_prompt)} 
+            {fix_prompt_v1} 
             
             tenha alguma palavra que pareça com lista, por exemplo,
             'list', liste, listo, listw, gere uma possível lista de compras de acordo 
@@ -1091,15 +1087,15 @@ def chatbot_response(user_prompt):
             
         else:
             answer_prompt = f"""Considerando que o cliente do nosso 
-            mercado {business_name} quer saber {pre_process_prompt_grammatical(user_prompt)} 
+            mercado {business_name} quer saber {fix_prompt_v1} 
             que o produto que ele deseja está atualmente indisponível, 
             responda com uma frase simples e útil ao cliente.
             Considere esse texto {generated_detailed_prompt.text} como exemplo e melhore a sua resposta.
-            E por fim caso a mensagem do usuário: 
+            Reforçando essa foi a mensagem do usuário: 
             
-            {pre_process_prompt_grammatical(user_prompt)} 
+            {fix_prompt_v1} 
             
-            tenha alguma palavra que pareça com lista, por exemplo,
+            Caso tenha alguma palavra que pareça com lista, por exemplo,
             'list', liste, listo, listw, gere uma possível lista de compras de acordo 
             com os produtos disponíveis no mercado possivelmente parecidos com o produto solicitado pelo usário sendo esses:
             
@@ -1122,10 +1118,12 @@ def chatbot_response(user_prompt):
 
                 {user_prompt} 
 
-                e os possíveis produtos temos disponíveis são esses: 
+                e alguns produtos que temos disponíveis são esses: 
                 \n
                 """
-                
+            
+            answer_prompt+=f"{products_alike} \n"
+            
             with conn.cursor() as cursor:
                 
                 sql_query = """
@@ -1145,9 +1143,11 @@ def chatbot_response(user_prompt):
                     # print("RANDOM PRODUCT: ", product[i])
                     product_info += str(product[i]) + " " 
                 
-                answer_prompt+=product_info.strip() + "\n"
+                # answer_prompt+=product_info.strip() + "\n"
             
-            print("Fixed prompt V1: ", fix_prompt_v1)                
+            print("Product info: ", product_info)
+            
+            # print("Fixed prompt V1: ", fix_prompt_v1)                
                 
             
             answer_prompt+="""
@@ -1173,7 +1173,7 @@ def chatbot_response(user_prompt):
         else:
             
             answer_prompt = f"""Considerando que o cliente do nosso 
-                mercado {business_name} quer saber {pre_process_prompt_grammatical(user_prompt)} 
+                mercado {business_name} quer saber {fix_prompt_v1} 
                 responda com uma frase simples e útil ao cliente. 
                 E por fim gere alguma evento ou ação para o cliente fazer
                 no mercado se vier a o caso, por exemplo, "Queria saber que horas o
@@ -1198,7 +1198,7 @@ def chatbot_response(user_prompt):
                 """
     
     answer_prompt+="""
-            Considerando essas informações retorne uma mensagem com útil para o cliente e alguma possível ação ou pergunta que o cliente pode fazer agora. Retorne a melhor resposta possível. Não faça nenhum comentário desnecessário, no final da sua resposta pergunte se pode ajudar com algo mais ou alguma outra pergunta do genêro.
+            Considerando essas informações retorne uma mensagem com útil para o cliente e alguma possível ação ou pergunta que o cliente pode fazer agora. Retorne a melhor resposta possível. Não faça nenhum comentário desnecessário, no final da sua resposta pergunte se pode ajudar com algo mais ou alguma outra pergunta do gênero.
             """
 
 
@@ -1214,7 +1214,10 @@ def chatbot_response(user_prompt):
     return response.text
 
 
-print(chatbot_response("seção 3"))
+synonym_test = "biscoito cream cracker".capitalize()
+
+# print(chatbot_response("Quero um biscoito que tem um menino na frente da embalagem"))
+print("Products using synonyms: ", find_using_synonyms(conn, synonym_test))
 
 def generate_synonymous(product=None, product_list=None, synonyms=None):
     products_dict = {}

@@ -46,7 +46,7 @@ class MenuOptionsView(viewsets.ViewSet):
     permission_classes = [permissions.AllowAny]
     
     # MenuOptionExtended.createMenusOptions()
-    # MenuOptionExtended.delete_and_recreate_menuOption()
+    MenuOptionExtended.delete_and_recreate_menuOption()
     
     @action(detail=False, methods=['post'])
     def post(self, request):
@@ -92,7 +92,7 @@ class MenuOptionsView(viewsets.ViewSet):
     def get(self, request):         
         all_options = list(MenuOptionExtended.get_all_menuOptions())
         total_option = len(all_options)  
-        all_options_only_4 = all_options[:4]
+        all_options_only_4 = all_options[:5]
         print("All options : ", all_options)
         return Response([
             {'menu_extended_id': option.menu_extended_id, 'menu_option_description': option.menu_option_description} for option in all_options_only_4

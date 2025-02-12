@@ -4,15 +4,16 @@ import hecatePFP from "../assets/hecate_pfp.jpg";
 import test_image from "../assets/test_image.jpg";
 import Typewriter from "./Typewriter";
 import AxiosInstance from "./AxiosInstance";
+import { useNavigate } from "react-router-dom";
 // import ReactTyped
 
 function Capitalize(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-// TODO: Capitalize the name of the user
-
 function Chatbot() {
+  const navigate = useNavigate();
+
   const [menuOptions, setMenuOptions] = useState([]);
   const [userInput, setUserInput] = useState("");
   const [userName, setUserName] = useState("");
@@ -26,13 +27,15 @@ function Chatbot() {
   const [pendingMenuOptions, setPendingMenuOptions] = useState(null);
 
   const chatContainerRef = useRef(null);
-  const [clockFormat, setClockFormat] = useState("24-hour");
-  const [currentTime, setCurrentTime] = useState("");  
+  // const [clockFormat, setClockFormat] = useState("24-hour");
+  // const [currentTime, setCurrentTime] = useState("");
 
   const [
-    showMenuOptionsAfterHecateAnswer,
-    setShowMenuOptionsAfterHecateAnswer,
+    showMenuOptionsAndInputAfterHecateAnswer,
+    setShowMenuOptionsAndInputAfterHecateAnswer,
   ] = useState(false);
+
+  const [showPreviousMenuButton, setShowPreviousMenuButton] = useState(false);
 
   // Update the clock every second
   // useEffect(() => {
@@ -62,11 +65,13 @@ function Chatbot() {
 
   useEffect(() => {
     if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+      chatContainerRef.current.scrollTop =
+        chatContainerRef.current.scrollHeight;
     }
   }, [chatMessages, menuOptions]);
 
   const fetchMenuOptions = () => {
+    setShowPreviousMenuButton(false);
     AxiosInstance.get(`menu-options/get/`)
       // .then((response) => setMenuOptions(response.data))
       .then((response) => setPendingMenuOptions(response.data))
@@ -91,6 +96,43 @@ function Chatbot() {
     fetchMenuOptions();
   }, [userName]);
 
+  useEffect(() => {
+    if (menuOptions.length <= 0) {
+      setShowMenuOptionsAndInputAfterHecateAnswer(true);
+    }
+  }, [menuOptions]);
+
+  const handleSessionEnding = (e) => {
+    // setIsHecateAnswering(true);
+    // setIsTypingDone(false);
+    const clientText = e.target.textContent;
+    const clientMessage = {
+      sender: "Você",
+      text: clientText,
+      timestamp: new Date().toLocaleTimeString("pt-BR", {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+    };
+    const hecateMessage = {
+      sender: "Hecate",
+      text: "Estou a disposição se precisar volte a falar comigo. :)",
+      timestamp: new Date().toLocaleTimeString("pt-BR", {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+    };
+    setChatMessages((prevMessages) => [...prevMessages, clientMessage]);
+    setShowMenuOptionsAndInputAfterHecateAnswer(false);
+
+    setTimeout(() => {
+      setChatMessages((prevMessages) => [...prevMessages, hecateMessage]);
+    }, 3000);
+    setTimeout(() => {
+      navigate("/");
+    }, 8000);
+  };
+
   // Send a message to the chatbot
   const sendMessage = async (message, showMessage = true) => {
     setIsHecateAnswering(true);
@@ -108,7 +150,7 @@ function Chatbot() {
     if (showMessage) {
       setChatMessages((prevMessages) => [...prevMessages, newMessage]);
     }
-    
+
     console.log("Sending message at:", new Date().toISOString());
 
     try {
@@ -117,7 +159,6 @@ function Chatbot() {
       const response = await AxiosInstance.post(`chatbot/post/`, {
         user_input: message,
       });
-
       setIsHecateAnswering(false);
       const botResponse = {
         sender: "Hecate",
@@ -128,16 +169,15 @@ function Chatbot() {
         }),
       };
       setChatMessages((prevMessages) => [...prevMessages, botResponse]);
-
-      setShowMenuOptionsAfterHecateAnswer(true);
-
+      
       // showingMenuOptions();
-
+      
       // setHasSelectedOption(false);
       // fetchMenuOptions();
-
+      
       // const botResponseAfterFirstAnswer = { sender: "Hecate", text: "Posso lhe ajudar em algo mais?"};
       // setChatMessages((prevMessages) => [...prevMessages, botResponseAfterFirstAnswer]);
+      
     } catch (error) {
       console.error("Error sending message: ", error);
     }
@@ -178,6 +218,18 @@ function Chatbot() {
         console.log(`menu options data: ${response.data}`);
         console.log(`option Text: ${optionText}`);
 
+        console.log(
+          "showMenuOptionsAfterHecateAnswer: ",
+          showMenuOptionsAndInputAfterHecateAnswer
+        );
+        console.log(
+          "Showmenuoptions: ",
+          showMenuOptionsAndInputAfterHecateAnswer
+        );
+        console.log("isTypingDone: ", isTypingDone);
+        console.log("isHecateAnswering: ", isHecateAnswering);
+        console.log("MenuOptions lenght: ", menuOptions.length);
+
         if (response.data === "No more options available") {
           let answer = "Digite sua dúvida.";
           if (optionText === "Digitar o nome do produto") {
@@ -208,9 +260,9 @@ function Chatbot() {
             }),
           };
           if (chatbotAnswer.text.length > 0) {
-          setChatMessages((prevMessages) => [...prevMessages, chatbotAnswer]);
-        }
-        setHasSelectedOption(true);
+            setChatMessages((prevMessages) => [...prevMessages, chatbotAnswer]);
+          }
+          setHasSelectedOption(true);
         } else {
           // get this message based on the user menu choice
           // TODO: Get the text based on the menuOption, so I think I have to do this in the view python
@@ -228,9 +280,10 @@ function Chatbot() {
           console.log(`menu options data: ${response.data}`);
 
           setPendingMenuOptions(response.data);
-          // };
 
           handleTypingEnd();
+
+          setShowPreviousMenuButton(true);
         }
       })
       .catch((error) => console.error("Error fetching next options:", error));
@@ -248,7 +301,7 @@ function Chatbot() {
 
     if (userInput.trim()) {
       setUserName(value);
-      const newUserName = Capitalize(value);
+      const newUserName = value;
       setIsNameEntered(true);
       console.log(newUserName);
 
@@ -311,8 +364,30 @@ function Chatbot() {
   };
 
   const showingMenuOptions = (e) => {
-    setShowMenuOptionsAfterHecateAnswer(false);
-    fetchMenuOptions();
+    e.preventDefault();
+    const lastHecateMessage = chatMessages
+      .filter((msg) => msg.sender === "Hecate")
+      .pop();
+
+    console.log("Last message hecate: " + lastHecateMessage.text);
+    if (lastHecateMessage.text !== "Entendi. Selecione uma das opções abaixo:") {
+      const botConfirmation = {
+        sender: "Hecate",
+        text: "Selecione uma das opções abaixo:",
+        timestamp: new Date().toLocaleTimeString("pt-BR", {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+      };
+      setChatMessages((prevMessages) => [...prevMessages, botConfirmation]);
+      setShowMenuOptionsAndInputAfterHecateAnswer(false);
+      setTimeout(() => {
+        fetchMenuOptions();
+      }, 3000);
+    } else {
+      setShowMenuOptionsAndInputAfterHecateAnswer(false);
+      fetchMenuOptions();
+    }
   };
 
   return (
@@ -320,7 +395,7 @@ function Chatbot() {
       <div className="absolute top-4 left-4">
         <img className="w-20" src={logo} alt="Logo" />
       </div>
-  
+
       <div className="flex flex-col flex-grow w-full max-w-4xl overflow-hidden bg-white rounded-lg shadow-xl">
         <div
           className="flex flex-col flex-grow h-0 p-4 overflow-auto text-left"
@@ -439,41 +514,73 @@ function Chatbot() {
             </span>
           )}
 
-          {showMenuOptionsAfterHecateAnswer &&
+          {showMenuOptionsAndInputAfterHecateAnswer &&
+            hasSelectedOption &&
+            !isHecateAnswering &&
+            menuOptions <= 0 &&
+            isTypingDone && (
+              <div className="flex justify-between">
+                <button
+                  className="h-10 px-6 ml-2 font-bold text-black bg-yellow-400 hover:bg-yellow-300 rounded-r-md"
+                  onClick={showingMenuOptions}
+                >
+                  {/* onClick={showingMenuOptions()} */}
+                  Voltar para a lista de opções
+                </button>
+                <button
+                  className="h-10 px-6 ml-2 font-bold text-black bg-yellow-400 hover:bg-yellow-300 rounded-r-md"
+                  onClick={handleSessionEnding}
+                >
+                  {/* onClick={showingMenuOptions()} */}
+                  Encerrar atendimento
+                </button>
+              </div>
+            )}
+
+          {/* Return to the previous menu button */}
+          {showPreviousMenuButton &&
             isTypingDone &&
             !isHecateAnswering &&
-            menuOptions.length <= 0 && (
-              <button className="h-10 px-6 ml-2 font-bold text-black bg-yellow-400 hover:bg-yellow-300 rounded-r-md" onClick={showingMenuOptions}>
-                {/* onClick={showingMenuOptions()} */}
-                Voltar para a lista de opções
+            menuOptions.length >= 1 && (
+              <button
+                className="h-10 px-6 ml-2 font-bold text-black bg-yellow-400 hover:bg-yellow-300 rounded-r-md"
+                onClick={showingMenuOptions}
+              >
+                {/* onClick={handlePreviousMenu()} */}
+                Voltar para o menu anterior
               </button>
             )}
-          {/* Input field */}
-          {hasSelectedOption && !isHecateAnswering && menuOptions <= 0 && isTypingDone &&(
-            <div className="absolute bottom-0 left-0 w-full bg-primary">
-              <form
-                onSubmit={handleSubmit}
-                className="flex items-center px-4 py-3"
-              >
-                <input
-                  className="flex-grow h-10 px-3 border border-gray-400 rounded-l-md focus:outline-none focus:ring focus:ring-yellow-500"
-                  type="text"
-                  placeholder="Type your message…"
-                  onSubmit={handleSubmit}
-                  onChange={(e) => setUserInput(e.target.value)}
-                  value={userInput}
-                />
 
-                <button
-                  type="submit"
-                  className="h-10 px-6 ml-2 font-bold text-black bg-yellow-400 hover:bg-yellow-300 rounded-r-md"
+          {/* Input field */}
+          {showMenuOptionsAndInputAfterHecateAnswer &&
+            hasSelectedOption &&
+            !isHecateAnswering &&
+            menuOptions <= 0 &&
+            isTypingDone && (
+              <div className="absolute bottom-0 left-0 w-full bg-primary">
+                <form
+                  onSubmit={handleSubmit}
+                  className="flex items-center px-4 py-3"
                 >
-                  Enviar
-                </button>
-              </form>
-            </div>
-            // </div>
-          )}
+                  <input
+                    className="flex-grow h-10 px-3 border border-gray-400 rounded-l-md focus:outline-none focus:ring focus:ring-yellow-500"
+                    type="text"
+                    placeholder="Digite sua mensagem…"
+                    onSubmit={handleSubmit}
+                    onChange={(e) => setUserInput(e.target.value)}
+                    value={userInput}
+                  />
+
+                  <button
+                    type="submit"
+                    className="h-10 px-6 ml-2 font-bold text-black bg-yellow-400 hover:bg-yellow-300 rounded-r-md"
+                  >
+                    Enviar
+                  </button>
+                </form>
+              </div>
+              // </div>
+            )}
         </div>
       </div>
     </div>

@@ -63,7 +63,7 @@ def find_price(text, conn):
     return None
 
 def find_brand(text, conn):
-    
+    # TODO: Problem with the way I'm looking for brands even with the input "Quero saber mais sobre o mercado" it entered here and returned products!
     brand = None
     
     # Define the regular expression to match "brand"
@@ -193,6 +193,42 @@ def find_similar_products_using_input_embeddings(input_embed, conn, np, cosine_s
             
         return product_details[:15]
 
+def find_using_synonyms(conn, text):
+    cursor = conn.cursor()
+    
+    # Splitting the search text into words and adding wildcards
+    words = [word.strip() for word in text.split() if word.strip()]
+    
+    if not words:
+        return []
+    
+    # Generating conditions for each word (case-insensitive)
+    conditions = " AND ".join(["elem ILIKE %s" for _ in words])
+    params = [f"%{word}%" for word in words]
+    
+    cursor.execute(f"""
+                    SELECT name 
+                    FROM products_with_embeddings 
+                    WHERE EXISTS ( 
+                        SELECT *
+                        FROM unnest(synonymous) AS elem
+                        WHERE {conditions}
+                    )
+                    LIMIT 30;
+                   """, params)
+    
+    search_term = f"%{text}%"
+    cursor.execute("""
+                SELECT name FROM products_with_embeddings 
+                WHERE EXISTS (
+                    SELECT *
+                    FROM unnest(synonymous) AS elem
+                    WHERE elem LIKE %s
+                )
+                LIMIT 30;
+                """, (search_term,))
+    return cursor.fetchall()
+
 # Test cases
 # print(find_section("I want the product from seção B"))  
 # print(find_section("Where's the seção A?"))            
@@ -203,3 +239,4 @@ def find_similar_products_using_input_embeddings(input_embed, conn, np, cosine_s
 # print(find_price("I want to 3.50 price of all")) 
 # print(find_price("I 100.20 to price of all")) 
 # print(find_price("I 10020 to price of all")) 
+

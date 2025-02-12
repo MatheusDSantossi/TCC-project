@@ -99,11 +99,11 @@ class MenuOptionExtended(models.Model):
     @staticmethod
     def createMenusOptions():
         # Level 1: Main options
-        menu_option1_s1 = MenuOptionExtended.create_or_get_option(menu_option_description='Tenho dúvida de algum produto específico')
-        menu_option2_s1 = MenuOptionExtended.create_or_get_option(menu_option_description=f'Me conte algumas informações do {business_name}')
+        menu_option1_s1 = MenuOptionExtended.create_or_get_option(menu_option_description='Tenho dúvida de um produto específico')
+        menu_option2_s1 = MenuOptionExtended.create_or_get_option(menu_option_description=f'Quero informações do {business_name}')
         menu_option3_s1 = MenuOptionExtended.create_or_get_option(menu_option_description=f'Quero saber mais sobre os serviços do {business_name}')
-        menu_option4_s1 = MenuOptionExtended.create_or_get_option(menu_option_description='Quais os produtos vocês vendem?')
-        menu_option5_s1 = MenuOptionExtended.create_or_get_option(menu_option_description='Você tem alguma promoção especial?')
+        menu_option4_s1 = MenuOptionExtended.create_or_get_option(menu_option_description=f'Quais os produtos o {business_name} vende?')
+        menu_option5_s1 = MenuOptionExtended.create_or_get_option(menu_option_description='Desejo outra opção')
         # uma lista de perguntas (sugestões de perguntas com interrogação in the end?) uma lista com tudo que it's able to answer
         
         # Level 2: Opções específicas para cada categoria
@@ -111,7 +111,7 @@ class MenuOptionExtended(models.Model):
         menu_option1_s2_o1 = MenuOptionExtended.create_or_get_option(menu_option_description='Digitar o nome do produto')
         menu_option1_s2_o2 = MenuOptionExtended.create_or_get_option(menu_option_description='Digitar a seção do produto')
         menu_option1_s2_o3 = MenuOptionExtended.create_or_get_option(menu_option_description='Digitar a marca do produto')
-        menu_option1_s2_o4 = MenuOptionExtended.create_or_get_option(menu_option_description='Digitar alguma descrição do produto')
+        menu_option1_s2_o4 = MenuOptionExtended.create_or_get_option(menu_option_description='Digitar alguma descrição do produto/sinônimo')
         ####
         
         # Opções para "Quais os produtos vocês vendem?"
@@ -129,6 +129,9 @@ class MenuOptionExtended(models.Model):
         menu_option4_s2_o2 = MenuOptionExtended.create_or_get_option(menu_option_description='Quero saber sobre um produto específico')
         ###
         
+        ### 
+        menu_option5_s2_o1 = MenuOptionExtended.create_or_get_option(menu_option_description='Informar o assunto sobre o qual quero tratar')
+        
         # Saber mais sobre os produtos
         menu_option1_s1.next_options.clear()
         menu_option1_s1.next_options.add(menu_option1_s2_o1, menu_option1_s2_o2, menu_option1_s2_o3, menu_option1_s2_o4)
@@ -144,6 +147,10 @@ class MenuOptionExtended(models.Model):
         
         menu_option4_s1.next_options.clear()
         menu_option4_s1.next_options.add(menu_option4_s2_o1, menu_option4_s2_o2)
+        
+        # Me fale sobre qual assunto você quer tratar
+        menu_option5_s1.next_options.clear()
+        menu_option5_s1.next_options.add(menu_option5_s2_o1)
         
     @staticmethod
     def get_menuOption_by_id(ids):

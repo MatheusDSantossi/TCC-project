@@ -42,22 +42,24 @@ export default function CustomTextField(props) {
             width: "100%",
             "& .MuiOutlinedInput-root": {
               color: "white",
-              "& .MuiOutlinedInput-notchedOutline": {
+              // Default state
+              "& fieldset": {
                 borderColor: "#F0FF3D",
               },
-              "& .Mui-focused": {
+              // Hover state
+              "&:hover fieldset": {
+                borderColor: "#F0FF3D",
+              },
+              // Focused state
+              "&.Mui-focused fieldset": {
                 borderColor: "#F0FF3D",
               },
             },
             "& .MuiInputLabel-outlined": {
               color: "white",
-              fonteweigth: "bold",
-              "& .Mui-focused": {
-                borderColor: "#F0FF3D",
+              "&.Mui-focused": {
+                color: "#F0FF3D",
               },
-            },
-            "& .Mui-focused": {
-              borderColor: "#F0FF3D",
             },
             "& .MuiFormHelperText-root": {
               color: "#5D76D3",

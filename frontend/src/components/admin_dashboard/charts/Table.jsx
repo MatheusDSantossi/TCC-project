@@ -1,4 +1,3 @@
-import { styled, TableCell, tableCellClasses } from "@mui/material";
 import Box from "@mui/material/Box";
 import { DataGrid } from "@mui/x-data-grid";
 import { IconButton } from "@mui/material";
@@ -6,43 +5,15 @@ import { MdEdit } from "react-icons/md";
 import { useState } from "react";
 import AxiosInstance from "../../AxiosInstance";
 import ProductEdit from "../../ProductEdit";
-import { Diversity1Outlined } from "@mui/icons-material";
-
-// const StyleTableCell = styled(TableCell)(({ theme }) => ({
-//   [`&.${tableCellClasses.head}`]: {
-//     backgroundColor: theme.palette.common.black,
-//     color: theme.palette.common.white,
-//     fontWeight: "bold",
-//     fontSize: "1rem",
-//     whiteSpace: "nowrap",
-//     padding: "10px 16px",
-//   },
-//   [`&.${tableCellClasses.body}`]: {
-//     fontSize: 14,
-//   },
-// }));
-
-// const StyledTableRow = styled(TableRow)((({ theme }) => ({
-//   '&:nth-of-type(odd)': {
-//     backgroundColor: theme.palette.action.hover,
-//   },
-//   // Hide last border
-//   '&:last-child td, &:last-child th': {
-//     border: 0,
-//   },
-// })));
 
 export default function ProductsTable({ products_data, onProductUpdate }) {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
 
-  const [loading, setLoading] = useState(false);
-
   const handleEditClick = (product) => {
     console.log("Product: ", product);
     setSelectedProduct(product);
     setEditModalOpen(true);
-    setLoading(true);
   };
 
   const handleSave = async (updatedProduct) => {
@@ -54,6 +25,11 @@ export default function ProductsTable({ products_data, onProductUpdate }) {
           productBrand: updatedProduct.productBrand,
           productQuantityFormat: updatedProduct.productQuantityFormat,
           productSection: updatedProduct.productSection,
+          productPrice: updatedProduct.productPrice,
+          productMetricUnity: updatedProduct.productMetricUnity,
+          productAvailability: updatedProduct.productAvailability,
+          productLocalSynonyms: updatedProduct.productLocalSynonyms,
+          // productSynonyms: updatedProduct.productSynonyms,
         }
       );
       console.log("Product updated successfully: ", updatedProduct);
@@ -89,13 +65,18 @@ export default function ProductsTable({ products_data, onProductUpdate }) {
     },
     {
       field: "quantity",
-      headerName: <strong>Formato da Quantidade</strong>,
+      headerName: <strong>Formato Quantidade</strong>,
       width: 180,
     },
     {
       field: "secao_produto",
       headerName: <strong>Seção</strong>,
       width: 100,
+    },
+    {
+      field: "preco_venda",
+      headerName: <strong>Preço de venda</strong>,
+      width: 140,
     },
     {
       field: "actions",
@@ -140,7 +121,7 @@ export default function ProductsTable({ products_data, onProductUpdate }) {
 
   return (
     <div className="flex items-center justify-center w-full overflow-x-auto">
-      <Box sx={{ height: 650, width: 900 }}>
+      <Box sx={{ height: 650, width: 970 }}>
         <DataGrid
           rows={products_data}
           columns={columns}

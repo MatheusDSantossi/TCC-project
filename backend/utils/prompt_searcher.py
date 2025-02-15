@@ -1,6 +1,16 @@
 import re
 from changing_db_columns import KNOWN_BRANDS, KNOWN_METRICS
 
+def find_business_sections(conn):
+    with conn.cursor() as cursor:
+
+        cursor.execute("""
+                        SELECT DISTINCT secao_produto FROM products_with_embeddings
+                        """)
+        
+        sections_in_database = cursor.fetchall()
+    return sections_in_database
+
 def find_section(text, conn):
     # Define the regular expression to match "section" followed by a letter or a number
     pattern = r'\bseção\s([a-zA-Z0-9]+)\b'
@@ -17,13 +27,14 @@ def find_section(text, conn):
         
         # return match.group(1)
         with conn.cursor() as cursor:
-            # cursor.execute("SELECT name FROM products_with_embeddings WHERE secao_produto = %s", (match.group(1),))
+        #     # cursor.execute("SELECT name FROM products_with_embeddings WHERE secao_produto = %s", (match.group(1),))
             
-            cursor.execute("""
-                           SELECT DISTINCT secao_produto FROM products_with_embeddings
-                           """)
+        #     cursor.execute("""
+        #                    SELECT DISTINCT secao_produto FROM products_with_embeddings
+        #                    """)
             
-            sections_in_database = cursor.fetchall()
+        #     sections_in_database = cursor.fetchall()
+            sections_in_database = find_business_sections(conn)
             
             print("Sections in database: ", sections_in_database)
             print("Length of Sections in database: ", len(sections_in_database))
@@ -32,9 +43,9 @@ def find_section(text, conn):
                 print("Section found in database")
             
                 cursor.execute("""
-                            SELECT name FROM products_with_embeddings 
+                            SELECT name, secao_produto FROM products_with_embeddings 
                             WHERE secao_produto = %s
-                            LIMIT 30
+                            LIMIT 20
                             """, (section,))
                 return cursor.fetchall()
             return ["This section isn't available in our establishment"]
@@ -54,26 +65,34 @@ def find_price(text, conn):
         # return float(match.group())
         with conn.cursor() as cursor:
             cursor.execute("""
-                           SELECT name FROM products_with_embeddings 
+                           SELECT name, preco_venda FROM products_with_embeddings 
                            WHERE preco_venda = %s
-                           LIMIT 30
+                           LIMIT 20
                            """, (price_with_point,))
             return cursor.fetchall()
     
     return None
 
 def find_brand(text, conn):
-    # TODO: Problem with the way I'm looking for brands even with the input "Quero saber mais sobre o mercado" it entered here and returned products!
-    brand = None
     
-    # Define the regular expression to match "brand"
-    # Check for known brands
-    for known_brand in KNOWN_BRANDS:
-        if known_brand.lower() in text.lower():
-            brand = known_brand
+    brand = None
+    text_lower = text.lower()
+    
+    # Creating a set of normalized brand names
+    normalized_brands = {brand.lower(): brand for brand in KNOWN_BRANDS}
+    
+    # Tokenized input text
+    tokens = re.findall(r'\b\w+\b', text_lower)
+    
+    # Check for exact matches in tokens
+    for token in tokens:
+        # if known_brand.lower() in text.lower():
+        if token in normalized_brands:
+            brand = normalized_brands[token]
             break
         
     if brand:
+        print(f"Exact brand match found: {brand}")
         with conn.cursor() as cursor:
             
             cursor.execute("""
@@ -84,7 +103,28 @@ def find_brand(text, conn):
             
             return cursor.fetchall()
     
-    return brand
+    return None
+    
+    # Checking for exact matches in tokens
+    for token in tokens:
+        # if known_brand.lower() in text.lower():
+        if pattern.search(text_lower):
+            brand = brand
+            break
+        
+    if brand:
+        print("Brand found: ", brand)
+        with conn.cursor() as cursor:
+            
+            cursor.execute("""
+                            SELECT name, brand FROM products_with_embeddings 
+                            WHERE brand = %s
+                            LIMIT 30
+                            """, (brand,))
+            
+            return cursor.fetchall()
+    
+    return None
 
 def find_quantity(text, conn):
 
@@ -112,21 +152,21 @@ def find_quantity(text, conn):
        with conn.cursor() as cursor:
             if metric and quantity:
                 cursor.execute("""
-                    SELECT name FROM products_with_embeddings
+                    SELECT name, quantity, unidade_medida FROM products_with_embeddings
                     WHERE quantity = %s OR unidade_medida = %s
-                    LIMIT 30
+                    LIMIT 20
                 """, (quantity, metric))
             elif quantity:
                 cursor.execute("""
-                    SELECT name FROM products_with_embeddings
+                    SELECT name, quantity FROM products_with_embeddings
                     WHERE quantity = %s
-                    LIMIT 30
+                    LIMIT 20
                 """, (quantity,))
             elif metric:
                 cursor.execute("""
-                    SELECT name FROM products_with_embeddings
+                    SELECT name, unidade_medida FROM products_with_embeddings
                     WHERE unidade_medida = %s
-                    LIMIT 30
+                    LIMIT 20
                 """, (metric,))
             
             # Fetch and return the results
@@ -180,7 +220,7 @@ def find_similar_products_using_input_embeddings(input_embed, conn, np, cosine_s
         
         product_details = []
         for product_id, similarity in similar_products:
-            cursor.execute("SELECT name, secao_produto, preco_venda FROM products_with_embeddings WHERE product_id = %s", (product_id,)
+            cursor.execute("SELECT name, secao_produto, preco_venda, quantity, unidade_medida FROM products_with_embeddings WHERE product_id = %s", (product_id,)
                            )
             product_row = cursor.fetchone()
             product_details.append({

@@ -120,6 +120,10 @@ pattern_for_syn = r"\{(.+?)\}"
 contains_a_product = True
 products_list_after_user_input = []
 
+text_has_section = False
+text_has_brand = False
+sections_find_in_db = find_business_sections(conn) 
+
 # model_text_generator = models.get("text-davinci-003")
 
 ## I HAVE THE DF IN MY DATABASE
@@ -316,6 +320,8 @@ def fetch_products_alike(product_name):
 
 def pre_process_prompt(prompt):
     
+    global text_has_section 
+    global text_has_brand 
     # fix_prompt_v1 = pre_process_prompt_grammatical(prompt)
     # print(f"FIXED 1 {fix_prompt_v1}")
     fix_prompt_v1 = prompt
@@ -327,7 +333,7 @@ def pre_process_prompt(prompt):
     
     input_embed = embed_fn(fix_prompt_v1)
     
-    print("INPUT EMBED: ", input_embed)
+    # print("INPUT EMBED: ", input_embed)
     
     products_find_in_section = find_section(fix_prompt_v1, conn)
     products_find_with_price = find_price(fix_prompt_v1, conn)
@@ -341,6 +347,8 @@ def pre_process_prompt(prompt):
     and products_find_with_price is not None 
     and products_find_using_brand is not None 
     and products_find_using_metric_or_quantity is not None):
+        text_has_section = True
+        text_has_brand = True
         # Match all conditions
         fix_prompt_v2 = products_match_all_conditions(
             products_find_in_section, 
@@ -355,6 +363,8 @@ def pre_process_prompt(prompt):
     elif (products_find_in_section is not None 
         and products_find_with_price is not None 
         and products_find_using_brand is not None):
+        text_has_section = True
+        text_has_brand = True
         # Match section, price, and brand
         fix_prompt_v2 = products_match_section_price_and_brand(
             products_find_in_section, 
@@ -367,6 +377,7 @@ def pre_process_prompt(prompt):
 
     elif (products_find_in_section is not None 
         and products_find_with_price is not None):
+        text_has_section = True
         # Match section and price
         fix_prompt_v2 = products_match_section_and_price(
             products_find_in_section, 
@@ -376,15 +387,20 @@ def pre_process_prompt(prompt):
             fix_prompt_v1
         )
     elif (products_find_in_section is not None and products_find_using_brand is not None):
+        text_has_brand = True
+        text_has_section = True
         products_match_section_and_brand(products_find_in_section, products_find_using_brand, products_find_using_prompt, products_alike, fix_prompt_v1)
 
     elif (products_find_in_section is not None and products_find_using_metric_or_quantity is not None):
+        text_has_section = True
         products_match_section_and_metric_or_quantity(products_find_in_section, products_find_using_metric_or_quantity, products_find_using_prompt, products_alike, fix_prompt_v1)
 
 
     elif (products_find_with_price is not None 
         and products_find_using_brand is not None 
         and products_find_using_metric_or_quantity is not None):
+        text_has_brand = True
+        
         # Match price, brand, and metric
         fix_prompt_v2 = products_match_price_brand_and_metric(
             products_find_with_price, 
@@ -397,6 +413,8 @@ def pre_process_prompt(prompt):
 
     elif (products_find_with_price is not None 
         and products_find_using_brand is not None):
+        text_has_brand = True
+        
         # Match price and brand
         fix_prompt_v2 = products_match_price_and_brand(
             products_find_with_price, 
@@ -412,6 +430,8 @@ def pre_process_prompt(prompt):
         fix_prompt_v2 = products_match_price_and_quantity_or_metric(products_find_with_price, products_find_using_metric_or_quantity, products_find_using_prompt, products_alike, fix_prompt_v1)
 
     elif products_find_in_section is not None:
+        text_has_section = True
+        
         # Only match section
         fix_prompt_v2 = products_find_in_section_fix_prompt(
             products_find_in_section, 
@@ -430,6 +450,8 @@ def pre_process_prompt(prompt):
         )
 
     elif products_find_using_brand is not None:
+        text_has_brand = True
+        
         # Only match brand
         fix_prompt_v2 = products_find_with_brand_fix_prompt(
             products_find_using_brand, 
@@ -570,6 +592,7 @@ def find_similarity_products(prompt, embeddings_products=None):
             return text.strip()
         
         new_prompt_clean = preprocess_text(new_prompt_without_spaces)
+        print("new prompt clean: ", new_prompt_clean)
         products_df['Cleaned_Name'] = products_df['Nome'].apply(preprocess_text)
 
         # Using TF-IDF to text comparation
@@ -580,13 +603,15 @@ def find_similarity_products(prompt, embeddings_products=None):
 
         # Getting the products index with similarity above the threshold
 
-        # threshold = 0.3
-        threshold = 0.5
+        threshold = 0.3
+        # threshold = 0.5
         similar_index = np.where(similarities > threshold)[0]
         sorted_index = similar_index[np.argsort(-similarities[similar_index])]
         # index = np.argsort(similarities)[0][::-1]
 
         similar_products = sorted_index.tolist()
+        
+        print("Similar products: ", similar_products)
 
         # return index[0]
         # return index[:5].tolist()
@@ -1041,71 +1066,42 @@ def chatbot_response(user_prompt):
 
         # if find_product['Disponivel'].item():
         if find_product['Disponivel'].any():
-            answer_prompt = f"""Considerando que o cliente do nosso
-            comércio {business_name} enviou a mensagem:
+            answer_prompt = f"""Considering that the customer of our store **{business_name}** sent the following message:
 
-            {fix_prompt_v1} 
+            "{fix_prompt_v1}"
 
-            e os possíveis produtos que ele deseja são esses 
-            
+            And the possible products they are referring to are:\n            
             """
             # for product in pre_processed_prompt_products_list: 
             for product in products_list_after_user_input: 
-                answer_prompt += f"Nome do produto: {product['Name']}\n"
-                answer_prompt += f"Preço do produto: {product['Price']}\n"
-                answer_prompt += f"Seção do produto: {product['Section']}\n"
-                answer_prompt += f"Produto está disponível com {product['Available']} em estoque\n\n"
+                answer_prompt += f"- **Product Name:** {product['Name']}\n"
+                answer_prompt += f"  - **Price:** {product['Price']}\n"
+                answer_prompt += f"  - **Section:** {product['Section']}\n"
+                answer_prompt += f"  - **Availability:** {product['Available']} in stock\n\n"
 
             # {pre_processed_prompt_products_list}.
             answer_prompt += f"""
-            Considere também essa descrição detalhada dos produtos: 
+            Additionally, consider this detailed product description as a reference:
 
-            {generated_detailed_prompt.text} 
+            {generated_detailed_prompt.text}
 
-            utilize-la como um guia para melhorar a resposta para o cliente
-            e responda com uma frase simples e útil levando em conta todos os produtos e informações disponibilizadas. Não acrescente mais nenhum texto ou caracter desnecessário 
-            apenas a mensagem informando envolvendo algum detalhe do produto usando a descrição acima como guia e a seção que o
-            mesmo se encontra.
-            """
-            
-            answer_prompt+=f"""
-            E por fim caso a mensagem do usuário: 
-            
-            {fix_prompt_v1} 
-            
-            tenha alguma palavra que pareça com lista, por exemplo,
-            'list', liste, listo, listw, gere uma possível lista de compras de acordo 
-            com os produtos disponíveis no mercado possivelmente parecidos com o produto solicitado pelo usário sendo esses:
-            
-            {matching_products} 
-            
-            Repetindo, caso se e somente se
-            a mensagem do usuário contenha alguma palavra que remeta a lista, caso não tenha
-            não gere nenhuma lista apenas a mensagem principal.
-
+            Use this description as a **guide** to improve the response to the customer.  
+            Respond with a **clear, concise, and helpful sentence** that incorporates relevant details about the product, its description, and the section where it is located.  
+            Do not include **any unnecessary text, symbols, or additional explanations**—just a **straightforward and informative message** based on the provided data.
             """
             
         else:
-            answer_prompt = f"""Considerando que o cliente do nosso 
-            mercado {business_name} quer saber {fix_prompt_v1} 
-            que o produto que ele deseja está atualmente indisponível, 
-            responda com uma frase simples e útil ao cliente.
-            Considere esse texto {generated_detailed_prompt.text} como exemplo e melhore a sua resposta.
-            Reforçando essa foi a mensagem do usuário: 
+            answer_prompt = f"""Considering that the customer of our store **{business_name}** sent the following message:\n 
             
-            {fix_prompt_v1} 
+            "{fix_prompt_v1}"\n
             
-            Caso tenha alguma palavra que pareça com lista, por exemplo,
-            'list', liste, listo, listw, gere uma possível lista de compras de acordo 
-            com os produtos disponíveis no mercado possivelmente parecidos com o produto solicitado pelo usário sendo esses:
+            and that their desired product is currently unavailable,
+            return a simple and useful message to the customer.
+            Additionally, consider this detailed product text as a reference:\n
+            {generated_detailed_prompt.text} \n
             
-            {matching_products} 
-            
-            Repetindo, caso se e somente se
-            a mensagem do usuário contenha alguma palavra que remeta a lista, caso não tenha
-            não gere nenhuma lista apenas a mensagem principal,
-            leve em consideração o produto que ele queria que estava indisponível e gere
-            uma lista que substitua o produto da melhor forma possível explicando o porque da lista"""
+            And enhanced your answer.
+             """
 
     else:
         
@@ -1113,17 +1109,16 @@ def chatbot_response(user_prompt):
         
         if user_prompt == "Saber mais sobre os produtos":
             answer_prompt = f"""
-                Considerando que o cliente do nosso
-                mercado {business_name} enviou a mensagem:
+                The customer from our store **{business_name}** has sent the following message:
 
-                {user_prompt} 
+                "{user_prompt}"
 
-                e alguns produtos que temos disponíveis são esses: 
+                Here are some of the products we currently have available: 
                 \n
+                
+                {products_alike} \n
                 """
-            
-            answer_prompt+=f"{products_alike} \n"
-            
+                        
             with conn.cursor() as cursor:
                 
                 sql_query = """
@@ -1151,61 +1146,87 @@ def chatbot_response(user_prompt):
                 
             
             answer_prompt+="""
-            Considerando esses produtos que contém os seguintes valores nome do produto, seção do produto, preco de venda e se o mesmo está disponivel 
-            extamente nessa sequência, retorne uma mensagem com alguns produtos que temos para ver se o cliente vai querer algum deles
-            retorne a melhor resposta possível.
+            Considering these products, which include the following details in order: product name, product section, selling price, and availability,  
+            generate a **concise and engaging response** showcasing a few of these products to see if the customer is interested in any of them.  
+            Provide the **best possible response** based on the available data.
             """
             
         elif user_prompt == "Saber mais sobre nosso mercado":
             answer_prompt = f"""
-                Considerando que o cliente do nosso
-                mercado {business_name} enviou a mensagem:
+                The customer from our store **{business_name}** has sent the following message:
 
-                {user_prompt} 
+                "{user_prompt}"
 
-                e as informações sobre o {business_name} que temos disponíveis são essas: 
-                \n
+                Here is some available information about **{business_name}**:\n
                 """
                 
             for info in info_about_the_business:
-                answer_prompt+=f"{info}\n"
+                answer_prompt+=f"- {info}\n"
             
         else:
             
-            answer_prompt = f"""Considerando que o cliente do nosso 
-                mercado {business_name} quer saber {fix_prompt_v1} 
-                responda com uma frase simples e útil ao cliente. 
-                E por fim gere alguma evento ou ação para o cliente fazer
-                no mercado se vier a o caso, por exemplo, "Queria saber que horas o
-                mercado abre?", resposta, "O mercado abre as 7h e hoje temos uma grande promoção"
-                
-                Leve em consideração essas informações sobre o {business_name}:
+            answer_prompt = f"""The customer from our store **{business_name}** wants to know:
+
+            "{fix_prompt_v1}"
+
+            Provide a **clear and helpful response** based on the query.  
+            If applicable, suggest an action or event the customer might be interested in.  
+            For example:  
+
+            - **Customer:** "What time does the store open?"  
+            - **Chatbot:** "Our store opens at **7 AM**, and today we have a **big promotion** happening!"  
+
+            Additionally, consider the following store details:  
                 """
             
             for info in info_about_the_business:
-                answer_prompt+=f"{info}\n"
+                answer_prompt+=f"- {info}\n"
         
+
+    if text_has_section:
+        answer_prompt+=f"""
+        The user's message **mentions something related to store sections**. The available sections in the store are:
+
+        {sections_find_in_db}
+
+        Take this into account when generating the response.
+        \n 
+        """
+    if text_has_brand:
+        answer_prompt+=f"""
+        The user's message **includes a brand or a product name associated with a brand**.  
+        Ensure that this is considered when generating the response.
+        """
+    
 
     section_products = find_section(fix_prompt_v1, conn)
     
     if section_products:
         answer_prompt+=f"""
-        Levando em consideração também que esses produtos:
-        
+        Also, take into account that these products:
+
         {section_products}
-        
-        São os produtos disponíveis na seção que o cliente comentou retorne uma resposta conveniente com alguns exemplos usando esses produtos para o mesmo. Em caso do dado acima ter alguma mensagem parecida com "This section isn't available in our establishment" retorne informando ao cliente sobre esse problema relacionado a seção.
-                """
+
+        Belong to the section mentioned by the customer.  
+        **Generate a relevant response including some examples** from these products.  
+
+        If the data above contains a message like "This section isn't available in our establishment,"  
+        inform the customer about this issue **politely and professionally**.
+        """
     
     answer_prompt+="""
-            Considerando essas informações retorne uma mensagem com útil para o cliente e alguma possível ação ou pergunta que o cliente pode fazer agora. Retorne a melhor resposta possível. Não faça nenhum comentário desnecessário, no final da sua resposta pergunte se pode ajudar com algo mais ou alguma outra pergunta do gênero.
+            Based on this information, generate a **useful and engaging response** for the customer,  
+            including a possible follow-up action or question they might ask.  
+
+            Avoid any unnecessary comments. At the end of your response,  
+            **ask if you can assist with anything else** or offer a **related follow-up question**.
             """
 
 
     response = chat.send_message(answer_prompt)
 
+    print("-"*80)
     print(f"ANSWER PROMPT {answer_prompt}")
-    
     
     print("-"*80)
     print("RESPONSE: ", response.text)
@@ -1214,10 +1235,17 @@ def chatbot_response(user_prompt):
     return response.text
 
 
-synonym_test = "biscoito cream cracker".capitalize()
+# synonym_test = "biscoito cream cracker".capitalize()
 
-# print(chatbot_response("Quero um biscoito que tem um menino na frente da embalagem"))
-print("Products using synonyms: ", find_using_synonyms(conn, synonym_test))
+# print(chatbot_response("Estou interessado na Seção 3"))
+
+# print("Products using synonyms: ", find_using_synonyms(conn, synonym_test))
+# print("Products using brand: ", find_brand( "Quero saber mais sobre a marca VITAMASSA", conn))
+
+# print(chatbot_response("O produto que eu quero custa 2.50"))
+# print(chatbot_response("O produto da marca even tem quais?"))
+# print(chatbot_response("Quais produtos de 1KG vocês têm?"))
+print(chatbot_response("Quero um produto de 500G"))
 
 def generate_synonymous(product=None, product_list=None, synonyms=None):
     products_dict = {}

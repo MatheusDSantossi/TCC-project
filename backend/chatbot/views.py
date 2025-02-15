@@ -287,11 +287,27 @@ class ProductUpdate(viewsets.ViewSet):
             product.brand = data.get('productBrand', product.brand)
             product.quantity = data.get('productQuantityFormat', product.quantity)
             product.secao_produto = data.get('productSection', product.secao_produto)
-            print("Product brand: ", product.brand)
+            product.preco_venda = data.get('productPrice', product.secao_produto)
+            product.unidade_medida = data.get('productMetricUnity', product.unidade_medida)
+            product.disponivel = data.get('productAvailability', product.disponivel)
+            product.synonymous = data.get('productLocalSynonyms', product.synonymous)
+            print("Product brand: ", product.synonymous)
+            print("Product synonyms: ", data.get('productLocalSynonyms'))
             
             product.save()
             
             return Response({'message': 'Product updated successfully'}, status=201)
+        
+        except Product.DoesNotExist:
+            return Response({'error': 'Product not found'}, status=404)
+
+class ProductDelete(viewsets.ViewSet):
+    @action(detail=True, methods=['delete'], url_path='delete-product/(?P<pk>[^/.]+)')
+    def delete_product(self, request, pk):
+        try:
+            product = Product.objects.get(product_id=pk)
+            product.delete()
+            return Response({'message': 'Product deleted successfully'}, status=204)
         
         except Product.DoesNotExist:
             return Response({'error': 'Product not found'}, status=404)

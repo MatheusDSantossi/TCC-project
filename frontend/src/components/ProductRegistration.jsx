@@ -61,7 +61,7 @@ function ProductRegistration() {
   const registerProduct = (e) => {
     e.preventDefault();
 
-    setButtonState("loading");
+    setButtonState("Carregando...");
 
     console.log("Product synonyms: ", productSynonyms);
 
@@ -81,7 +81,7 @@ function ProductRegistration() {
         }
 
         setTimeout(() => {
-          setButtonState("success");
+          setButtonState("Sucesso");
         }, 2000);
 
         console.log("Response: ", response);
@@ -207,7 +207,7 @@ function ProductRegistration() {
                 htmlFor="productPrice"
                 className="block text-sm font-semibold text-white"
               >
-                Preço do Produto
+                Preço do Produto (R$)
               </label>
               <input
                 type="text"
@@ -219,7 +219,7 @@ function ProductRegistration() {
                 onChange={(e) => setProductPrice(e.target.value)}
               />
             </div>
-            {/* Prouct Metric Unity */}
+            {/* Product Metric Unity */}
             <div>
               <label
                 htmlFor="productMetricUnity"
@@ -281,13 +281,6 @@ function ProductRegistration() {
               /> */}
             </div>
 
-          {/* <button
-            className="px-4 py-2 mt-4 font-bold text-black transition duration-200 bg-yellow-400 rounded-lg hover:bg-yellow-300"
-            type="submit"
-            onClick={registerProduct}
-          >
-            Register
-          </button> */}
           <ReactiveButton
             className="text-primary hover:bg-yellow-300"
             buttonState={buttonState}
@@ -295,7 +288,7 @@ function ProductRegistration() {
             type={"submit"}
             loadingText="Carregando..."
             successText={"Cadastrado com sucesso"}
-            idleText={"Cadastrar produto"}
+            idleText={"Cadastrar"}
             animation={true}
             rounded={true}
             width="120"

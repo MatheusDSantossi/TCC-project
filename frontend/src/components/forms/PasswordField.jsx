@@ -38,23 +38,25 @@ export default function CustomPasswordField(props) {
             borderColor: "#D1D5DB",
             width: "100%",
             "& .MuiOutlinedInput-root": {
-              color: "#FFFFFFFF",
-              "& .MuiOutlinedInput-notchedOutline": {
+              color: "white",
+              // Default state
+              "& fieldset": {
                 borderColor: "#F0FF3D",
               },
-              "& .Mui-focused": {
+              // Hover state
+              "&:hover fieldset": {
+                borderColor: "#F0FF3D",
+              },
+              // Focused state
+              "&.Mui-focused fieldset": {
                 borderColor: "#F0FF3D",
               },
             },
             "& .MuiInputLabel-outlined": {
-              color: "#FFFFFFFF",
-              fonteweigth: "bold",
-              "& .Mui-focused": {
-                borderColor: "#F0FF3D",
+              color: "white",
+              "&.Mui-focused": {
+                color: "#F0FF3D",
               },
-            },
-            "& .Mui-focused": {
-              borderColor: "#F0FF3D",
             },
             "& .MuiFormHelperText-root": {
               color: "#5D76D3",

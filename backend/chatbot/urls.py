@@ -12,6 +12,7 @@ router.register('chatbot', ChatbotResponse, basename='chatbotResponse')
 urlpatterns = [ 
     path('', include(router.urls)),
     path('update-product/<int:pk>/', ProductUpdate.as_view({'put': 'update_product'}), name='updateProduct'),
+    path('delete-product/<int:pk>/', ProductDelete.as_view({'delete': 'delete_product'}), name='deleteProduct'),
     path("api/products/", ProductListCreateView.as_view(), name='productListCreate'),
     path("api/products/<int:pk>/", ProductRetrieveUpdateDestroyView.as_view(), name='productRetrieveUpdateDestroy'),
 ]

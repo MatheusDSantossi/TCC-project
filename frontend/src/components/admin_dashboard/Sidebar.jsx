@@ -1,5 +1,10 @@
-import React, { useState, useEffect, useRef } from "react";
-import { BsChatFill, BsGrid1X2Fill, BsFillArchiveFill,  BsArrowRightCircleFill } from "react-icons/bs";
+import React, { useState, useRef } from "react";
+import {
+  BsChatFill,
+  BsGrid1X2Fill,
+  BsFillArchiveFill,
+  BsArrowRightCircleFill,
+} from "react-icons/bs";
 
 import logo from "../../assets/logo.svg";
 
@@ -46,8 +51,14 @@ function Sidebar({ onSidebarToggle, changeComponent }) {
           <div className="flex justify-center gap-4 p-4 mb-2 bg-primary">
             <img src={logo} alt="brand" className="w-28 h-28" />
           </div>
-          <motion.div style={background} variants={sidebarVariants} />
-          <Navigation changeComponent={changeComponent} />
+          <motion.div
+            style={background}
+            variants={sidebarVariants}
+            className={!isOpen ? "pointer-events-none" : ""}
+          />
+          <div style={{ pointerEvents: isOpen ? "auto" : "none" }}>
+            <Navigation changeComponent={changeComponent} />
+          </div>
           <MenuToggle toggle={() => setIsOpen(!isOpen)} />
         </motion.nav>
       </div>
@@ -98,7 +109,7 @@ const Navigation = ({ changeComponent }) => {
 
   return (
     <motion.ul style={list} variants={navVariants}>
-      {Object.entries(listItemsNav).map(([label, item, icon], i) => (
+      {Object.entries(listItemsNav).map(([label, item], i) => (
         <div key={i}>
           <MenuItem
             label={label}
@@ -115,23 +126,24 @@ const Navigation = ({ changeComponent }) => {
               }
             }}
           />
-          {item.subitems && openSubmenu === label && <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-          >
-            {Object.entries(item.subitems).map(([subLabel, subItem], j) => (
-              <SubMenuItem 
-                key={j}
-                label={subLabel}
-                onClick={(e) => {
-                  e.preventDefault();
-                  changeComponent(subItem.component);
-                }}
-              />
-               
-            ))}
-          </motion.div>}
+          {item.subitems && openSubmenu === label && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+            >
+              {Object.entries(item.subitems).map(([subLabel, subItem], j) => (
+                <SubMenuItem
+                  key={j}
+                  label={subLabel}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    changeComponent(subItem.component);
+                  }}
+                />
+              ))}
+            </motion.div>
+          )}
         </div>
       ))}
     </motion.ul>
@@ -160,10 +172,10 @@ const itemVariants = {
       delay: 0.1,
       duration: 0.2,
     },
-  }
+  },
 };
 
-const colors = ["#FF008C", "#D309E1", "#9C1AFF", "#7700FF", "#4400FF"];
+// const colors = ["#FF008C", "#D309E1", "#9C1AFF", "#7700FF", "#4400FF"];
 
 const MenuItem = ({ label, icon, onClick, hasSubitems, isOpen }) => {
   // const border = `2px solid ${colors[i]}`;
@@ -176,19 +188,19 @@ const MenuItem = ({ label, icon, onClick, hasSubitems, isOpen }) => {
       onClick={onClick}
     >
       <div style={iconPlaceholder}>{icon}</div>
-      <div style={{...textPlaceholder, position: 'relative'}}>
+      <div style={{ ...textPlaceholder, position: "relative" }}>
         <span style={{ color: "white", fontWeight: "bold" }}>{label}</span>
         {hasSubitems && (
-          <motion.span 
+          <motion.span
             style={{
               position: "absolute",
               top: 3,
               right: 0,
               color: "white",
-              transform: isOpen ? 'rotate(90deg)' : 'rotate(0deg)',
+              transform: isOpen ? "rotate(90deg)" : "rotate(0deg)",
             }}
             initial={{ rotate: 0 }}
-            animate={{ rotate: isOpen? 90 : 0 }}
+            animate={{ rotate: isOpen ? 90 : 0 }}
           >
             <BsArrowRightCircleFill />
           </motion.span>
@@ -201,10 +213,7 @@ const MenuItem = ({ label, icon, onClick, hasSubitems, isOpen }) => {
 const SubMenuItem = ({ label, onClick }) => {
   return (
     <motion.li
-      style={{ ...listItem, 
-        marginLeft: "30px",
-        padding: "8px 25px 8px 45px"
-      }}
+      style={{ ...listItem, marginLeft: "30px", padding: "8px 25px 8px 45px" }}
       variants={itemVariants}
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.99 }}

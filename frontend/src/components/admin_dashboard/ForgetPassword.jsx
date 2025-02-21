@@ -21,13 +21,15 @@ const ForgetPassword = () => {
   const [ShowMessage, setShowMessage] = useState(false);
 
   const submission = (data) => {
+    setButtonState("loading");
 
     AxiosInstance.post(`api/password_reset/`, {
       email: data.email,
-    })
-    .then((response) => {
-
+    }).then((response) => {
       setShowMessage(true);
+      setTimeout(() => {
+        setButtonState("success");
+      }, 2000);
     });
   };
   return (
@@ -47,9 +49,11 @@ const ForgetPassword = () => {
         <Box className={"whiteBox"}>
           <div className="flex items-center justify-center mb-5">
             <img className="w-20 mr-4" src={logo} alt="" />
-            <h2 className="mb-6 text-2xl font-semibold text-center left-40">Redefinir Senha</h2>
+            <h2 className="mb-6 text-2xl font-semibold text-center left-40">
+              Redefinir Senha
+            </h2>
           </div>
-        
+
           <label className="block mb-3 text-lg font-semibold text-left text-white">
             Digite o email cadastrado
           </label>
@@ -58,19 +62,19 @@ const ForgetPassword = () => {
           </Box>
 
           <ReactiveButton
-              className="font-bold text-primary hover:bg-yellow-300"
-              buttonState={buttonState}
-              color="yellow"
-              type={"submit"}
-              loadingText="Carregando..."
-              successText={"Sucesso!"}
-              idleText={"Solicitar redefinição de senha"}
-              animation="true"
-              rounded="true"
-              width={250}
-              height={40}
-              size="large"
-            />
+            className="font-bold text-primary hover:bg-yellow-300"
+            buttonState={buttonState}
+            color="yellow"
+            type={"submit"}
+            loadingText="Carregando..."
+            successText={"Sucesso!"}
+            idleText={"Solicitar redefinição de senha"}
+            animation="true"
+            rounded="true"
+            width={250}
+            height={40}
+            size="large"
+          />
 
           {/* <div className='flex items-center p-3 space-x-32'>
             <CustomButton label={"Request password reset"} type={"submit"} />

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import "../App.css";
-import { BsEraserFill } from "react-icons/bs";
+import { BsEraserFill, BsInfoCircleFill } from "react-icons/bs";
 // Component
 
 const SynonymDetails = ({
@@ -102,6 +102,9 @@ const SynonymDetails = ({
         >
           Sinônimos para o Produto
         </label>
+        <span className="p-1 rounded-full text-secondary">
+          <BsInfoCircleFill />
+        </span>
 
         <button
           className="p-1.5 rounded text-primary bg-secondary

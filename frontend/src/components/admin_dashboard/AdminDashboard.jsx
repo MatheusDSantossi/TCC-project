@@ -51,8 +51,8 @@ function AdminDashboard() {
 
   const renderComponent = () => {
     switch (currentComponent) {
-      case "dashboard":
-        return <HomeDashboard />;
+      // case "dashboard":
+      //   return <HomeDashboard />;
       case "productRegistration":
         return <ProductRegistration />;
       case "chatbot":
@@ -63,7 +63,7 @@ function AdminDashboard() {
         return <ProductList />;
 
       default:
-        return <HomeDashboard />;
+        return <ProductRegistration />;
       // return <div>Not found!!!!</div>;
     }
   };

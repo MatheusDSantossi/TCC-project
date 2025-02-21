@@ -61,7 +61,7 @@ generation_config = {
 }
     # "candidate_count": 1,
 
-main_chatbot_model = genai.GenerativeModel(model_name="gemini-1.5-flash-8b",
+main_chatbot_model = genai.GenerativeModel(model_name="gemini-2.0-flash",
                                 generation_config=generation_config)
 
 chat = main_chatbot_model.start_chat(
@@ -71,7 +71,7 @@ chat = main_chatbot_model.start_chat(
     ]    
 )
 
-generate_content_model = genai.GenerativeModel(model_name="gemini-1.5-flash-8b", 
+generate_content_model = genai.GenerativeModel(model_name="gemini-2.0-flash", 
                                                generation_config=generation_config)
 
 # model_2 = genai.GenerativeModel("gemini-1.0-pro",
@@ -299,7 +299,8 @@ def fetch_products_alike(product_name):
         
         query = """
             SELECT name, secao_produto, preco_venda FROM products_with_embeddings
-            WHERE SIMILARITY(name, %s) > 0.1;
+            WHERE SIMILARITY(name, %s) > 0.1
+            LIMIT 10;
         """
         
         # print(type(product_name))
@@ -1181,6 +1182,9 @@ def chatbot_response(user_prompt):
             
             for info in info_about_the_business:
                 answer_prompt+=f"- {info}\n"
+                
+                
+            answer_prompt += """But only return this information if it's related to the question of the client."""
         
 
     if text_has_section:
@@ -1245,9 +1249,10 @@ def chatbot_response(user_prompt):
 # print(chatbot_response("O produto que eu quero custa 2.50"))
 # print(chatbot_response("O produto da marca even tem quais?"))
 # print(chatbot_response("Quais produtos de 1KG vocês têm?"))
-print(chatbot_response("Quero um produto de 500G"))
-
-def generate_synonymous(product=None, product_list=None, synonyms=None):
+# print(chatbot_response("Quero um produto de 500G"))
+# print(find_quantity("macarrao pilar 26X600G", conn))
+def generate_synonymous(product=None, product_list=None, brand=None, synonyms=None):
+    # TODO: Fix this structure because brand can't be None
     products_dict = {}
     product_synonymous_list = []
     
@@ -1258,7 +1263,10 @@ def generate_synonymous(product=None, product_list=None, synonyms=None):
         original_product = product_list.name
         
         # semantic_dictorinary = create_semantic_dictionary(product)
-        products = generate_and_search(original_product)
+        if brand:
+            products = generate_and_search(brand)
+        else:
+            products = generate_and_search(original_product)
         
         
         print("PRODUCTS SIZE: ", products.size)
@@ -1282,7 +1290,11 @@ def generate_synonymous(product=None, product_list=None, synonyms=None):
         original_product = product
         
         # semantic_dictorinary = create_semantic_dictionary(product)
-        products = generate_and_search(product)
+        if brand:
+            products = generate_and_search(brand)
+        else:
+            products = generate_and_search(original_product)
+        
         
         print("PRODUCTS SIZE: ", products.size)
     

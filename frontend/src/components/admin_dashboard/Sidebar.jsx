@@ -76,10 +76,10 @@ const navVariants = {
 };
 
 const listItemsNav = {
-  Dashboard: {
-    icon: <BsGrid1X2Fill />,
-    component: "dashboard",
-  }, // Add your desired icons here
+  // Dashboard: {
+  //   icon: <BsGrid1X2Fill />,
+  //   component: "dashboard",
+  // },
   Produtos: {
     icon: <BsFillArchiveFill />,
     subitems: {

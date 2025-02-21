@@ -131,22 +131,28 @@ def find_quantity(text, conn):
     metric = None
     quantity = None
 
-    # Identify quantity (e.x., "6X30", "1X24 500G")
-    quantity_match = re.search(r"\b\d+\s*[Xx]\s*\d+[A-Za-z]*\b|\b\d+\s?(KG|G|ML|L)\b", text, re.IGNORECASE)
+    # Regex info:
+    #   - an "x" with another number and then some letters (e.g., "1 X 24 500G")
+    #   - or a standalone number with a unit (e.g., "500G", "500ML", "500MT")
+    quantity_pattern = r"\b\d+\s*(?:[Xx]\s*\d+\s*[A-Za-z]+|\s?(?:KG|G|ML|L|MT|CX|PT|PCT|UN))\b"
+    quantity_match = re.search(quantity_pattern, text, re.IGNORECASE)
 
     
     if quantity_match:
         quantity = quantity_match.group().strip()
         text = text.replace(quantity, '').strip()
+        
+        # Extract the trailing letters from the quantity as the metric.
+        m = re.search(r"[A-Za-z]+$", quantity)
+        
+        if m:
+            metric = m.group().upper()
     
     # Check for known metrics
-    
-    for known_metric in KNOWN_METRICS:
-        if re.search(rf"\b{known_metric}", text, re.IGNORECASE):
-            metric = known_metric
-            text = re.sub(rf"\b{known_metric}\b", '', text, flags=re.IGNORECASE).strip()
-            break
-        
+    name = text.strip()
+    print("Product name: ", name)
+    print("Product metric: ", metric)
+    print("Product quantity: ", quantity)
     if metric or quantity:
         
        with conn.cursor() as cursor:
@@ -171,6 +177,8 @@ def find_quantity(text, conn):
             
             # Fetch and return the results
             results = cursor.fetchall()
+            if len(results) == 0:
+                return None
             # return [row[0] for row in results]
             return results
 
@@ -188,6 +196,7 @@ def find_similar_products_using_input_embeddings(input_embed, conn, np, cosine_s
         
         query = """
             SELECT product_id, embeddings FROM products_with_embeddings
+            LIMIT 10
         """
         
         cursor.execute(query)

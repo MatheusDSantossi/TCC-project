@@ -169,15 +169,14 @@ function Chatbot() {
         }),
       };
       setChatMessages((prevMessages) => [...prevMessages, botResponse]);
-      
+
       // showingMenuOptions();
-      
+
       // setHasSelectedOption(false);
       // fetchMenuOptions();
-      
+
       // const botResponseAfterFirstAnswer = { sender: "Hecate", text: "Posso lhe ajudar em algo mais?"};
       // setChatMessages((prevMessages) => [...prevMessages, botResponseAfterFirstAnswer]);
-      
     } catch (error) {
       console.error("Error sending message: ", error);
     }
@@ -357,7 +356,7 @@ function Chatbot() {
 
   // handle key press
   const handleKeyPress = (e) => {
-    setIsTypingDone(false);
+    // setIsTypingDone(false);
     if (e.key === "Enter" && userInput.trim()) {
       handleNameSubmit();
     }
@@ -370,7 +369,9 @@ function Chatbot() {
       .pop();
 
     console.log("Last message hecate: " + lastHecateMessage.text);
-    if (lastHecateMessage.text !== "Entendi. Selecione uma das opções abaixo:") {
+    if (
+      lastHecateMessage.text !== "Entendi. Selecione uma das opções abaixo:"
+    ) {
       const botConfirmation = {
         sender: "Hecate",
         text: "Selecione uma das opções abaixo:",
@@ -462,23 +463,24 @@ function Chatbot() {
               </div>
             </div>
           ))}
-          {/* {!isNameEntered && isTypingDone && ( */}
-          {!isNameEntered && (
-            <div className="flex items-center mt-4">
-              <input
-                className="w-full px-4 py-3 border border-gray-400 rounded-md focus:outline-none focus:ring focus:ring-yellow-500"
-                type="text"
-                placeholder="Digite seu nome"
-                value={userInput}
-                onChange={(e) => setUserInput(e.target.value)}
-                onKeyDown={handleKeyPress}
-              />
-              <button
-                className="flex-shrink-0 px-4 py-2 ml-2 font-bold text-black bg-yellow-400 rounded-md hover:bg-yellow-300"
-                onClick={handleNameSubmit}
-              >
-                Enviar
-              </button>
+          {!isNameEntered && isTypingDone && (
+            <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-[600px] z-50 px-4">
+              <div className="flex items-center w-full mt-4 space-x-2">
+                <input
+                  className="flex-grow px-4 py-3 border border-gray-400 rounded-md focus:outline-none focus:ring focus:ring-yellow-500"
+                  type="text"
+                  placeholder="Digite seu nome"
+                  value={userInput}
+                  onChange={(e) => setUserInput(e.target.value)}
+                  onKeyDown={handleKeyPress}
+                />
+                <button
+                  className="flex-shrink-0 px-4 py-2 ml-2 font-bold text-black bg-yellow-400 rounded-md hover:bg-yellow-300 whitespace-nowrap"
+                  onClick={handleNameSubmit}
+                >
+                  Enviar
+                </button>
+              </div>
             </div>
           )}
           {/* {isNameEntered && isTypingDone && menuOptions.length > 0 && ( */}
@@ -557,13 +559,13 @@ function Chatbot() {
             !isHecateAnswering &&
             menuOptions <= 0 &&
             isTypingDone && (
-              <div className="absolute bottom-0 left-0 w-full bg-primary">
+              <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-[600px] px-4">
                 <form
                   onSubmit={handleSubmit}
-                  className="flex items-center px-4 py-3"
+                  className="flex items-center w-full mt-4 space-x-2"
                 >
                   <input
-                    className="flex-grow h-10 px-3 border border-gray-400 rounded-l-md focus:outline-none focus:ring focus:ring-yellow-500"
+                    className="flex-grow px-4 py-3 border border-gray-400 rounded-md focus:outline-none focus:ring focus:ring-yellow-500"
                     type="text"
                     placeholder="Digite sua mensagem…"
                     onSubmit={handleSubmit}

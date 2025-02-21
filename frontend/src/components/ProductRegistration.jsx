@@ -5,6 +5,10 @@ import AxiosInstance from "./AxiosInstance";
 import ReactiveButton from "reactive-button";
 import SynonymDetails from "./SynonymsDetails";
 
+import { BsInfoCircleFill } from "react-icons/bs";
+
+import InfoDialogScreen from "./InfoDialogScreen";
+
 function ProductRegistration() {
   const [productName, setProductName] = useState("");
   const [productBrand, setProductBrand] = useState("");
@@ -61,7 +65,7 @@ function ProductRegistration() {
   const registerProduct = (e) => {
     e.preventDefault();
 
-    setButtonState("Carregando...");
+    setButtonState("loading");
 
     console.log("Product synonyms: ", productSynonyms);
 
@@ -81,7 +85,7 @@ function ProductRegistration() {
         }
 
         setTimeout(() => {
-          setButtonState("Sucesso");
+          setButtonState("success");
         }, 2000);
 
         console.log("Response: ", response);
@@ -93,7 +97,7 @@ function ProductRegistration() {
         setProductMetricUnity("");
         setProductAvailibility("");
         setProductSynonyms([]);
-        setResetKey(prev => prev + 1);
+        setResetKey((prev) => prev + 1);
       })
       .catch((error) => {
         setButtonState("error");
@@ -114,12 +118,18 @@ function ProductRegistration() {
           {/* # divide the product name into three parts (name, brand, quantity) */}
           {/* Product Name */}
           <div className="mb-5">
-            <label
-              htmlFor="productName"
-              className="block text-sm font-semibold text-white"
-            >
-              Nome do Produto
-            </label>
+            <div className="flex align-center">
+              <label
+                htmlFor="productName"
+                className="block text-sm font-semibold text-white"
+              >
+                Nome do Produto
+              </label>
+              {/* <span className="p-1 rounded-full text-secondary">
+                <BsInfoCircleFill />
+              </span> */}
+              <InfoDialogScreen infoText="Coloque ao menos três letras para receber os produtos já cadastrados no sistema" />
+            </div>
             <input
               type="text"
               id="productName"
@@ -143,12 +153,17 @@ function ProductRegistration() {
           <div className="grid grid-cols-2 gap-6">
             {/* Product brand */}
             <div>
-              <label
-                htmlFor="productBrand"
-                className="block text-sm font-semibold text-white"
-              >
-                Marca do Produto
-              </label>
+              <div className="flex align-center">
+                <label
+                  htmlFor="productBrand"
+                  className="block text-sm font-semibold text-white"
+                >
+                  Marca do Produto
+                </label>
+                <span className="p-1 rounded-full text-secondary">
+                  <BsInfoCircleFill />
+                </span>
+              </div>
               <input
                 type="text"
                 id="productBrand"
@@ -163,12 +178,17 @@ function ProductRegistration() {
 
             {/* Product Quantity Format */}
             <div>
-              <label
-                htmlFor="productQuantityFormat"
-                className="block text-sm font-semibold text-white"
-              >
-                Formato Quantidade do Produto
-              </label>
+              <div className="flex align-center">
+                <label
+                  htmlFor="productQuantityFormat"
+                  className="block text-sm font-semibold text-white"
+                >
+                  Formato Quantidade do Produto
+                </label>
+                <span className="p-1 rounded-full text-secondary">
+                  <BsInfoCircleFill />
+                </span>
+              </div>
               <input
                 type="text"
                 id="productQuantityFormat"
@@ -183,12 +203,17 @@ function ProductRegistration() {
 
             {/* Product Section */}
             <div>
-              <label
-                htmlFor="productSection"
-                className="block text-sm font-semibold text-white"
-              >
-                Seção do Produto
-              </label>
+              <div className="flex align-center">
+                <label
+                  htmlFor="productSection"
+                  className="block text-sm font-semibold text-white"
+                >
+                  Seção do Produto
+                </label>
+                <span className="p-1 rounded-full text-secondary">
+                  <BsInfoCircleFill />
+                </span>
+              </div>
               <input
                 type="number"
                 id="productSection"
@@ -203,12 +228,17 @@ function ProductRegistration() {
 
             {/* Product Price */}
             <div>
-              <label
-                htmlFor="productPrice"
-                className="block text-sm font-semibold text-white"
-              >
-                Preço do Produto (R$)
-              </label>
+              <div className="flex align-center">
+                <label
+                  htmlFor="productPrice"
+                  className="block text-sm font-semibold text-white"
+                >
+                  Preço do Produto (R$)
+                </label>
+                <span className="p-1 rounded-full text-secondary">
+                  <BsInfoCircleFill />
+                </span>
+              </div>
               <input
                 type="text"
                 id="productPrice"
@@ -221,12 +251,17 @@ function ProductRegistration() {
             </div>
             {/* Product Metric Unity */}
             <div>
-              <label
-                htmlFor="productMetricUnity"
-                className="block text-sm font-semibold text-white"
-              >
-                Unidade de Medida do Produto
-              </label>
+              <div className="flex align-center">
+                <label
+                  htmlFor="productMetricUnity"
+                  className="block text-sm font-semibold text-white"
+                >
+                  Unidade de Medida do Produto
+                </label>
+                <span className="p-1 rounded-full text-secondary">
+                  <BsInfoCircleFill />
+                </span>
+              </div>
               <select
                 id="productMetricUnity"
                 name="productMetricUnity"
@@ -249,12 +284,17 @@ function ProductRegistration() {
             </div>
             {/* Product Availability */}
             <div>
-              <label
-                htmlFor="productAvailability"
-                className="block text-sm font-semibold text-white"
-              >
-                Produtos em Estoque
-              </label>
+              <div className="flex align-center">
+                <label
+                  htmlFor="productAvailability"
+                  className="block text-sm font-semibold text-white"
+                >
+                  Produtos em Estoque
+                </label>
+                <span className="p-1 rounded-full text-secondary">
+                  <BsInfoCircleFill />
+                </span>
+              </div>
               <input
                 type="text"
                 id="productAvailability"
@@ -267,19 +307,13 @@ function ProductRegistration() {
               />
             </div>
           </div>
-            <div>
-              <SynonymDetails setProductSynonyms={setProductSynonyms} resetKey={resetKey} />
-              {/* <input
-                type="text"
-                id="productSynonymous"
-                name="productSynonymous"
-                required
-                className="w-full p-2 mt-1 mb-5 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
-                value={productSynonyms}
-                onChange={(e) => setproductSynonyms(e.target.value)}
-                placeholder="Bateria, Pilha..."
-              /> */}
-            </div>
+          <div>
+              <SynonymDetails
+                setProductSynonyms={setProductSynonyms}
+                resetKey={resetKey}
+              />
+
+          </div>
 
           <ReactiveButton
             className="text-primary hover:bg-yellow-300"
@@ -289,10 +323,10 @@ function ProductRegistration() {
             loadingText="Carregando..."
             successText={"Cadastrado com sucesso"}
             idleText={"Cadastrar"}
-            animation={true}
-            rounded={true}
-            width="120"
-            height="40"
+            animation="true"
+            rounded="true"
+            width={120}
+            height={40}
             size="large"
             // onClick={registerProduct}
           />

@@ -40,11 +40,11 @@ class Product(models.Model):
         return None
     
     @staticmethod
-    def generate_synonymous(product=None, product_list=None, synonyms=None):
+    def generate_synonymous(product=None, product_list=None, brand=None, synonyms=None):
         if product_list:
-            return generate_synonymous(product_list=product_list, synonyms=synonyms)
+            return generate_synonymous(product_list=product_list, brand=brand, synonyms=synonyms)
         else:
-            return generate_synonymous(product=product, synonyms=synonyms)
+            return generate_synonymous(product=product, brand=brand, synonyms=synonyms)
 
     @staticmethod
     def fetch_products_alike(product_name):

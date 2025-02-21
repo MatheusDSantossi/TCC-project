@@ -46,7 +46,7 @@ class MenuOptionsView(viewsets.ViewSet):
     permission_classes = [permissions.AllowAny]
     
     # MenuOptionExtended.createMenusOptions()
-    MenuOptionExtended.delete_and_recreate_menuOption()
+    # MenuOptionExtended.delete_and_recreate_menuOption()
     
     @action(detail=False, methods=['post'])
     def post(self, request):
@@ -216,7 +216,7 @@ class ProductRegistration(viewsets.ViewSet):
                 Product.fetch_products_alike(product_name)
                 
                 
-                Product.generate_synonymous(product=product_name, synonyms=synonyms)
+                Product.generate_synonymous(product=product_name, brand=product_brand, synonyms=synonyms)
                 product.save()
                 
             else:
@@ -229,7 +229,7 @@ class ProductRegistration(viewsets.ViewSet):
                         print("Product: ", product)
                         product_synonymous = Product.get_synonymus(product)
                         if not product_synonymous:
-                            synonymous = Product.generate_synonymous(product_list=product, synonyms=synonyms)
+                            synonymous = Product.generate_synonymous(product_list=product, brand=product_brand, synonyms=synonyms)
                         
                         
                         product.brand = product_brand
@@ -248,7 +248,7 @@ class ProductRegistration(viewsets.ViewSet):
                     product = Product.get_product_by_name(product_name)
                     
                     if not product_synonymous:
-                        synonymous_list = Product.generate_synonymous(product_list=product, synonyms=synonyms)
+                        synonymous_list = Product.generate_synonymous(product_list=product, brand=product_brand, synonyms=synonyms)
                     else:
                         synonymous_list = Product.get_synonymus(product_name)
                         

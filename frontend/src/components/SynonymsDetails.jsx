@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 
 import "../App.css";
 import { BsEraserFill, BsInfoCircleFill } from "react-icons/bs";
+import InfoDialogScreen from "./InfoDialogScreen";
 // Component
 
 const SynonymDetails = ({
@@ -102,13 +103,20 @@ const SynonymDetails = ({
         >
           Sinônimos para o Produto
         </label>
-        <span className="p-1 rounded-full text-secondary">
-          <BsInfoCircleFill />
-        </span>
+        <InfoDialogScreen
+          infoText={
+            <h2>
+              Sinônimos do produto, esse campo é <strong>opcional</strong><br></br>
+              Exemplo: Para cadastrar Refrigerante Cola com sinônimos:<br></br>
+              <strong>Refri</strong> (pressione Tab) → <strong>Cola</strong>{" "}
+              (pressione Tab) → <strong>Bebida gaseificada</strong> (pressione Tab)
+            </h2>
+          }
+        />
 
         <button
           className="p-1.5 rounded text-primary bg-secondary
-      hover:bg-secondary-dark transition-colors"
+      hover:bg-secondary-dark transition-colors ml-auto"
           onClick={clearSynonyms}
         >
           <BsEraserFill />

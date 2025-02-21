@@ -118,7 +118,7 @@ function ProductRegistration() {
           {/* # divide the product name into three parts (name, brand, quantity) */}
           {/* Product Name */}
           <div className="mb-5">
-            <div className="flex align-center">
+            <div className="flex items-center">
               <label
                 htmlFor="productName"
                 className="block text-sm font-semibold text-white"
@@ -128,7 +128,16 @@ function ProductRegistration() {
               {/* <span className="p-1 rounded-full text-secondary">
                 <BsInfoCircleFill />
               </span> */}
-              <InfoDialogScreen infoText="Coloque ao menos três letras para receber os produtos já cadastrados no sistema" />
+              <InfoDialogScreen
+                infoText={
+                  <h2>
+                    Coloque três letras para receber exemplos de produtos já
+                    cadastrados no sistema. Com produto selecionado aperte a
+                    tecla <strong>tab</strong> para adicionar os dados do
+                    determinado produto.
+                  </h2>
+                }
+              />
             </div>
             <input
               type="text"
@@ -153,16 +162,21 @@ function ProductRegistration() {
           <div className="grid grid-cols-2 gap-6">
             {/* Product brand */}
             <div>
-              <div className="flex align-center">
+              <div className="flex items-center">
                 <label
                   htmlFor="productBrand"
                   className="block text-sm font-semibold text-white"
                 >
                   Marca do Produto
                 </label>
-                <span className="p-1 rounded-full text-secondary">
-                  <BsInfoCircleFill />
-                </span>
+                <InfoDialogScreen
+                  infoText={
+                    <h2>
+                      Coloque a marca do produto preferencialmente texto
+                      maiúsculo.
+                    </h2>
+                  }
+                />
               </div>
               <input
                 type="text"
@@ -172,22 +186,28 @@ function ProductRegistration() {
                 className="w-full p-2 mt-1 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
                 value={productBrand}
                 onChange={(e) => setProductBrand(e.target.value)}
-                placeholder="Néscau"
+                placeholder="NÉSCAU"
               />
             </div>
 
             {/* Product Quantity Format */}
             <div>
-              <div className="flex align-center">
+              <div className="flex items-center">
                 <label
                   htmlFor="productQuantityFormat"
                   className="block text-sm font-semibold text-white"
                 >
                   Formato Quantidade do Produto
                 </label>
-                <span className="p-1 rounded-full text-secondary">
-                  <BsInfoCircleFill />
-                </span>
+                <InfoDialogScreen
+                  infoText={
+                    <h2>
+                      Informe a quantidade de unidades por embalagem e a medida
+                      de cada unidade. Exemplo: Se um fardo tem 6 garrafas de
+                      2L, digite <strong>6X2L</strong>
+                    </h2>
+                  }
+                />
               </div>
               <input
                 type="text"
@@ -203,16 +223,20 @@ function ProductRegistration() {
 
             {/* Product Section */}
             <div>
-              <div className="flex align-center">
+              <div className="flex items-center">
                 <label
                   htmlFor="productSection"
                   className="block text-sm font-semibold text-white"
                 >
                   Seção do Produto
                 </label>
-                <span className="p-1 rounded-full text-secondary">
-                  <BsInfoCircleFill />
-                </span>
+                <InfoDialogScreen
+                  infoText={
+                    <h2>
+                      Informe o número da seção que o produto será colocado.
+                    </h2>
+                  }
+                />
               </div>
               <input
                 type="number"
@@ -228,21 +252,28 @@ function ProductRegistration() {
 
             {/* Product Price */}
             <div>
-              <div className="flex align-center">
+              <div className="flex items-center">
                 <label
                   htmlFor="productPrice"
                   className="block text-sm font-semibold text-white"
                 >
                   Preço do Produto (R$)
                 </label>
-                <span className="p-1 rounded-full text-secondary">
-                  <BsInfoCircleFill />
-                </span>
+                <InfoDialogScreen
+                  infoText={
+                    <h2>
+                      Informe o preço do produto (use ponto como separador
+                      decimal). Exemplos: <strong>2.50</strong> |{" "}
+                      <strong>0.60</strong> | <strong>10.99</strong>
+                    </h2>
+                  }
+                />
               </div>
               <input
                 type="text"
                 id="productPrice"
                 name="productPrice"
+                placeholder="10.99"
                 required
                 className="w-full p-2 mt-1 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
                 value={productPrice}
@@ -251,16 +282,25 @@ function ProductRegistration() {
             </div>
             {/* Product Metric Unity */}
             <div>
-              <div className="flex align-center">
+              <div className="flex items-center">
                 <label
                   htmlFor="productMetricUnity"
                   className="block text-sm font-semibold text-white"
                 >
                   Unidade de Medida do Produto
                 </label>
-                <span className="p-1 rounded-full text-secondary">
-                  <BsInfoCircleFill />
-                </span>
+                <InfoDialogScreen
+                  infoText={
+                    <h2>
+                      Selecione a unidade de medida correspondente à embalagem:
+                      <br></br>
+                      Exemplos:<br></br>
+                      <strong>6X2L</strong> → <strong>FD</strong> (Fardo) |
+                      <strong> 12X200G </strong> → <strong>CX</strong> (Caixa) |
+                      <strong> 1X5KG</strong> → <strong>UN</strong> (Unidade)
+                    </h2>
+                  }
+                />
               </div>
               <select
                 id="productMetricUnity"
@@ -284,16 +324,22 @@ function ProductRegistration() {
             </div>
             {/* Product Availability */}
             <div>
-              <div className="flex align-center">
+              <div className="flex items-center">
                 <label
                   htmlFor="productAvailability"
                   className="block text-sm font-semibold text-white"
                 >
                   Produtos em Estoque
                 </label>
-                <span className="p-1 rounded-full text-secondary">
-                  <BsInfoCircleFill />
-                </span>
+                <InfoDialogScreen
+                  infoText={
+                    <h2>
+                      Informe a quantidade de embalagens:<br></br>
+                      Digite apenas o número total (ex: para 5 caixas com 12
+                      unidades cada, insira <strong>5</strong>)
+                    </h2>
+                  }
+                />
               </div>
               <input
                 type="text"
@@ -308,11 +354,10 @@ function ProductRegistration() {
             </div>
           </div>
           <div>
-              <SynonymDetails
-                setProductSynonyms={setProductSynonyms}
-                resetKey={resetKey}
-              />
-
+            <SynonymDetails
+              setProductSynonyms={setProductSynonyms}
+              resetKey={resetKey}
+            />
           </div>
 
           <ReactiveButton

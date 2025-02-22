@@ -290,6 +290,64 @@ def products_find_with_metric_or_quantity_fix_prompt(products_find_using_metric_
         
     return prompt
 
+def products_find_with_synonyms(products_find_using_synonyms, products_find_using_prompt, products_alike, fix_prompt_v1):
+    prompt = f"""
+            Task Description
+            Your task is to normalize synonyms in the input text and return the exact list of matching products based on alternative product descriptions.
+
+            Response Rules (STRICT)
+            Your response must be one of these two outputs only:
+
+            1 A Python-style list of product names (if the input matches any products via synonyms)
+
+            Example: "Refrigerante de cola" → ["COCA-COLA LATA 350ML", "PEPSI PET 2L"]
+            
+            2 The exact string "Texto RA" (if no matching products are found)
+            Example: "Bebida espacial" → "Texto RA"
+            
+            Nothing else is allowed – no explanations, extra text, or code blocks.
+
+            Processing Steps
+            1 Normalize the Input
+            Fix spelling & grammar in this text: \n
+            
+            "{fix_prompt_v1}".
+            
+            \n
+            Convert common product synonyms into standard forms:
+            "Refrigerante de cola" → "Coca-Cola, Pepsi"
+            "Pasta de dente" → "Creme dental"
+            "Feijão preto" → "Feijão comum"
+            
+            2 Identify & Match Synonyms
+            Identify terms in the input that correspond to known synonyms.
+            Match the normalized term against {products_find_using_synonyms}.
+            If no valid synonym is detected, return "Texto RA".
+            
+            3 Retrieve Products Based on Synonyms
+            Retrieve ONLY products associated with {products_find_using_synonyms}.
+            
+            Use exact product names, keeping capitalization and punctuation.
+            
+            Ignore {products_find_using_prompt} and {products_alike} unless explicitly instructed.
+                        
+            STRICT Output Examples
+            Valid Outputs (Only two options exist!)
+
+            Exact Synonym Matches
+            Input: "Refresco de cola" → Output: ["COCA-COLA LATA 350ML", "PEPSI PET 2L"]
+            Input: "Pasta de dente" → Output: ["COLGATE CREME DENTAL 90G", "ORAL-B CREME DENTAL 70G"]
+            Input: "Sabão em pó" → Output: ["OMO LAVAGEM PERFEITA 1.6KG", "TIXAN YPÊ 2KG"]
+            General Synonym Matches
+            Input: "Biscoito recheado" → Output: ["OREO 90G", "TRAQUINAS CHOCOLATE"]
+            Input: "Água sem gás" → Output: ["CRYSTAL SEM GÁS 500ML", "MINALBA NATURAL 1.5L"]
+            Invalid Inputs (No Matches)
+            Input: "Bebida espacial" → Output: "Texto RA"
+            Input: "Pó de dragão" → Output: "Texto RA"
+        """
+        
+    return prompt
+
 def products_match_all_conditions(products_find_in_section, products_find_with_price, products_find_using_brand, products_find_using_metric_or_quantity, products_find_using_prompt, products_alike, fix_prompt_v1):
         prompt = f"""
         Task Description:

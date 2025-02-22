@@ -52,8 +52,8 @@ function Header() {
       {/* Icons container */}
       <span className="flex items-center ml-auto space-x-4 text-xl cursor-pointer hover:text-secondary">
         <div className="flex">
-        <BsFillBellFill />
-        <span className="text-xs">3</span>
+        {/* <BsFillBellFill />
+        <span className="text-xs">3</span> */}
         </div>
       </span>
 

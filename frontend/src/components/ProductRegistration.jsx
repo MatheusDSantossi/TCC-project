@@ -51,7 +51,7 @@ function ProductRegistration() {
 
     if (selectedProduct) {
       const numberOfSection = selectedProduct.secao_produto.slice(-1);
-
+      console.log("Selected product in PREGISTER: ", selectedProduct)
       console.log("Number of section: " + numberOfSection);
       setProductBrand(selectedProduct.brand);
       setProductQuantityFormat(selectedProduct.quantity);
@@ -59,6 +59,7 @@ function ProductRegistration() {
       setProductPrice(selectedProduct.preco_venda);
       setProductMetricUnity(selectedProduct.unidade_medida);
       setProductAvailibility(selectedProduct.disponivel);
+      setProductSynonyms(selectedProduct.synonymous);
     }
   };
 
@@ -357,6 +358,9 @@ function ProductRegistration() {
             <SynonymDetails
               setProductSynonyms={setProductSynonyms}
               resetKey={resetKey}
+              previousProductSynonyms={productSynonyms}
+              // formData={formData}
+              // setFormData={setFormData}
             />
           </div>
 

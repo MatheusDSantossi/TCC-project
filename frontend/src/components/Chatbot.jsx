@@ -241,6 +241,8 @@ function Chatbot() {
             answer = "Digite alguma descrição do produto.";
           } else if (optionText === "Digitar o código do produto") {
             answer = "Digite o código do produto.";
+          } else if (optionText === "Digitar alguma descrição do produto ou sinônimo") {
+            answer = "Digite a descrição ou sinônimo do produto.";
           } else if (
             optionText === "Nome do gerente" ||
             optionText === "Quais são as promoções do dia?" ||
@@ -464,7 +466,7 @@ function Chatbot() {
             </div>
           ))}
           {!isNameEntered && isTypingDone && (
-            <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-[600px] z-50 px-4">
+            <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 w-full max-w-[600px] z-50 px-4">
               <div className="flex items-center w-full mt-4 space-x-2">
                 <input
                   className="flex-grow px-4 py-3 border border-gray-400 rounded-md focus:outline-none focus:ring focus:ring-yellow-500"
@@ -559,7 +561,7 @@ function Chatbot() {
             !isHecateAnswering &&
             menuOptions <= 0 &&
             isTypingDone && (
-              <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-[600px] px-4">
+              <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 w-full max-w-[600px] px-4">
                 <form
                   onSubmit={handleSubmit}
                   className="flex items-center w-full mt-4 space-x-2"

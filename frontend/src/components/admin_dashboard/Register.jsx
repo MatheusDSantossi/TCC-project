@@ -43,14 +43,14 @@ const Register = () => {
   const { handleSubmit, control } = useForm({ resolver: yupResolver(schema) });
 
   const submission = (data) => {
-    setButtonState("Carregando...");
+    setButtonState("success");
 
     AxiosInstance.post(`register/`, {
       email: data.email,
       password: data.password,
     }).then(() => {
       setTimeout(() => {
-        setButtonState("Sucesso!");
+        setButtonState("error");
       }, 2000);
       navigate(`/admin`);
     });

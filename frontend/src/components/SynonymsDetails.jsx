@@ -17,6 +17,9 @@ const SynonymDetails = ({
   const inputRef = useRef(null);
   const [changingSynonyms, setChangingSynonyms] = useState(false);
 
+  // Ref to check if initial load is done
+  const initialLoadRef = useRef(true);
+
   useEffect(() => {
     // console.log("Form Data before: ", formData)
     if (formData) {
@@ -32,6 +35,7 @@ const SynonymDetails = ({
   useEffect(() => {
     setProductsLocalSynonyms([]);
     setInputValue("");
+    initialLoadRef.current = true;
   }, [resetKey]);
 
   useEffect(() => {
@@ -39,20 +43,12 @@ const SynonymDetails = ({
   }, [productLocalSynonyms, setProductSynonyms]);
 
   useEffect(() => {
-    console.log("Changing synonyms: ", changingSynonyms);
-    if (!previousProductSynonyms && productLocalSynonyms) {
-      setProductsLocalSynonyms(productLocalSynonyms);
-    } else if (previousProductSynonyms && !changingSynonyms) {
+    if (initialLoadRef.current && previousProductSynonyms?.length) {
       setProductsLocalSynonyms(previousProductSynonyms);
+      initialLoadRef.current = false;
     }
-    console.log("Previous Synonyms: ", previousProductSynonyms);
-  }, [
-    productLocalSynonyms,
-    setProductSynonyms,
-    previousProductSynonyms,
-    changingSynonyms,
-  ]);
-
+  }, [previousProductSynonyms]);
+  
   useEffect(() => {
     if (inputRef.current) {
       inputRef.current.focus();

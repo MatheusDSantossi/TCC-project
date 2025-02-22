@@ -42,6 +42,11 @@ export default function ProductsTable({ products_data, onProductUpdate }) {
     }
   };
 
+  const handleRefreshTable = () => {
+    console.log("Entered to refresh table");
+    onProductUpdate();
+  };
+
   const handleClose = () => {
     // setLoading(false);
     setEditModalOpen(false);
@@ -52,36 +57,43 @@ export default function ProductsTable({ products_data, onProductUpdate }) {
       field: "product_id",
       headerName: <strong>ID</strong>,
       width: 90,
+      minWidth: 80,
     },
     {
       field: "name",
       headerName: <strong>Produto</strong>,
-      width: 200,
+      minWidth: 200,
+      flex: 2,
     },
     {
       field: "brand",
       headerName: <strong>Marca</strong>,
-      width: 150,
+      minWidth: 150,
+      flex: 1,
     },
     {
       field: "quantity",
-      headerName: <strong>Formato Quantidade</strong>,
-      width: 180,
+      headerName: <strong>Formato Qt.</strong>,
+      minWidth: 180,
+      flex: 1,
     },
     {
       field: "secao_produto",
       headerName: <strong>Seção</strong>,
-      width: 100,
+      minWidth: 100,
+      flex: 0.5,
     },
     {
       field: "preco_venda",
-      headerName: <strong>Preço de venda</strong>,
-      width: 140,
+      headerName: <strong>Preço</strong>,
+      minWidth: 120,
+      flex: 1,
     },
     {
       field: "actions",
       headerName: <strong>Ações</strong>,
-      width: 100,
+      minWidth: 100,
+      flex: 0.5,
       sortable: false,
       renderCell: (params) => (
         <IconButton
@@ -95,6 +107,8 @@ export default function ProductsTable({ products_data, onProductUpdate }) {
     },
   ];
 
+  // const rows = products_data;
+
   let rows = [];
 
   const products_dict = () => {
@@ -107,21 +121,18 @@ export default function ProductsTable({ products_data, onProductUpdate }) {
 
   console.log("Product dict: ", products_dict()[0]);
 
-  // const rows = [
-  //     { id: 1, lastName: 'Snow', firstName: 'Jon', age: 14 },
-  //     { id: 2, lastName: 'Lannister', firstName: 'Cersei', age: 31 },
-  //     { id: 3, lastName: 'Lannister', firstName: 'Jaime', age: 31 },
-  //     { id: 4, lastName: 'Stark', firstName: 'Arya', age: 11 },
-  //     { id: 5, lastName: 'Targaryen', firstName: 'Daenerys', age: null },
-  //     { id: 6, lastName: 'Melisandre', firstName: null, age: 150 },
-  //     { id: 7, lastName: 'Clifford', firstName: 'Ferrara', age: 44 },
-  //     { id: 8, lastName: 'Frances', firstName: 'Rossini', age: 36 },
-  //     { id: 9, lastName: 'Roxie', firstName: 'Harvey', age: 65 },
-  //   ];
-
   return (
     <div className="flex items-center justify-center w-full overflow-x-auto">
-      <Box sx={{ height: 650, width: 970 }}>
+      <Box
+        sx={{
+          width: "100%",
+          height: "calc(100 - 100px)",
+          padding: 2,
+          "& .MuiDataGrid-root": {
+            minWidth: 800, // Minimum width before scrolling
+          },
+        }}
+      >
         <DataGrid
           rows={products_data}
           columns={columns}
@@ -135,14 +146,31 @@ export default function ProductsTable({ products_data, onProductUpdate }) {
           }}
           pageSizeOptions={[10]}
           disableRowSelectionOnClick
+          sx={{
+            boxShadow: 2,
+            border: 2,
+            borderColor: '#5D76D3',
+            "& .MuiDataGrid-cell": {
+              backgroundColor: "#F4F4F4FF",
+              whiteSpace: "normal",
+              lineHeight: "1.2",
+              padding: "8px",
+            },
+            "& .MuiDataGrid-columnHeaderTitle": {
+              fontWeight: "bold",
+            },
+            '& .MuiDataGrid-cell:hover': {
+              color: '#5D76D3',
+            },
+          }}
         />
         <ProductEdit
           open={editModalOpen}
           onClose={handleClose}
           product={selectedProduct}
           onSave={handleSave}
+          refreshTable={handleRefreshTable}
         />
-        
       </Box>
     </div>
   );

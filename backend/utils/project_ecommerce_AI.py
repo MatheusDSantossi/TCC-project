@@ -90,10 +90,10 @@ business_name = "Supermercado Santos"
 chatbot_name = "Hecate"
 
 # My plan is to give the opportunity and way to the client put some information like the ones bellow
-info_about_the_business = ["Nosso mercado abre as 7h e fecha as 22h", 
-                           "Nosso mercado tem o valor de sempre atender os clientes com o melhor atendimento possível",
+info_about_the_business = [f"O {business_name} abre as 7h e fecha as 22h", 
+                           f"O {business_name} tem o valor de sempre atender os clientes com o melhor atendimento possível",
                            "O nome do nosso gerente é Matheus",
-                           "As promoções do nosso mercado hoje são principalmente no arroz que está 50% mais barato",
+                           f"As promoções do {business_name} hoje são principalmente no arroz que está 50% mais barato",
                            f"""Essas são as categorias por tipo de produto do {business_name}:
                            Alimentos básicos, como arroz, feijão, cuscuz, macarrão, óleo, sal e açucar.
                            Frios e laticínios, como queijo qualho, manteigas e queijo de manteiga.
@@ -113,6 +113,7 @@ pre_processed_prompt_products_list = []
 
 # nlp = spacy.load("pt_core_news_lg")
 
+# Check if the text is an array. 
 pattern = r"\[(.*?)\]"
 # pattern_for_syn = r"\{.*?\}"
 pattern_for_syn = r"\{(.+?)\}"
@@ -300,7 +301,7 @@ def fetch_products_alike(product_name):
         query = """
             SELECT name, secao_produto, preco_venda FROM products_with_embeddings
             WHERE SIMILARITY(name, %s) > 0.1
-            LIMIT 10;
+            LIMIT 30;
         """
         
         # print(type(product_name))
@@ -341,6 +342,7 @@ def pre_process_prompt(prompt):
     products_find_using_prompt = find_similar_products_using_input_embeddings(input_embed, conn, np, cosine_similarity)
     products_find_using_brand = find_brand(fix_prompt_v1, conn)
     products_find_using_metric_or_quantity = find_quantity(fix_prompt_v1, conn)
+    products_find_using_synonyms = find_using_synonyms(fix_prompt_v1, conn)
     
     fix_prompt_v2 = fix_prompt_v1
     
@@ -465,6 +467,13 @@ def pre_process_prompt(prompt):
         # Only match metric or quantity
         fix_prompt_v2 = products_find_with_metric_or_quantity_fix_prompt(
             products_find_using_metric_or_quantity, 
+            products_find_using_prompt, 
+            products_alike, 
+            fix_prompt_v1
+        )
+    elif products_find_using_synonyms is not None:
+        fix_prompt_v2 = products_find_with_synonyms(
+            products_find_using_synonyms,
             products_find_using_prompt, 
             products_alike, 
             fix_prompt_v1
@@ -1224,9 +1233,10 @@ def chatbot_response(user_prompt):
 
             Avoid any unnecessary comments. At the end of your response,  
             **ask if you can assist with anything else** or offer a **related follow-up question**.
+            Remember do not EVER return a response in English, you are talking with a Brazilian client. 
             """
 
-
+    
     response = chat.send_message(answer_prompt)
 
     print("-"*80)
@@ -1268,20 +1278,21 @@ def generate_synonymous(product=None, product_list=None, brand=None, synonyms=No
         else:
             products = generate_and_search(original_product)
         
-        
-        print("PRODUCTS SIZE: ", products.size)
-        
-        if products.size > 1:
-            for index, row in products.iterrows():
+        if not isinstance(products, str):
+            # print("products value: ", products)
+            # print("Instance of product 1.0: ", isinstance(products, str))
+            if products.size > 1:
+                print("PRODUCTS SIZE: ", products.size)
+                for index, row in products.iterrows():
 
-                products_dict = {
-                    "Name": row['Nome'],
-                    "Section": row['Secao'],
-                    "Price": row['PrecoVenda'],
-                    "Available": row['Disponivel'],
-                }            
-                product_synonymous_list.append(products_dict)
-                # print("GENERATE SYNONYMOUS PRODUCT", products_dict["Name"])
+                    products_dict = {
+                        "Name": row['Nome'],
+                        "Section": row['Secao'],
+                        "Price": row['PrecoVenda'],
+                        "Available": row['Disponivel'],
+                    }            
+                    product_synonymous_list.append(products_dict)
+                    # print("GENERATE SYNONYMOUS PRODUCT", products_dict["Name"])
     
     else:
         print("product: ", product)
@@ -1296,19 +1307,20 @@ def generate_synonymous(product=None, product_list=None, brand=None, synonyms=No
             products = generate_and_search(original_product)
         
         
-        print("PRODUCTS SIZE: ", products.size)
-    
-    if products.size > 1:
-        for index, row in products.iterrows():
+    if not isinstance(products, str):
+        # print("products value: ", products)
+        # print("Instance of product 2: ", isinstance(products, str))
+        if products.size > 1:
+            for index, row in products.iterrows():
 
-            products_dict = {
-                "Name": row['Nome'],
-                "Section": row['Secao'],
-                "Price": row['PrecoVenda'],
-                "Available": row['Disponivel'],
-            }            
-            product_synonymous_list.append(products_dict)
-            # print("GENERATE SYNONYMOUS PRODUCT", products_dict["Name"])
+                products_dict = {
+                    "Name": row['Nome'],
+                    "Section": row['Secao'],
+                    "Price": row['PrecoVenda'],
+                    "Available": row['Disponivel'],
+                }            
+                product_synonymous_list.append(products_dict)
+                # print("GENERATE SYNONYMOUS PRODUCT", products_dict["Name"])
     
     print("Products synonymous list: ", product_synonymous_list)
     print("Products dict list: ", products_dict)

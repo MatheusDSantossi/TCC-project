@@ -111,7 +111,7 @@ class MenuOptionExtended(models.Model):
         menu_option1_s2_o1 = MenuOptionExtended.create_or_get_option(menu_option_description='Digitar o nome do produto')
         menu_option1_s2_o2 = MenuOptionExtended.create_or_get_option(menu_option_description='Digitar a seção do produto')
         menu_option1_s2_o3 = MenuOptionExtended.create_or_get_option(menu_option_description='Digitar a marca do produto')
-        menu_option1_s2_o4 = MenuOptionExtended.create_or_get_option(menu_option_description='Digitar alguma descrição do produto/sinônimo')
+        menu_option1_s2_o4 = MenuOptionExtended.create_or_get_option(menu_option_description='Digitar alguma descrição do produto ou sinônimo')
         ####
         
         # Opções para "Quais os produtos vocês vendem?"

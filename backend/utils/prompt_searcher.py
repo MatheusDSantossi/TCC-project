@@ -1,3 +1,4 @@
+import unicodedata
 import re
 from changing_db_columns import KNOWN_BRANDS, KNOWN_METRICS
 
@@ -73,22 +74,31 @@ def find_price(text, conn):
     
     return None
 
+def remove_accents(input_str):
+    """Remove accents/diacritics from a string while preserving the base chracter"""
+    nfkd_form = unicodedata.normalize('NFKD', input_str)
+    return u''.join([c for c in nfkd_form if not unicodedata.combining(c)])
+
 def find_brand(text, conn):
     
     brand = None
     text_lower = text.lower()
+    brand_clean = remove_accents(text_lower)
     
     # Creating a set of normalized brand names
-    normalized_brands = {brand.lower(): brand for brand in KNOWN_BRANDS}
+    normalized_brands = {
+        remove_accents(brand).lower(): brand for brand in KNOWN_BRANDS
+        }
     
     # Tokenized input text
-    tokens = re.findall(r'\b\w+\b', text_lower)
+    tokens = re.findall(r'\b\w+\b', brand_clean)
     
     # Check for exact matches in tokens
     for token in tokens:
         # if known_brand.lower() in text.lower():
         if token in normalized_brands:
             brand = normalized_brands[token]
+            print(f"Normalized brand match found: {brand}(Original: {text})")
             break
         
     if brand:
@@ -105,27 +115,6 @@ def find_brand(text, conn):
     
     return None
     
-    # Checking for exact matches in tokens
-    for token in tokens:
-        # if known_brand.lower() in text.lower():
-        if pattern.search(text_lower):
-            brand = brand
-            break
-        
-    if brand:
-        print("Brand found: ", brand)
-        with conn.cursor() as cursor:
-            
-            cursor.execute("""
-                            SELECT name, brand FROM products_with_embeddings 
-                            WHERE brand = %s
-                            LIMIT 30
-                            """, (brand,))
-            
-            return cursor.fetchall()
-    
-    return None
-
 def find_quantity(text, conn):
 
     metric = None
@@ -184,6 +173,7 @@ def find_quantity(text, conn):
 
     return None
 
+# TODO: Fix this function because the return is not good
 def find_similar_products_using_input_embeddings(input_embed, conn, np, cosine_similarity):
     
 
@@ -242,11 +232,13 @@ def find_similar_products_using_input_embeddings(input_embed, conn, np, cosine_s
             
         return product_details[:15]
 
-def find_using_synonyms(conn, text):
+def find_using_synonyms(text, conn):
     cursor = conn.cursor()
     
+    text_cleaned = remove_accents(text).lower()
+    
     # Splitting the search text into words and adding wildcards
-    words = [word.strip() for word in text.split() if word.strip()]
+    words = [word.strip() for word in text_cleaned.split() if word.strip()]
     
     if not words:
         return []
@@ -268,7 +260,7 @@ def find_using_synonyms(conn, text):
     
     search_term = f"%{text}%"
     cursor.execute("""
-                SELECT name FROM products_with_embeddings 
+                SELECT name, synonymous FROM products_with_embeddings 
                 WHERE EXISTS (
                     SELECT *
                     FROM unnest(synonymous) AS elem

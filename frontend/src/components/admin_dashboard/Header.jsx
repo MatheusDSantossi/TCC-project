@@ -26,8 +26,8 @@ function Header() {
       // Clear user session data and navigate to login pagel
       localStorage.removeItem("Token");
 
-      // Navigate to login page
-      navigate("/login");
+      // Navigate to home page
+      navigate("/adminHome");
     });
   };
 

@@ -4,6 +4,7 @@ from knox import views as knox_views
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("accounts/", include("allauth.urls")),
     path("", include("users.urls")),
     path("", include("chatbot.urls")),
     # path("api/auth/", include("knox.urls")),

@@ -30,6 +30,12 @@ const ForgetPassword = () => {
       setTimeout(() => {
         setButtonState("success");
       }, 2000);
+    }).catch((error) => {
+      setShowMessage(true);
+      console.log(error);
+      setTimeout(() => {
+        setButtonState("error");
+      }, 2000);
     });
   };
   return (
@@ -37,7 +43,7 @@ const ForgetPassword = () => {
       {ShowMessage ? (
         <CustomMessage
           text={
-            "If your email exists you have received an email with instructions for resetting the password"
+            "Se esse e-mail existe em nosso banco de dados você recebu um e-mail com as instruções para redefinir sua senha"
           }
           color={"#69C9AB"}
         />

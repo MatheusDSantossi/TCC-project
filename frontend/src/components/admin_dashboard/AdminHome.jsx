@@ -1,7 +1,10 @@
 import logo from "../../assets/logo.svg";
 import hugeRobotHand from "../../assets/huge_robot_hand.png";
+import hugeRobotHand2 from "../../assets/huge_robot_hand_2.png";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+
+import { businessName } from "../../utils/BusinessInfo";
 
 const AdminHome = () => {
   const navigate = useNavigate();
@@ -21,22 +24,18 @@ const AdminHome = () => {
         <div className="flex items-center justify-between">
           <img src={logo} alt="logo" className="h-10" />
           <div className="flex">
-            <h3 className="mr-3 font-bold text-white text-md">
-              <button
-                onClick={(e) => handleClick(e, "Login")}
-                className="hover:text-secondary"
-              >
-                Login
-              </button>
-            </h3>
-            <h3 className="font-bold text-white text-md">
-              <button
-                onClick={(e) => handleClick(e)}
-                className="hover:text-secondary"
-              >
-                Cadastrar
-              </button>
-            </h3>
+            <button
+              onClick={(e) => handleClick(e, "Login")}
+              className="mr-3 text-white text-md bg-quartiary p-1 rounded-lg hover:text-secondary-dark hover:bg-quartiary-dark"
+            >
+              Login
+            </button>
+            <button
+              onClick={(e) => handleClick(e)}
+              className="mr-3 text-white text-md bg-quartiary p-1 rounded-lg hover:text-secondary-dark hover:bg-quartiary-dark"
+            >
+              Cadastrar
+            </button>
           </div>
         </div>
       </div>
@@ -50,6 +49,16 @@ const AdminHome = () => {
           transition={{ type: "spring", stiffness: 50, damping: 15 }}
         />
       </div>
+      <div className="absolute inset-0 flex justify-start -z-10">
+        <motion.img
+          src={hugeRobotHand2}
+          alt="Huge robot hand pointing"
+          className="max-w-[50%] md:max-w-[40%] lg:max-w-[30%] xl:max-w-[25%] object-contain"
+          initial={{ x: "-100vw", opacity: 0 }}
+          animate={{ x: "0", opacity: 1 }}
+          transition={{ type: "spring", stiffness: 50, damping: 15 }}
+        />
+      </div>
       <div className="flex flex-col items-center justify-center min-h-screen p-40">
         <div className="p-6 rounded-lg shadow-card bg-primary w-[90%] max-w-[600px]">
           <div className="flex items-center justify-center mb-6">
@@ -58,16 +67,23 @@ const AdminHome = () => {
           <div className="text-center">
             <h1 className="mb-4 text-4xl font-bold">
               Seja bem-vindo as Ferramentas Administrativas do
-              <span className="text-secondary"> Hecate🤖</span>
+              <span className="text-secondary"> {businessName}💼</span>
             </h1>
-            <hr style={{ height: '1px', border: 'none', backgroundColor: '#5D76D3' }}></hr>
+            <hr
+              style={{
+                height: "1px",
+                border: "none",
+                backgroundColor: "#5D76D3",
+              }}
+            ></hr>
             <h2 className="mt-4 text-xl">
               O sistema administrativo do{" "}
-              <span className="text-secondary">Hecate</span> com diversas
-              funcionalidades
+              <span className="text-secondary">{businessName}</span> com
+              diversas funcionalidades
             </h2>
             <h3 className="mt-6">
-              Em qualquer dúvida entre em contato com o email abaixo:<br />
+              Em qualquer dúvida entre em contato com o email abaixo:
+              <br />
               <a className="text-secondary" href="mailto:admin@hecate.com.br">
                 admin@hecate.com.br
               </a>

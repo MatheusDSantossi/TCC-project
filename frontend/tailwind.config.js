@@ -11,6 +11,7 @@ export default {
         "secondary-dark": "#CEE009FF",
         tertiary: "#013D31",
         quartiary: "#5D76D3",
+        "quartiary-dark": "#2F4EBEFF",
         "black-100": "#100d25",
         "black-200": "#090325",
         "white-100": "#f3f3f3",

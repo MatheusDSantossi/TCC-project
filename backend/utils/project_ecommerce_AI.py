@@ -1375,7 +1375,10 @@ def generate_synonymous(product=None, product_list=None, brand=None, synonyms=No
         """ 
     
     elif product_list: 
+        print("Original product elid: ", original_product)
         new_product = pre_process_prompt_grammatical(original_product)
+        
+        print("New_product: ", new_product)
         
         prompt = """Generate all possible synonyms for the product names listed below. Follow these rules carefully:
 
@@ -1415,6 +1418,8 @@ def generate_synonymous(product=None, product_list=None, brand=None, synonyms=No
         """ 
      
     else:
+        print("Product name: else ", product)
+        
         prompt = """Generate all possible synonyms for the product names listed below. Follow these rules carefully:
 
         The product names may be abbreviated, e.g., "INSET SBP AERO" means "INSETICIDA SBP AEROSSOL". Analyze each abbreviation to determine its meaning.
@@ -1435,8 +1440,10 @@ def generate_synonymous(product=None, product_list=None, brand=None, synonyms=No
         Here are the product names:
                 \n"""
         
-        for product in product_synonymous_list:
-            prompt += str(product["Name"]) + "\n"
+        prompt += product
+        
+        # for product in product_synonymous_list:
+        #     prompt += str(product["Name"]) + "\n"
         
         prompt += """\n\nOutput example (adjusted for dynamic products):
         

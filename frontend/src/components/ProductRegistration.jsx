@@ -187,7 +187,7 @@ function ProductRegistration() {
                 className="w-full p-2 mt-1 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
                 value={productBrand}
                 onChange={(e) => setProductBrand(e.target.value)}
-                placeholder="NÉSCAU"
+                placeholder="NESTLE"
               />
             </div>
 

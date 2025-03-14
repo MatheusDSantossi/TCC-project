@@ -441,8 +441,15 @@ function Chatbot() {
                     message.sender === "Você"
                       ? "bg-black text-white"
                       : "bg-gray-200 text-black"
-                  } p-3 rounded-lg`}
+                  } leading-1.5 p-4 border-gray-200 rounded-e-xl rounded-es-xl mt-5`}
                 >
+                {/* <div
+                  className={`${
+                    message.sender === "Você"
+                      ? "bg-black text-white"
+                      : "bg-gray-200 text-black"
+                  } p-3 rounded-lg`}
+                > */}
                   {message.sender == "Você" ? (
                     <p className="text-sm">{message.text}</p>
                   ) : (

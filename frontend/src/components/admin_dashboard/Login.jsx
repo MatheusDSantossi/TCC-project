@@ -102,7 +102,8 @@ const Login = () => {
           {/* </div>
 
           <div className="flex items-center justify-center m-3"> */}
-          <GoogleButton />
+          {/* TODO: I need to fix the problem witht the login using google */}
+          {/* <GoogleButton /> */}
 
             {/* <button className="flex items-center p-1 rounded rounded-full bg-[#FFC107] bg-white text-black hover:bg-yellow-300" onClick={googleLoginHandle}>
               <img className="h-10" src={googleBrand} alt="Logo do Google" />

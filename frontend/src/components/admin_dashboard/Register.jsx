@@ -90,9 +90,9 @@ const Register = () => {
             />
           </Box>
 
-          <a href="http://127.0.0.1:8000/accounts/google/login">
+          {/* <a href="http://127.0.0.1:8000/accounts/google/login">
             Cadastrar com Google
-          </a>
+          </a> */}
           
           <div className="flex items-center justify-center p-3 space-x-32">
             {/* <CustomButton

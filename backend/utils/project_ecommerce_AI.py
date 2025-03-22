@@ -471,7 +471,7 @@ def pre_process_prompt(prompt):
             products_alike, 
             fix_prompt_v1
         )
-    elif products_find_using_synonyms is not None:
+    elif products_find_using_synonyms is not None and products_find_using_metric_or_quantity is None and products_find_using_brand is None and products_find_using_prompt is None and products_find_with_price is None:
         fix_prompt_v2 = products_find_with_synonyms(
             products_find_using_synonyms,
             products_find_using_prompt, 

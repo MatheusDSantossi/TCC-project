@@ -230,7 +230,7 @@ def find_similar_products_using_input_embeddings(input_embed, conn, np, cosine_s
                 # "similarity": similarity
             })
             
-        return product_details[:15]
+        return product_details[:30]
 
 def find_using_synonyms(text, conn):
     cursor = conn.cursor()

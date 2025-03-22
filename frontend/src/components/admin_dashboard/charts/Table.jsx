@@ -55,43 +55,43 @@ export default function ProductsTable({ products_data, onProductUpdate }) {
   const columns = [
     {
       field: "product_id",
-      headerName: <strong>ID</strong>,
+      headerName: <strong className="text-base">ID</strong>,
       width: 90,
       minWidth: 80,
     },
     {
       field: "name",
-      headerName: <strong>Produto</strong>,
+      headerName: <strong className="text-base">Produto</strong>,
       minWidth: 200,
       flex: 2,
     },
     {
       field: "brand",
-      headerName: <strong>Marca</strong>,
+      headerName: <strong className="text-base">Marca</strong>,
       minWidth: 150,
       flex: 1,
     },
     {
       field: "quantity",
-      headerName: <strong>Formato Qt.</strong>,
+      headerName: <strong className="text-base">Formato Qt.</strong>,
       minWidth: 180,
       flex: 1,
     },
     {
       field: "secao_produto",
-      headerName: <strong>Seção</strong>,
+      headerName: <strong className="text-base">Seção</strong>,
       minWidth: 100,
       flex: 0.5,
     },
     {
       field: "preco_venda",
-      headerName: <strong>Preço</strong>,
+      headerName: <strong className="text-base">Preço</strong>,
       minWidth: 120,
       flex: 1,
     },
     {
       field: "actions",
-      headerName: <strong>Ações</strong>,
+      headerName: <strong className="text-base">Ações</strong>,
       minWidth: 100,
       flex: 0.5,
       sortable: false,
@@ -147,6 +147,7 @@ export default function ProductsTable({ products_data, onProductUpdate }) {
           pageSizeOptions={[10]}
           disableRowSelectionOnClick
           sx={{
+            fontSize: "16px",
             boxShadow: 2,
             border: 2,
             borderColor: '#5D76D3',

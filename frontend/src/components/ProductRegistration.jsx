@@ -132,7 +132,7 @@ function ProductRegistration() {
               <InfoDialogScreen
                 infoText={
                   <h2>
-                    Coloque três letras para receber exemplos de produtos já
+                    Coloque quatro letras ou mais para receber exemplos de produtos já
                     cadastrados no sistema. Com produto selecionado aperte a
                     tecla <strong>tab</strong> para adicionar os dados do
                     determinado produto.

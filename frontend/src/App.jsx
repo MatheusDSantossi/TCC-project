@@ -14,8 +14,11 @@ import AdminHome from "./components/admin_dashboard/AdminHome";
 import ProtectedRoute from "./components/ProtectedRoutes";
 import ForgetPassword from "./components/admin_dashboard/ForgetPassword";
 import ForgetPasswordReset from "./components/admin_dashboard/ForgetPasswordReset";
+import useInactivityLogout from "./components/UseInactivityLogout";
 
 function App() {
+  useInactivityLogout();
+
   const [openSidebarToggle, setOpenSidebarToggle] = useState(false);
 
   const OpenSidebar = () => {

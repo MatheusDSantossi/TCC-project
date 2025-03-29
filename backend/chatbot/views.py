@@ -198,16 +198,19 @@ class ProductRegistration(viewsets.ViewSet):
 
             print("Synonyms: ", synonyms)
 
-            products = Product.get_all_products()
+            # products = Product.get_all_products()
+            
             
             product_name = product_name.strip()
             product_section = "Seção " + str(product_section)
             
             print("V1_PN: ", product_name, product_section, price, metric_unity, available)
             
-            # THE RESULTS WERE REALLY BAD TO THE FIX OF PRODUCTS
-            if not Product.objects.filter(name=product_name).exists():
-                print("ENTER HERE")
+            existing_product = Product.objects.filter(name=product_name, brand=product_brand).first()
+            
+            # if not Product.objects.filter(name=product_name).exists() or not Product.objects.filter(brand=product_brand).exists():
+            if not existing_product:
+                print("Creating new Product...")
                 
                 embeddings = Product.generate_emebed(product_name)
 
@@ -218,71 +221,90 @@ class ProductRegistration(viewsets.ViewSet):
                 
                 synonymous = Product.generate_synonymous(product=product_name, brand=product_brand, synonyms=synonyms)
                 
-                product.brand = product_brand
+                # product.brand = product_brand
                 product.synonymous = synonymous
                 print("Product original quantity: ", product.quantity)
                 print("Product quantity: ", product_quantity_format)
                 print("Product brand: ", product.brand)
             
-                product.quantity = product_quantity_format
+                # product.quantity = product_quantity_format
                 product.save()
                 
+                result_product = product
+                
             else:
-                print("ENTER THERE")
+                print("Updating existing product...")
                 
-                products = Product.objects.filter(name=product_name)
+                product = existing_product
                 
-                if len(products) > 1:
-                    for product in products:
-                        print("Product: ", product)
-                        product_synonymous = Product.get_synonymus(product)
-                        if not product_synonymous:
-                            synonymous = Product.generate_synonymous(product_list=product, brand=product_brand, synonyms=synonyms)
-                        
-                        
-                        product.brand = product_brand
-                        product.synonymous = synonymous
-                        print("Product original quantity: ", product.quantity)
-                        print("Product quantity: ", product_quantity_format)
-                        print("Product brand: ", product.brand)
+                product.brand = product_brand
+                product.quantity = product_quantity_format
+                
+                product_synonymous = Product.get_synonymus(product_name)
+                
+                if not product_synonymous:
+                    synonymous = Product.generate_synonymous(product=product_name, brand=product_brand, synonyms=synonyms)
                     
-                        product.quantity = product_quantity_format
-                        product.save()
-                        
                 else:
-                    product_synonymous = Product.get_synonymus(product_name)
-                    print("SYNONYMOUS: ", product_synonymous)
+                    product.synonymous = product_synonymous
                     
-                    product = Product.get_product_by_name(product_name)
-                    
-                    if not product_synonymous:
-                        synonymous_list = Product.generate_synonymous(product_list=product, brand=product_brand, synonyms=synonyms)
-                    else:
-                        synonymous_list = Product.get_synonymus(product_name)
+                product.save()
+                result_product = product
+                
+                # if len(products) > 1:
+                #     for product in products:
+                #         print("Product: ", product)
+                #         product_synonymous = Product.get_synonymus(product)
+                #         if not product_synonymous:
+                #             synonymous = Product.generate_synonymous(product_list=product, brand=product_brand, synonyms=synonyms)
                         
-                    print("Product name: ", product.name)
-                    print("Product brand: ", product.brand)
-                    print("Product quantity: ", product.quantity)
-                    print("Product synonymous: ", product.synonymous)
+                        
+                #         product.brand = product_brand
+                #         product.synonymous = synonymous
+                #         print("Product original quantity: ", product.quantity)
+                #         print("Product quantity: ", product_quantity_format)
+                #         print("Product brand: ", product.brand)
+                    
+                #         product.quantity = product_quantity_format
+                #         product.save()
+                        
+                # else:
+                #     product_synonymous = Product.get_synonymus(product_name)
+                #     print("SYNONYMOUS: ", product_synonymous)
+                    
+                #     product = Product.get_product_by_name(product_name)
+                    
+                #     if not product_synonymous:
+                #         synonymous_list = Product.generate_synonymous(product_list=product, brand=product_brand, synonyms=synonyms)
+                #     else:
+                #         synonymous_list = Product.get_synonymus(product_name)
+                        
+                #     print("Product name: ", product.name)
+                #     print("Product brand: ", product.brand)
+                #     print("Product quantity: ", product.quantity)
+                #     print("Product synonymous: ", product.synonymous)
             
-                    product.brand = product_brand
+                #     product.brand = product_brand
                     
-                    product.quantity = product_quantity_format
-                    product.synonymous = synonymous_list
-                    print("Product synonymous: ", product.synonymous)
+                #     product.quantity = product_quantity_format
+                #     product.synonymous = synonymous_list
+                #     print("Product synonymous: ", product.synonymous)
                     
-                    product.save()
+                #     product.save()
                     
                     
         except Exception as err:
             print('Error here 2.0: ', err)
             return Response({'error': 'An error occured while registering the product: '}, status=500)
         
-        products = Product.get_all_products()
+        # products = Product.get_all_products()
         
         return Response([
-            {'product_id': product.product_id, 'product_name': product.name} for product in products
+            {'product_id': result_product.product_id, 'product_name': result_product.name}
             ])
+        # return Response([
+        #     {'product_id': product.product_id, 'product_name': product.name} for product in products
+        #     ])
 
 class ProductUpdate(viewsets.ViewSet):
     @action(detail=True, methods=['put'], url_path='update-product/(?P<pk>[^/.]+)')

@@ -26,6 +26,8 @@ function Chatbot() {
   const [isTypingDone, setIsTypingDone] = useState(false);
   const [pendingMenuOptions, setPendingMenuOptions] = useState(null);
 
+  const [isTextRelatedTo, setIsTextRelatedTo] = useState("default");
+
   const chatContainerRef = useRef(null);
   // const [clockFormat, setClockFormat] = useState("24-hour");
   // const [currentTime, setCurrentTime] = useState("");
@@ -158,6 +160,7 @@ function Chatbot() {
       // Await the Axios POST request
       const response = await AxiosInstance.post(`chatbot/post/`, {
         user_input: message,
+        text_related_to: isTextRelatedTo
       });
       setIsHecateAnswering(false);
       const botResponse = {
@@ -234,8 +237,10 @@ function Chatbot() {
           if (optionText === "Digitar o nome do produto") {
             answer = "Digite o nome do produto.";
           } else if (optionText === "Digitar a seção do produto") {
+            setIsTextRelatedTo("section");
             answer = "Digite a seção do produto. (Ex: Seção 1)";
           } else if (optionText === "Digitar a marca do produto") {
+            setIsTextRelatedTo("brand");
             answer = "Digite a marca do produto. (Ex: Vitamassa)";
           } else if (optionText === "Digitar alguma descrição do produto") {
             answer = "Digite alguma descrição do produto.";
@@ -441,7 +446,7 @@ function Chatbot() {
                     message.sender === "Você"
                       ? "bg-black text-white"
                       : "bg-gray-200 text-black"
-                  } leading-1.5 p-4 border-gray-200 rounded-e-xl rounded-es-xl mt-5`}
+                  } p-4 border-gray-200 rounded-e-xl rounded-es-xl mt-5 text-lg leading-relaxed`}
                 >
                 {/* <div
                   className={`${
@@ -451,7 +456,7 @@ function Chatbot() {
                   } p-3 rounded-lg`}
                 > */}
                   {message.sender == "Você" ? (
-                    <p className="text-sm">{message.text}</p>
+                    <p className="text-lg">{message.text}</p>
                   ) : (
                     <Typewriter
                       className="text-sm"
@@ -476,7 +481,7 @@ function Chatbot() {
             <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 w-full max-w-[600px] z-50 px-4">
               <div className="flex items-center w-full mt-4 space-x-2">
                 <input
-                  className="flex-grow px-4 py-3 border border-gray-400 rounded-md focus:outline-none focus:ring focus:ring-yellow-500"
+                  className="flex-grow px-4 py-3 text-lg rounded-md bg-input focus:outline-none focus:ring-2 focus:ring-yellow-500"
                   type="text"
                   placeholder="Digite seu nome"
                   value={userInput}
@@ -502,7 +507,7 @@ function Chatbot() {
                 {menuOptions.map((option, index) => (
                   <button
                     key={index}
-                    className="px-4 py-2 font-bold text-black transition duration-200 bg-yellow-400 rounded-lg hover:bg-yellow-300"
+                    className="px-4 py-2 text-lg font-bold text-black transition duration-200 bg-yellow-400 rounded-lg hover:bg-yellow-300"
                     onClick={() => {
                       selectOption(
                         option.menu_extended_id,
@@ -574,7 +579,7 @@ function Chatbot() {
                   className="flex items-center w-full mt-4 space-x-2"
                 >
                   <input
-                    className="flex-grow px-4 py-3 border border-gray-400 rounded-md focus:outline-none focus:ring focus:ring-yellow-500"
+                    className="flex-grow px-4 py-3 text-lg border rounded-md bg-input focus:outline-none focus:ring-2 focus:ring-yellow-500"
                     type="text"
                     placeholder="Digite sua mensagem…"
                     onSubmit={handleSubmit}

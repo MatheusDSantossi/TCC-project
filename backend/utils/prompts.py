@@ -48,6 +48,37 @@ def pre_process_prompt_grammatical_fix_prompt(text, business_name):
     """
     return prompt
     
+def pre_process_prompt_grammatical_brand_fix_prompt(text, business_name, brands_in_database):
+    prompt = f"""
+        Correct the following text for grammatical and spelling errors, ensuring it is clear and understandable to a human reader.
+        Additionally, if the text contains any product brands, verify them against the provided brands list and correct any misspellings to the exact brand names from that list.
+        If a word might be a brand, do not alter it unless you are certain it is misspelled. In other cases, perform standard grammatical corrections.
+
+        Consider that the text is provided by a customer of the store {business_name} and may include retail product names, utensils, or other related items.
+        For example, if the text contains an abbreviated or misspelled term like "INSET SBP AERO", it should be corrected to "INSETICIDA SBP AEROSSOL".
+        Similarly, if the text includes a brand (e.g., "Treloso") even in a misspelled form like "teloso", and that brand exists in the provided brands list, it must be corrected to the exact brand name ("Treloso").
+
+        Examples:
+        - Input: "biscoite teloso" → Output: "biscoito treloso"   (Assuming "Treloso" is in the brands list)
+        - Input: "vocês têm cafi preto?" → Output: "vocês têm café preto?"
+
+        Instructions:
+        1. Fix grammatical and spelling errors in the text: 
+        - Correct common errors while preserving the original meaning.
+        2. Normalize product names, utensils, or any other items to a standard form.
+        3. When encountering potential brand names:
+        - If the term closely resembles a brand from the list {brands_in_database}, correct it to the exact brand name.
+        - Do not change words to a brand form if it is uncertain they refer to a brand.
+        4. Maintain all other parts of the text without adding extra information.
+
+        Text to correct:
+        "{text}"
+
+        Return the corrected text in Portuguese, with no additional formatting or characters.
+        """
+    return prompt
+    
+# Specific prompts to find some possible products
 def products_find_in_section_fix_prompt(products_find_in_section, products_find_using_prompt, products_alike, fix_prompt_v1):
     
     prompt = f"""

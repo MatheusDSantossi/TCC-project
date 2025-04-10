@@ -95,7 +95,7 @@ const SynonymDetails = ({
       <div className="flex items-center justify-between w-full mb-1">
         <label
           htmlFor="productSynonyms"
-          className="block text-sm font-semibold text-white"
+          className="block text-lg font-semibold text-white"
         >
           Sinônimos para o Produto
         </label>

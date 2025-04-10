@@ -1,3 +1,4 @@
+import '../App.css';
 import React, { useEffect } from "react";
 import logo from "../assets/logo.svg";
 import { useNavigate } from "react-router-dom";
@@ -31,8 +32,8 @@ const Home = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-40">
-      <div className="p-6 rounded-lg shadow-card bg-primary">
+    <div className="flex flex-col items-center justify-center min-h-screen p-40 drop-shadow-3xl">
+      <div className="p-6 rounded-lg bg-primary">
         <div className="flex items-center justify-center mb-6">
           <img src={logo} alt="logo" className="h-20" />
         </div>

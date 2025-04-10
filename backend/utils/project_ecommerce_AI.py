@@ -251,6 +251,8 @@ for row in rows:
         "Disponivel": row[5],
         "Embeddings": row[6],
         "Synonymous": row[7],
+        "Brand": row[8],
+        "Quantity": row[9],
     }
     products_list.append(products)
 
@@ -280,6 +282,17 @@ def for_dividing_prompt_limit():
     for i in range(0, max_prompt_size):
         prompt+= products_list_2[i]
 
+def pre_process_prompt_brand(prompt, brands_find):
+    fix_prompt = pre_process_prompt_grammatical_brand_fix_prompt(prompt, business_name, brands_find)
+
+    time.sleep(3)
+
+    
+    pre_processed_prompt = generate_content_model.generate_content(fix_prompt)
+    
+    return pre_processed_prompt.text
+
+
 def pre_process_prompt_grammatical(prompt):
     
     fix_prompt = pre_process_prompt_grammatical_fix_prompt(prompt, business_name)
@@ -291,6 +304,28 @@ def pre_process_prompt_grammatical(prompt):
     # Problema agora é identificar mais de um produto :)
 
     return pre_processed_prompt.text
+
+def fetch_brands_alike(product_brand):
+    print("ENTERED FETCH BRANDS!!")
+    with conn.cursor() as cursor:
+        
+        cursor.execute("CREATE EXTENSION IF NOT EXISTS pg_trgm;")
+        
+        
+        query = """
+            SELECT DISTINCT brand FROM products_with_embeddings
+            WHERE SIMILARITY(brand, %s) > 0.1
+            LIMIT 30;
+        """
+        
+        # for keyword in product_name:
+        cursor.execute(query, (product_brand,))
+        rows = cursor.fetchall()
+        
+        unique_brands = [row[0] for row in rows]
+        print("Unique brands: ", unique_brands)
+            
+    return unique_brands
 
 def fetch_products_alike(product_name):
     with conn.cursor() as cursor:
@@ -1012,13 +1047,20 @@ def create_menu_options_prompts():
 
 
 
-def chatbot_response(user_prompt):
+def chatbot_response(user_prompt, text_related_to="default"):
     
     global dict_of_client_products
     global products_list_after_user_input
 
-    fix_prompt_v1 = pre_process_prompt_grammatical(user_prompt)
+    print("Text related to: ", text_related_to)
 
+    if text_related_to == "brand":
+        brands_find = fetch_brands_alike(user_prompt)
+        
+        fix_prompt_v1 = pre_process_prompt_brand(user_prompt, brands_find)
+    else:
+        fix_prompt_v1 = pre_process_prompt_grammatical(user_prompt)
+        
     find_product = generate_and_search(fix_prompt_v1)
 
     is_product = isinstance(find_product, pd.DataFrame)
@@ -1028,6 +1070,10 @@ def chatbot_response(user_prompt):
     print("Find products: ", find_product)
 
     if is_product:
+        
+        # for column in find_product.columns:
+        #     print(f"column: {column}")
+        
         count_row = find_product.shape[0]
         print(count_row)
         # if count_row > 1:
@@ -1037,21 +1083,29 @@ def chatbot_response(user_prompt):
                 # print(f"ID: {index}, Nome: {row['Nome']}, Secao: {row['Secao']}, Disponivel: {row['Disponivel']}")
                 dict_of_client_products = {
                     "Name": row['Nome'],
+                    "Brand": row["Brand"],
                     "Section": row['Secao'],
                     "Price": row['PrecoVenda'],
                     "Available": row['Disponivel'],
+                    "Quantity": row['Quantity'],
                 }            
                 products_list_after_user_input.append(dict_of_client_products)                
         
-            detailed_prompt = detailed_prompt = "Gerar uma descrição detalhada para um chatbot de e-commerce dos produtos que se encontram nessa lista: "
+            prompt_intro = "Generate a detailed yet compact description for an e-commerce chatbot using the following product data:\n\n"
+                
+            print("products_list_after_user_input: ", products_list_after_user_input)
                 
             name_of_product = ""
             matching_products = []
-            for product in products_list_after_user_input: 
-                name_of_product = product['Name']
-                detailed_prompt += f"Nome do produto: {product['Name']}\n"
-                detailed_prompt += f"Preço do produto: {product['Price']}\n"
-                detailed_prompt += f"Produto está disponível com {product['Available']} em estoque\n\n"
+            product_details = [
+                f"Product Name: {product['Name']}\n"
+                f"Product Brand: {product['Brand']}\n"
+                f"Product Price: {product['Price']}\n"
+                f"Stock: {product['Available']}\n"
+                for product in products_list_after_user_input
+            ]
+            
+            detailed_prompt = prompt_intro + "\n".join(product_details) 
             
             print("Name of product: ",name_of_product)
             if (len(name_of_product) > 0):

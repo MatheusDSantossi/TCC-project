@@ -122,7 +122,7 @@ function ProductRegistration() {
             <div className="flex items-center">
               <label
                 htmlFor="productName"
-                className="block text-sm font-semibold text-white"
+                className="block text-lg font-semibold text-white"
               >
                 Nome do Produto
               </label>
@@ -144,8 +144,9 @@ function ProductRegistration() {
               type="text"
               id="productName"
               name="productName"
+              placeholder="Digite o nome do produto"
               required
-              className="w-full p-2 mt-1 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
+              className="w-full p-2 mt-1 rounded-lg bg-input focus:outline-none focus:ring-2 focus:ring-yellow-400"
               value={productName}
               list="productsSuggestions"
               onChange={(e) => setProductName(e.target.value)}
@@ -163,10 +164,10 @@ function ProductRegistration() {
           <div className="grid grid-cols-2 gap-6">
             {/* Product brand */}
             <div>
-              <div className="flex items-center">
+              <div className="flex items-center mb-5">
                 <label
                   htmlFor="productBrand"
-                  className="block text-sm font-semibold text-white"
+                  className="block text-lg font-semibold text-white"
                 >
                   Marca do Produto
                 </label>
@@ -184,7 +185,7 @@ function ProductRegistration() {
                 id="productBrand"
                 name="productBrand"
                 required
-                className="w-full p-2 mt-1 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                className="w-full p-2 mt-1 rounded-lg bg-input focus:outline-none focus:ring-2 focus:ring-yellow-400"
                 value={productBrand}
                 onChange={(e) => setProductBrand(e.target.value)}
                 placeholder="NESTLE"
@@ -196,7 +197,7 @@ function ProductRegistration() {
               <div className="flex items-center">
                 <label
                   htmlFor="productQuantityFormat"
-                  className="block text-sm font-semibold text-white"
+                  className="block text-lg font-semibold text-white"
                 >
                   Formato Quantidade do Produto
                 </label>
@@ -215,7 +216,7 @@ function ProductRegistration() {
                 id="productQuantityFormat"
                 name="productQuantityFormat"
                 required
-                className="w-full p-2 mt-1 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                className="w-full p-2 mt-1 rounded-lg bg-input focus:outline-none focus:ring-2 focus:ring-yellow-400"
                 value={productQuantityFormat}
                 onChange={(e) => setProductQuantityFormat(e.target.value)}
                 placeholder="24X200G"
@@ -224,10 +225,10 @@ function ProductRegistration() {
 
             {/* Product Section */}
             <div>
-              <div className="flex items-center">
+              <div className="flex items-center mb-5">
                 <label
                   htmlFor="productSection"
-                  className="block text-sm font-semibold text-white"
+                  className="block text-lg font-semibold text-white"
                 >
                   Seção do Produto
                 </label>
@@ -244,7 +245,7 @@ function ProductRegistration() {
                 id="productSection"
                 name="productSection"
                 required
-                className="w-full p-2 mt-1 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                className="w-full p-2 mt-1 rounded-lg bg-input focus:outline-none focus:ring-2 focus:ring-yellow-400"
                 value={productSection}
                 onChange={(e) => setProductSection(e.target.value)}
                 placeholder="Seção 1"
@@ -256,7 +257,7 @@ function ProductRegistration() {
               <div className="flex items-center">
                 <label
                   htmlFor="productPrice"
-                  className="block text-sm font-semibold text-white"
+                  className="block text-lg font-semibold text-white"
                 >
                   Preço do Produto (R$)
                 </label>
@@ -276,7 +277,7 @@ function ProductRegistration() {
                 name="productPrice"
                 placeholder="10.99"
                 required
-                className="w-full p-2 mt-1 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                className="w-full p-2 mt-1 rounded-lg bg-input focus:outline-none focus:ring-2 focus:ring-yellow-400"
                 value={productPrice}
                 onChange={(e) => setProductPrice(e.target.value)}
               />
@@ -286,7 +287,7 @@ function ProductRegistration() {
               <div className="flex items-center">
                 <label
                   htmlFor="productMetricUnity"
-                  className="block text-sm font-semibold text-white"
+                  className="block text-lg font-semibold text-white"
                 >
                   Unidade de Medida do Produto
                 </label>
@@ -307,7 +308,7 @@ function ProductRegistration() {
                 id="productMetricUnity"
                 name="productMetricUnity"
                 required
-                className="w-full p-2 mt-1 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                className="w-full p-2 mt-1 rounded-lg bg-input focus:outline-none focus:ring-2 focus:ring-yellow-400"
                 value={productMetricUnity}
                 onChange={(e) => setProductMetricUnity(e.target.value)}
               >
@@ -325,10 +326,10 @@ function ProductRegistration() {
             </div>
             {/* Product Availability */}
             <div>
-              <div className="flex items-center">
+              <div className="flex items-center mb-5">
                 <label
                   htmlFor="productAvailability"
-                  className="block text-sm font-semibold text-white"
+                  className="block text-lg font-semibold text-white"
                 >
                   Produtos em Estoque
                 </label>
@@ -347,7 +348,7 @@ function ProductRegistration() {
                 id="productAvailability"
                 name="productAvailability"
                 required
-                className="w-full p-2 mt-1 mb-5 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                className="w-full p-2 mt-1 mb-5 rounded-lg bg-input focus:outline-none focus:ring-2 focus:ring-yellow-400"
                 value={productAvailability}
                 onChange={(e) => setProductAvailibility(e.target.value)}
                 placeholder="100"

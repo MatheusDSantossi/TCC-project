@@ -16,6 +16,8 @@ import { ListItemPrefix } from "@material-tailwind/react";
 import * as motion from "motion/react-client";
 import { AnimatePresence } from "motion/react";
 
+import "../../App.css";
+
 function Header() {
   const [userName, setUsername] = useState("");
   const [isClicked, setIsClicked] = useState(false);
@@ -46,7 +48,7 @@ function Header() {
   };
 
   return (
-    <header className="flex items-center justify-between p-5 shadow-md bg-primary">
+    <header className="flex items-center justify-between p-5 drop-shadow-3xl bg-primary">
       {/* <div className="flex items-center justify-around space-x-4"> */}
       <span className="absolute mr-20 text-lg font-bold transform -translate-x-1/2 left-1/2">{businessName}</span>
       {/* Icons container */}

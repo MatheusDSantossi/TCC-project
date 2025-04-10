@@ -1,7 +1,44 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
+@theme {
+  /* Colors */
+  --color-primary: #012921;
+  --color-secondary: #F0FF3D;
+  --color-secondary-dark: #CEE009FF;
+  --color-tertiary: #013D31;
+  --color-quartiary: #5D76D3;
+  --color-quartiary-dark: #2F4EBEFF;
+  --color-black-100: #100d25;
+  --color-black-200: #090325;
+  --color-white-100: #f3f3f3;
+  --color-white-200: #E0FFFF;
+  --color-input: #121212;
+
+  /* Drop Shadow */
+  --drop-shadow-3xl: 0 35px 120px rgba(1, 61, 49, 1);
+
+  /* Font Size */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+  --text-5xl: 3rem;
+  --text-6xl: 4rem;
+  --text-7xl: 5rem;
+
+  /* Screen breakpoints */
+  --breakpoint-xs: "450px";
+  --breakpoint-sm: "640px";
+  --breakpoint-md: "768px";
+  --breakpoint-lg: "1024px";
+  --breakpoint-xl: "1280px";
+}
+
+/* Project CSS  */
 html, body {
   height: 100%;
   margin: 0;

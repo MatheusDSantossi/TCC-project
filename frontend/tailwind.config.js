@@ -1,8 +1,13 @@
 /** @type {import('tailwindcss').Config} */
-export default {
+module.exports = {
   content: [
-    "./src/**/*.{js,jsx,ts,tsx}",
+    './src/**/*.{html,js,jsx,ts,tsx}',
+    // Adding paths to other files using Tailwind
+    "./node_modules/@material-tailwind/react/theme/components/**/*.{js, jsx, ts, tsx}",
   ],
+  corePlugins: {
+    preflight: true,
+  },
   theme: {
     extend: {
       colors: {

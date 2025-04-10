@@ -20,19 +20,19 @@ const AdminHome = () => {
 
   return (
     <div className="overflow-hidden">
-      <div className="p-3 shadow-card bg-primary">
+      <div className="p-3 drop-shadow-3xl bg-primary">
         <div className="flex items-center justify-between">
           <img src={logo} alt="logo" className="h-10" />
           <div className="flex">
             <button
               onClick={(e) => handleClick(e, "Login")}
-              className="mr-3 text-white text-md bg-quartiary p-1 rounded-lg hover:text-secondary-dark hover:bg-quartiary-dark"
+              className="p-1 mr-3 text-white rounded-lg text-md bg-quartiary hover:text-secondary-dark hover:bg-quartiary-dark"
             >
               Login
             </button>
             <button
               onClick={(e) => handleClick(e)}
-              className="mr-3 text-white text-md bg-quartiary p-1 rounded-lg hover:text-secondary-dark hover:bg-quartiary-dark"
+              className="p-1 mr-3 text-white rounded-lg text-md bg-quartiary hover:text-secondary-dark hover:bg-quartiary-dark"
             >
               Cadastrar
             </button>
@@ -60,12 +60,12 @@ const AdminHome = () => {
         />
       </div>
       <div className="flex flex-col items-center justify-center min-h-screen p-40">
-        <div className="p-6 rounded-lg shadow-card bg-primary w-[90%] max-w-[600px]">
+        <div className="p-6 rounded-lg drop-shadow-3xl bg-primary w-[90%] max-w-[600px]">
           <div className="flex items-center justify-center mb-6">
             {/* <img src={logo} alt="logo" className="h-20" /> */}
           </div>
           <div className="text-center">
-            <h1 className="mb-4 text-4xl font-bold">
+            <h1 className="m-6 text-4xl font-bold">
               Seja bem-vindo as Ferramentas Administrativas do
               <span className="text-secondary"> {businessName}💼</span>
             </h1>

@@ -34,8 +34,9 @@ class ChatbotResponse(viewsets.ViewSet):
         data = request.data
         print("The user input is: ", data["user_input"])
         user_input = data['user_input']
+        text_related_to = data['text_related_to']
         if user_input:
-            response = chatbot_response(user_input)
+            response = chatbot_response(user_input, text_related_to)
             print("The response is: ", response)
             return Response({"response": response}, status=200)
         

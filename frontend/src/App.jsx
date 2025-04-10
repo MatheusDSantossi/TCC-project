@@ -25,6 +25,12 @@ function App() {
     setOpenSidebarToggle(!openSidebarToggle);
   };
 
+  // return(
+  //   <div className="p-4 text-black bg-red-500">
+  //     Tailwind Test
+  //   </div>
+  // )
+
   return (
     <div className="w-full">
       <div className="absolute top-0 left-0 z-10 w-full h-full" >

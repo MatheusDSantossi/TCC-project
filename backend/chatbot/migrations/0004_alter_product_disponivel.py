@@ -8,7 +8,22 @@ class Migration(migrations.Migration):
         ("chatbot", "0003_alter_product_synonymous"),
     ]
 
-    operations = [
+operations = [
+        migrations.RunSQL(
+            sql="""
+                ALTER TABLE products_with_embeddings
+                ALTER COLUMN disponivel DROP DEFAULT;
+                
+                ALTER TABLE products_with_embeddings
+                ALTER COLUMN disponivel TYPE numeric(10,2)
+                USING (CASE WHEN disponivel THEN 1.00 ELSE 0.00 END);
+            """,
+            reverse_sql="""
+                ALTER TABLE products_with_embeddings
+                ALTER COLUMN disponivel TYPE boolean
+                USING (CASE WHEN disponivel = 1.00 THEN TRUE ELSE FALSE END);
+            """
+        ),
         migrations.AlterField(
             model_name="product",
             name="disponivel",

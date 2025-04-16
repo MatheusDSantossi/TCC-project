@@ -30,10 +30,14 @@ services:
     image: postgres:13
     volumes:
       - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - .env
     environment:
-      - POSTGRES_DB=project_pcc_v3
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=matheus19dev
+      - POSTGRES_DB=${DATABASE_DB}
+      - POSTGRES_USER=${DATABASE_USER}
+      - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
+      - POSTGRES_HOST=${DATABASE_HOST}
+      - POSTGRES_PORT=${DATABASE_PORT}
 volumes:
   postgres_data:
   static_volume:

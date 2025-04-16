@@ -1,15 +1,20 @@
 import unicodedata
 import re
-from changing_db_columns import KNOWN_BRANDS, KNOWN_METRICS
+from .changing_db_columns import KNOWN_BRANDS, KNOWN_METRICS
+import psycopg2
 
 def find_business_sections(conn):
-    with conn.cursor() as cursor:
+    try:
+        with conn.cursor() as cursor:
 
-        cursor.execute("""
-                        SELECT DISTINCT secao_produto FROM products_with_embeddings
-                        """)
-        
-        sections_in_database = cursor.fetchall()
+            cursor.execute("""
+                            SELECT DISTINCT secao_produto FROM products_with_embeddings
+                            """)
+            
+            sections_in_database = cursor.fetchall()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print("Error fetching sections from database:", error)
+        sections_in_database = []
     return sections_in_database
 
 def find_section(text, conn):

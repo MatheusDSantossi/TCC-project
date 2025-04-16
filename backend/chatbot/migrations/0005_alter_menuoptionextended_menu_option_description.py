@@ -7,28 +7,50 @@ class Migration(migrations.Migration):
     dependencies = [
         ("chatbot", "0004_alter_product_disponivel"),
     ]
-
+    
     operations = [
-        migrations.CreateModel(
-            name="MenuOptionExtended",
-            fields=[
-                (
-                    "menu_extended_id",
-                    models.AutoField(
-                        db_column="menu_extended_id", primary_key=True, serialize=False
-                    ),
-                ),
-                (
-                    "menu_option_description",
-                    models.CharField(default="", max_length=255, unique=True),
-                ),
-                (
-                    "next_options",
-                    models.ManyToManyField(blank=True, to="chatbot.menuoptionextended"),
-                ),
-            ],
-            options={
-                "db_table": "menu_options_extended",
-            },
+        migrations.RunSQL(
+            sql="""
+            CREATE TABLE IF NOT EXISTS menu_options_extended (
+                menu_extended_id serial PRIMARY KEY,
+                menu_option_description varchar(255) NOT NULL DEFAULT '',
+                -- Django’s ManyToManyField requires a separate intermediary table,
+                -- so you may need to let Django create that automatically.
+                -- For now, only creating the core table.
+                dummy_field integer  -- a dummy column if necessary, or remove if not needed
+            );
+            """,
+            reverse_sql="DROP TABLE IF EXISTS menu_options_extended;"
+        ),
+        # If you still need the AlterField operation to update Django’s state, you can add it:
+        migrations.AlterField(
+            model_name='menuoptionextended',
+            name='menu_option_description',
+            field=models.CharField(default="", max_length=255, unique=True),
         ),
     ]
+
+    # operations = [
+    #     migrations.CreateModel(
+    #         name="MenuOptionExtended",
+    #         fields=[
+    #             (
+    #                 "menu_extended_id",
+    #                 models.AutoField(
+    #                     db_column="menu_extended_id", primary_key=True, serialize=False
+    #                 ),
+    #             ),
+    #             (
+    #                 "menu_option_description",
+    #                 models.CharField(default="", max_length=255, unique=True),
+    #             ),
+    #             (
+    #                 "next_options",
+    #                 models.ManyToManyField(blank=True, to="chatbot.menuoptionextended"),
+    #             ),
+    #         ],
+    #         options={
+    #             "db_table": "menu_options_extended",
+    #         },
+    #     ),
+    # ]

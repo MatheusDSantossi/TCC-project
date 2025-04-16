@@ -39,8 +39,8 @@ import ast
 import json
 
 import time
-from prompt_searcher import *
-from prompts import *
+from .prompt_searcher import *
+from .prompts import *
 
 # Você: quero um refrige
 
@@ -51,7 +51,6 @@ from prompts import *
 # Configurando a API do Gemini
 GOOGLE_API_KEY = SECRET_KEY
 genai.configure(api_key=GOOGLE_API_KEY)
-
 
 
 # Generate a text stream
@@ -236,10 +235,13 @@ sql = "SELECT * FROM products_with_embeddings"
 
 cur = conn.cursor()
 
-cur.execute(sql)
+try:
+    cur.execute(sql)
 
-rows = cur.fetchall()
-
+    rows = cur.fetchall()
+except (Exception, psycopg2.DatabaseError) as error:
+    rows = []
+    
 products_list = []
 
 for row in rows:

@@ -24,20 +24,23 @@ KNOWN_METRICS = [
     "UN", "CX", "PT", "PCT", "PR", "CXT", "CT", "CXA" , "KG", "G", "M"
 ]
 
-# Database connection
-cur = conn.cursor()
-
-# Fetch products from database 
-# TODO: Instead of getting all products get only the name of products
-cur.execute("""SELECT * FROM products""")
-rows = cur.fetchall()
-# conn.commit()
-
-# Extract product ids and names
-products_ids = [row[0] for row in rows]
-product_list_simple = [row[1] for row in rows]
-
 def changing_db_columns():
+    # Database connection
+    cur = conn.cursor()
+
+    try: 
+        # Fetch products from database 
+        # TODO: Instead of getting all products info get only the name of products
+        cur.execute("""SELECT * FROM products""")
+        rows = cur.fetchall()
+    except psycopg2.Error as e:
+        print(f"Error fetching data from database: {e}")
+        rows = []
+    # conn.commit()
+
+    # Extract product ids and names
+    products_ids = [row[0] for row in rows]
+    product_list_simple = [row[1] for row in rows]
 
     def parse_product_name(product_name):
         """Parses a product name into its components."""

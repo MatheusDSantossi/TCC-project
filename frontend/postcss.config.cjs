@@ -5,6 +5,10 @@ module.exports = {
       config: './tailwind.config.js'
     },
     'postcss-nesting': {},
-    autoprefixer: {}
+    autoprefixer: {},
+    'postcss-custom-properties': {
+      preserve: false  // inlines final colors, strips var(...) calls
+    }
+
   },
 }

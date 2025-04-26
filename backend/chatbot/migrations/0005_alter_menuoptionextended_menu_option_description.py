@@ -9,25 +9,7 @@ class Migration(migrations.Migration):
     ]
     
     operations = [
-        migrations.RunSQL(
-            sql="""
-            CREATE TABLE IF NOT EXISTS menu_options_extended (
-                menu_extended_id serial PRIMARY KEY,
-                menu_option_description varchar(255) NOT NULL DEFAULT '',
-                -- Django’s ManyToManyField requires a separate intermediary table,
-                -- so you may need to let Django create that automatically.
-                -- For now, only creating the core table.
-                dummy_field integer  -- a dummy column if necessary, or remove if not needed
-            );
-            """,
-            reverse_sql="DROP TABLE IF EXISTS menu_options_extended;"
-        ),
-        # If you still need the AlterField operation to update Django’s state, you can add it:
-        migrations.AlterField(
-            model_name='menuoptionextended',
-            name='menu_option_description',
-            field=models.CharField(default="", max_length=255, unique=True),
-        ),
+       
     ]
 
     # operations = [

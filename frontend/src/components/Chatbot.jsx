@@ -76,7 +76,10 @@ function Chatbot() {
     setShowPreviousMenuButton(false);
     AxiosInstance.get(`menu-options/get/`)
       // .then((response) => setMenuOptions(response.data))
-      .then((response) => setPendingMenuOptions(response.data))
+      .then((response) => {
+        console.log("Fetching menu options return: ", response.data)
+        setPendingMenuOptions(response.data);
+      })
       .catch((error) => console.error("Error fetching menu options:", error));
   };
 
@@ -160,7 +163,7 @@ function Chatbot() {
       // Await the Axios POST request
       const response = await AxiosInstance.post(`chatbot/post/`, {
         user_input: message,
-        text_related_to: isTextRelatedTo
+        text_related_to: isTextRelatedTo,
       });
       setIsHecateAnswering(false);
       const botResponse = {
@@ -189,7 +192,7 @@ function Chatbot() {
     console.log("Got typing completion");
     if (pendingMenuOptions) {
       console.log("Setting pending menu options");
-      console.log(pendingMenuOptions);
+      console.log("Pending menu options: ", pendingMenuOptions);
       setMenuOptions(pendingMenuOptions);
       setPendingMenuOptions(null);
     }
@@ -246,7 +249,9 @@ function Chatbot() {
             answer = "Digite alguma descrição do produto.";
           } else if (optionText === "Digitar o código do produto") {
             answer = "Digite o código do produto.";
-          } else if (optionText === "Digitar alguma descrição do produto ou sinônimo") {
+          } else if (
+            optionText === "Digitar alguma descrição do produto ou sinônimo"
+          ) {
             answer = "Digite a descrição ou sinônimo do produto.";
           } else if (
             optionText === "Nome do gerente" ||
@@ -448,7 +453,7 @@ function Chatbot() {
                       : "bg-gray-200 text-black"
                   } p-4 border-gray-200 rounded-e-xl rounded-es-xl mt-5 text-lg leading-relaxed`}
                 >
-                {/* <div
+                  {/* <div
                   className={`${
                     message.sender === "Você"
                       ? "bg-black text-white"
@@ -489,7 +494,8 @@ function Chatbot() {
                   onKeyDown={handleKeyPress}
                 />
                 <button
-                  className="flex-shrink-0 px-4 py-2 ml-2 font-bold text-black bg-yellow-400 rounded-md hover:bg-yellow-300 whitespace-nowrap"
+                  className="flex-shrink-0 px-4 py-2 ml-2 font-bold text-black bg-yellow-400 rounded-md hover:bg-yellow-300 whitespace-nowrap
+                  cursor-pointer"
                   onClick={handleNameSubmit}
                 >
                   Enviar
@@ -507,7 +513,8 @@ function Chatbot() {
                 {menuOptions.map((option, index) => (
                   <button
                     key={index}
-                    className="px-4 py-2 text-lg font-bold text-black transition duration-200 bg-yellow-400 rounded-lg hover:bg-yellow-300"
+                    className="px-4 py-2 text-lg font-bold text-black transition duration-200 bg-yellow-400 rounded-lg hover:bg-yellow-300
+                    cursor-pointer"
                     onClick={() => {
                       selectOption(
                         option.menu_extended_id,

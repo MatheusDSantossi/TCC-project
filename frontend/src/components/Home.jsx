@@ -62,7 +62,8 @@ const Home = () => {
           {/* <p className='mb-8'>Selecione a opção que melhor lhe atende</p> */}
           <div className="flex justify-center space-x-4">
             <button
-              className="px-6 py-3 font-bold text-black transition bg-yellow-400 rounded-lg hover:bg-yellow-300"
+              className="px-6 py-3 font-bold text-black transition bg-yellow-400 rounded-lg hover:bg-yellow-300
+              cursor-pointer"
               onClick={handleClick}
             >
               Fale com o Hecate

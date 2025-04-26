@@ -260,7 +260,7 @@ for row in rows:
 
 products_df = pd.DataFrame(products_list)
 
-# print(products_df)
+print("PRODUCTS DF: ", products_df)
 
 # List of available products (I can keep that in the DB as well)
 products_available = [p["Nome"] for p in products_df.to_dict(orient='records') if p['Disponivel'] > 0]
@@ -1090,6 +1090,7 @@ def chatbot_response(user_prompt, text_related_to="default"):
                     "Price": row['PrecoVenda'],
                     "Available": row['Disponivel'],
                     "Quantity": row['Quantity'],
+                    "Metric": row['UnidadeMedida'],
                 }            
                 products_list_after_user_input.append(dict_of_client_products)                
         
@@ -1104,6 +1105,8 @@ def chatbot_response(user_prompt, text_related_to="default"):
                 f"Product Brand: {product['Brand']}\n"
                 f"Product Price: {product['Price']}\n"
                 f"Stock: {product['Available']}\n"
+                f"Quantity Format: {product['Quantity']}\n"
+                f"Metric Format: {product['Metric']}\n"
                 for product in products_list_after_user_input
             ]
             
@@ -1118,6 +1121,7 @@ def chatbot_response(user_prompt, text_related_to="default"):
                 matching_products = [name for name in products_available if first_letter_of_product.upper() in name]
             else:
                 matching_products = products_available[:20]
+        print("Matching products: ", matching_products)
         # Generate a text stream
         # By default, the model returns a response after 
         # completing the entire text generation process. 
@@ -1129,6 +1133,8 @@ def chatbot_response(user_prompt, text_related_to="default"):
         # using the streamGenerateContent method to 
         # generate text from a text-only input prompt.
         generated_detailed_prompt = generate_content_model.generate_content(detailed_prompt)
+        
+        # TODO: Check why the product when I search for section
 
         # if find_product['Disponivel'].item():
         if find_product['Disponivel'].any():
@@ -1141,6 +1147,7 @@ def chatbot_response(user_prompt, text_related_to="default"):
             # for product in pre_processed_prompt_products_list: 
             for product in products_list_after_user_input: 
                 answer_prompt += f"- **Product Name:** {product['Name']}\n"
+                answer_prompt += f"- **Product Brand:** {product['Brand']}\n"
                 answer_prompt += f"  - **Price:** {product['Price']}\n"
                 answer_prompt += f"  - **Section:** {product['Section']}\n"
                 answer_prompt += f"  - **Availability:** {product['Available']} in stock\n\n"

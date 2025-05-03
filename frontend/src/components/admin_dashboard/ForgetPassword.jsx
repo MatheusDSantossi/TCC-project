@@ -13,6 +13,8 @@ import ReactiveButton from "reactive-button";
 
 import logo from "../../assets/logo.svg";
 
+import { IoMdReturnLeft } from "react-icons/io";
+
 const ForgetPassword = () => {
   const navigate = useNavigate();
   const { handleSubmit, control } = useForm();
@@ -53,6 +55,7 @@ const ForgetPassword = () => {
         onSubmit={handleSubmit(submission)}
       >
         <Box className={"whiteBox"}>
+            <IoMdReturnLeft className="text-2xl cursor-pointer mr-18 hover:bg-secondary hover:text-primary hover:rounded-full" onClick={() => navigate("/login")} />
           <div className="flex items-center justify-center mb-5">
             <img className="w-20 mr-4" src={logo} alt="" />
             <h2 className="mb-6 text-2xl font-semibold text-center left-40">

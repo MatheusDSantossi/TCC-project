@@ -49,7 +49,7 @@ const Login = () => {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen p-4">
+    <div className="flex items-center justify-center min-h-screen p-4 drop-shadow-3xl">
       {ShowMessage ? (
         <CustomMessage
           text={"Login has failed, please try again, or reset your password"}

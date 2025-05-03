@@ -151,6 +151,7 @@ export default function ProductsTable({ products_data, onProductUpdate }) {
             boxShadow: 2,
             border: 2,
             borderColor: '#5D76D3',
+            backgroundColor: "#FFFFFFFF",
             "& .MuiDataGrid-cell": {
               backgroundColor: "#F4F4F4FF",
               whiteSpace: "normal",

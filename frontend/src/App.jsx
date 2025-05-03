@@ -15,9 +15,14 @@ import ProtectedRoute from "./components/ProtectedRoutes";
 import ForgetPassword from "./components/admin_dashboard/ForgetPassword";
 import ForgetPasswordReset from "./components/admin_dashboard/ForgetPasswordReset";
 import useInactivityLogout from "./components/UseInactivityLogout";
+import useFavicon from "./useFavicon";
+
+const LIGHT_ICON = '/logo.svg';
+const DARK_ICON = '/logo_darker.svg';
 
 function App() {
   useInactivityLogout();
+  useFavicon(DARK_ICON, LIGHT_ICON);
 
   const [openSidebarToggle, setOpenSidebarToggle] = useState(false);
 

@@ -9,6 +9,8 @@ import ReactiveButton from "reactive-button";
 import SynonymDetails from "./SynonymsDetails";
 import AxiosInstance from "./AxiosInstance";
 
+import { MdOutlineClose } from "react-icons/md";
+
 function ProductEdit({ open, onClose, product, onSave, refreshTable }) {
   const [updateButtonState, setUpdateButtonState] = useState("idle");
   const [deleteButtonState, setDeleteButtonState] = useState("idle");
@@ -75,9 +77,10 @@ function ProductEdit({ open, onClose, product, onSave, refreshTable }) {
       className="flex items-center justify-center min-h-screen p-4 bg-tertiary"
     >
         <div className="w-full max-w-2xl p-8 rounded-lg shadow-xl bg-primary">
+          <MdOutlineClose className="text-3xl text-white cursor-pointer hover:text-secondary" onClick={onClose} />
           <div className="flex items-center justify-center">
             <img className="w-20 mr-4" src={logo} alt="" />
-            <DialogTitle className="text-2xl font-bold text-center text-white ">
+            <DialogTitle className="text-2xl font-semibold text-center text-white ">
               Atualização de Produtos
             </DialogTitle>
           </div>
@@ -96,7 +99,7 @@ function ProductEdit({ open, onClose, product, onSave, refreshTable }) {
                   type="text"
                   id="productName"
                   name="productName"
-                  className="w-full p-3 text-white border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                  className="w-full p-3 text-white border-gray-300 rounded-lg bg-input focus:outline-none focus:ring-2 focus:ring-yellow-400"
                   value={formData?.productName}
                   onChange={(e) =>
                     setFormData((prev) => ({
@@ -118,7 +121,7 @@ function ProductEdit({ open, onClose, product, onSave, refreshTable }) {
                     type="text"
                     id="productBrand"
                     name="productBrand"
-                    className="w-full p-3 text-white border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                    className="w-full p-3 text-white border-gray-300 rounded-lg bg-input focus:outline-none focus:ring-2 focus:ring-yellow-400"
                     value={formData?.productBrand}
                     onChange={(e) =>
                       setFormData((prev) => ({
@@ -140,7 +143,7 @@ function ProductEdit({ open, onClose, product, onSave, refreshTable }) {
                     type="text"
                     id="productQuantityFormat"
                     name="productQuantityFormat"
-                    className="w-full p-3 text-white border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                    className="w-full p-3 text-white border-gray-300 rounded-lg bg-input focus:outline-none focus:ring-2 focus:ring-yellow-400"
                     value={formData?.productQuantityFormat}
                     onChange={(e) =>
                       setFormData((prev) => ({
@@ -162,7 +165,7 @@ function ProductEdit({ open, onClose, product, onSave, refreshTable }) {
                     type="text"
                     id="productSection"
                     name="productSection"
-                    className="w-full p-3 text-white border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                    className="w-full p-3 text-white border-gray-300 rounded-lg bg-input focus:outline-none focus:ring-2 focus:ring-yellow-400"
                     value={formData?.productSection}
                     onChange={(e) =>
                       setFormData((prev) => ({
@@ -184,7 +187,7 @@ function ProductEdit({ open, onClose, product, onSave, refreshTable }) {
                     type="text"
                     id="productPrice"
                     name="productPrice"
-                    className="w-full p-3 text-white border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                    className="w-full p-3 text-white border-gray-300 rounded-lg bg-input focus:outline-none focus:ring-2 focus:ring-yellow-400"
                     value={formData?.productPrice}
                     onChange={(e) =>
                       setFormData((prev) => ({
@@ -206,7 +209,7 @@ function ProductEdit({ open, onClose, product, onSave, refreshTable }) {
                     type="text"
                     id="productMetricUnity"
                     name="productMetricUnity"
-                    className="w-full p-3 text-white border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                    className="w-full p-3 text-white border-gray-300 rounded-lg bg-input focus:outline-none focus:ring-2 focus:ring-yellow-400"
                     value={formData?.productMetricUnity}
                     onChange={(e) =>
                       setFormData((prev) => ({
@@ -239,7 +242,7 @@ function ProductEdit({ open, onClose, product, onSave, refreshTable }) {
                     type="text"
                     id="productAvailability"
                     name="productAvailability"
-                    className="w-full p-3 text-white border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                    className="w-full p-3 text-white border-gray-300 rounded-lg bg-input focus:outline-none focus:ring-2 focus:ring-yellow-400"
                     value={formData?.productAvailability}
                     onChange={(e) =>
                       setFormData((prev) => ({

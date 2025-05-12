@@ -1,3 +1,4 @@
+# TODO: Test in the chatbot the product CAFE OURO VERDE INSTANTANEO
 import google.generativeai as genai
 
 from pathlib import Path
@@ -286,14 +287,26 @@ def for_dividing_prompt_limit():
 
 def pre_process_prompt_brand(prompt, brands_find):
     fix_prompt = pre_process_prompt_grammatical_brand_fix_prompt(prompt, business_name, brands_find)
+    
+    pre_processed_prompt = generate_content_model.generate_content(fix_prompt)
+    
+    # time.sleep(3)
+    return pre_processed_prompt.text
 
-    time.sleep(3)
+def pre_process_prompt_section(prompt):
+    products_find_in_section = find_section(prompt, conn)
+    input_embed = embed_fn(prompt)
+    products_find_using_prompt = find_similar_products_using_input_embeddings(input_embed, conn, np, cosine_similarity)
+    products_alike = fetch_products_alike(prompt)
+    
+    fix_prompt = products_find_in_section_fix_prompt(products_find_in_section, products_find_using_prompt, products_alike, prompt)
+
 
     
     pre_processed_prompt = generate_content_model.generate_content(fix_prompt)
     
+    # time.sleep(3)
     return pre_processed_prompt.text
-
 
 def pre_process_prompt_grammatical(prompt):
     
@@ -1059,13 +1072,24 @@ def chatbot_response(user_prompt, text_related_to="default"):
     if text_related_to == "brand":
         brands_find = fetch_brands_alike(user_prompt)
         
-        fix_prompt_v1 = pre_process_prompt_brand(user_prompt, brands_find)
+        brand = pre_process_prompt_brand(user_prompt, brands_find)
+        fix_prompt_v1 = f"I want a product of this brand {user_prompt}, it has some products like these ones {brand}, which ones do you recommend?"
+        
+    elif text_related_to == "section":
+        sections = pre_process_prompt_section(user_prompt)
+        fix_prompt_v1 = f"I want a product of this section {user_prompt}, which have some produtcst like this {sections}, which ones do you recommend?"
     else:
         fix_prompt_v1 = pre_process_prompt_grammatical(user_prompt)
         
     find_product = generate_and_search(fix_prompt_v1)
 
     is_product = isinstance(find_product, pd.DataFrame)
+    
+    # USER PROMPT:  seção 3
+    # Fixed prompt v1:  I want a product of this section seção 3, which have some produtcst like this ['REFRESCO  PLUS LARANJA', 'AGUA SANITARIA', 'SABAO LIQ.  MULTIACAO DOYP', 'FRALDA DESC. XG CXA', 'LEITE UHT  DESNATADO', 'REFRIG. SODA LIMONADA  PET', 'BISC. CIPANDOCE', 'TOALHA PAPEL SOCIAL CLEAN 50 FLS FDO', 'ACETONA', 'MAC.  SPECIALE PARAFUSO', 'SARD COQ OLEO', 'LAMP. 15W220V  ELETR.3U UND', 'PROTEINA DE SOJA  ESCURA T.A..', 'ACHOC.  CHOC. UHT', 'AGUA SANITARIA  2lt', 'MARG. POTE PTE', 'ACUCAR DEMERARA  FDO', 'BOMBOM  SORTIDO UND', 'SABAO PDC  AZUL PERFUMADO  200G', 'SARDINHA  PQ OLEO']
+    # , which ones do you recommend?
+    # Find products:  Empty DataFrame
+    # TODO: Check why is returning an empty DataFrame!!
     
     print("USER PROMPT: ", user_prompt)
     print("Fixed prompt v1: ", fix_prompt_v1)
@@ -1082,7 +1106,7 @@ def chatbot_response(user_prompt, text_related_to="default"):
         if contains_a_product:
             # for index, row in find_product.iteritems():
             for index, row in find_product.iterrows():
-                # print(f"ID: {index}, Nome: {row['Nome']}, Secao: {row['Secao']}, Disponivel: {row['Disponivel']}")
+            # print(f"ID: {index}, Nome: {row['Nome']}, Secao: {row['Secao']}, Disponivel: {row['Disponivel']}")
                 dict_of_client_products = {
                     "Name": row['Nome'],
                     "Brand": row["Brand"],

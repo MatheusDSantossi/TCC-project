@@ -1,6 +1,5 @@
 import { Fragment, useState } from "react";
 import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
@@ -8,6 +7,7 @@ import useMediaQuery from "@mui/material/useMediaQuery";
 import { useTheme } from "@mui/material/styles";
 import { BsInfoCircleFill } from "react-icons/bs";
 import { IconButton } from "@mui/material";
+import { MdOutlineClose } from "react-icons/md";
 
 function InfoDialogScreen({ infoText }) {
   const [open, setOpen] = useState(false);
@@ -46,13 +46,14 @@ function InfoDialogScreen({ infoText }) {
           },
         }}
       >
+        <MdOutlineClose className="mt-4 ml-4 text-3xl text-white cursor-pointer hover:text-secondary" onClick={handleClose} />
         <DialogTitle
           id="responsive-dialog-title"
-          className="text-2xl font-semibold text-center text-white"
+          className="text-2xl font-semibold text-center text-secondary"
         >
           Informações Importantes:
         </DialogTitle>
-        <DialogContent>
+        <DialogContent sx={{ fontSize: "3rem" }}>
           <DialogContentText sx={{ color: "#FFFF" }}>
             {infoText}
           </DialogContentText>

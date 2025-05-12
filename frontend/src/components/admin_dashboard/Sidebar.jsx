@@ -1,7 +1,7 @@
 import React, { useState, useRef } from "react";
 import {
   BsChatFill,
-  BsGrid1X2Fill,
+  BsTools,
   BsFillArchiveFill,
   BsArrowRightCircleFill,
 } from "react-icons/bs";
@@ -85,6 +85,17 @@ const listItemsNav = {
     subitems: {
       Cadastro: {
         component: "productRegistration",
+      },
+      Lista: {
+        component: "productList",
+      },
+    },
+  },
+  Serviços: {
+    icon: <BsTools />,
+    subitems: {
+      Cadastro: {
+        component: "serviceRegistration",
       },
       Lista: {
         component: "productList",

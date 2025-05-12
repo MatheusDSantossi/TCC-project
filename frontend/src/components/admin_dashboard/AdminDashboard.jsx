@@ -4,6 +4,7 @@ import Sidebar from "./Sidebar";
 import HomeDashboard from "./HomeDashboard";
 import ProductRegistration from "../ProductRegistration";
 import Chatbot from "../Chatbot";
+import ServiceRegistration from "../ServicesRegistration";
 
 import UserList from "./UsersList";
 
@@ -55,6 +56,8 @@ function AdminDashboard() {
       //   return <HomeDashboard />;
       case "productRegistration":
         return <ProductRegistration />;
+      case "serviceRegistration":
+        return <ServiceRegistration />;
       case "chatbot":
         return <Chatbot />;
       case "userList":

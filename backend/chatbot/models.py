@@ -189,3 +189,15 @@ class MenuOptionOrdered(models.Model):
     class Meta:
         db_table = 'menu_options_ordered'
         
+class BusinessDetail(models.Model):
+    
+    key = models.CharField(max_length=30, default='')
+    value = models.TextField()
+
+    @staticmethod
+    def get_business_detail_by_id(ids):
+        return BusinessDetail.objects.filter(id__in=ids)
+    
+    @staticmethod
+    def get_all_business_detail():
+        return BusinessDetail.objects.all()

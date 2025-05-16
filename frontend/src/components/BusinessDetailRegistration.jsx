@@ -5,25 +5,25 @@ import AxiosInstance from "./AxiosInstance";
 import ReactiveButton from "reactive-button";
 import InfoDialogScreen from "./InfoDialogScreen";
 
-function ServiceRegistration() {
-  const [serviceTitle, setServiceTitle] = useState("");
-  const [serviceDescription, setServiceDescription] = useState("");
+function BusinessDetailRegistration() {
+  const [businessDetailTitle, setbusinessDetailTitle] = useState("");
+  const [businessDetailDescription, setbusinessDetailDescription] = useState("");
   const [resetKey, setResetKey] = useState(0);
 
   const [buttonState, setButtonState] = useState("idle");
 
-  const registerProduct = (e) => {
+  const registerBusinessDetail = (e) => {
     e.preventDefault();
 
     setButtonState("loading");
 
-    AxiosInstance.post(`register-product/post/`, {
-      serviceTitle: serviceTitle.trim(),
-      serviceDescription: serviceDescription.trim(),
+    AxiosInstance.post(`register-business-detail/post/`, {
+      businessDetailTitle: businessDetailTitle.trim(),
+      businessDetailDescription: businessDetailDescription.trim(),
     })
       .then((response) => {
         if (!response) {
-          throw new Error("Failed to register the product");
+          throw new Error("Failed to register the detail");
         }
 
         setTimeout(() => {
@@ -31,13 +31,13 @@ function ServiceRegistration() {
         }, 2000);
 
         console.log("Response: ", response);
-        setServiceTitle("");
-        setServiceDescription("");
+        setbusinessDetailTitle("");
+        setbusinessDetailDescription("");
         setResetKey((prev) => prev + 1);
       })
       .catch((error) => {
         setButtonState("error");
-        console.error("Error registering the product: ", error);
+        console.error("Error registering the business detail: ", error);
       });
   };
 
@@ -50,13 +50,13 @@ function ServiceRegistration() {
             Cadastro de Serviços ou Informações
           </h2>
         </div>
-        <form onSubmit={registerProduct}>
+        <form onSubmit={registerBusinessDetail} key={resetKey}>
           {/* # divide the product name into three parts (name, brand, quantity) */}
-          {/* Service Title */}
+          {/* businessDetail Title */}
           <div className="mb-5">
             <div className="flex items-center">
               <label
-                htmlFor="productName"
+                htmlFor="businessDetailTitle"
                 className="block text-lg font-semibold text-white"
               >
                 Título do Serviço
@@ -76,22 +76,22 @@ function ServiceRegistration() {
             </div>
             <input
               type="text"
-              id="serviceTitle"
-              name="serviceTitle"
+              id="businessDetailTitle"
+              name="businessDetailTitle"
               placeholder="Digite o nome do produto"
               required
               className="w-full p-2 mt-1 rounded-lg bg-input focus:outline-none focus:ring-2 focus:ring-yellow-400"
-              value={serviceTitle}
+              value={businessDetailTitle}
               list="productsSuggestions"
-              onChange={(e) => setServiceTitle(e.target.value)}
+              onChange={(e) => setbusinessDetailTitle(e.target.value)}
             />
           </div>
 
-          {/* Service Description */}
+          {/* businessDetail Description */}
           <div className="mb-5">
             <div className="flex items-center">
               <label
-                htmlFor="productBrand"
+                htmlFor="businessDetailDescription"
                 className="block text-lg font-semibold text-white"
               >
                 Descrição do Serviço
@@ -107,13 +107,13 @@ function ServiceRegistration() {
               />
             </div>
             <textarea
-              id="serviceDescription"
-              name="serviceDescription"
+              id="businessDetailDescription"
+              name="businessDetailDescription"
               required
               className="w-full p-4 mt-1 rounded-lg bg-input focus:outline-none focus:ring-2 focus:ring-yellow-400"
-              value={serviceDescription}
-              onChange={(e) => setServiceDescription(e.target.value)}
-              placeholder="NESTLE"
+              value={businessDetailDescription}
+              onChange={(e) => setbusinessDetailDescription(e.target.value)}
+              placeholder="Esse serviço é..."
               rows={4}
               cols={50}
             />
@@ -140,4 +140,4 @@ function ServiceRegistration() {
   );
 }
 
-export default ServiceRegistration;
+export default BusinessDetailRegistration;

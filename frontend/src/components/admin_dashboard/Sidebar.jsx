@@ -95,10 +95,10 @@ const listItemsNav = {
     icon: <BsTools />,
     subitems: {
       Cadastro: {
-        component: "serviceRegistration",
+        component: "companyInfoRegistration",
       },
       Lista: {
-        component: "productList",
+        component: "businessDetailList",
       },
     },
   },

@@ -4,12 +4,13 @@ import Sidebar from "./Sidebar";
 import HomeDashboard from "./HomeDashboard";
 import ProductRegistration from "../ProductRegistration";
 import Chatbot from "../Chatbot";
-import ServiceRegistration from "../ServicesRegistration";
+import BusinessDetailRegistration from "../BusinessDetailRegistration";
 
 import UserList from "./UsersList";
 
 import "../../App.css";
 import ProductList from "../ProductList";
+import BusinessDetailList from "../BusinessDetailList";
 
 function AdminDashboard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -56,14 +57,16 @@ function AdminDashboard() {
       //   return <HomeDashboard />;
       case "productRegistration":
         return <ProductRegistration />;
-      case "serviceRegistration":
-        return <ServiceRegistration />;
+      case "companyInfoRegistration":
+        return <BusinessDetailRegistration />;
       case "chatbot":
         return <Chatbot />;
       case "userList":
         return <UserList />;
       case "productList":
         return <ProductList />;
+      case "businessDetailList":
+        return <BusinessDetailList />;
 
       default:
         return <ProductRegistration />;

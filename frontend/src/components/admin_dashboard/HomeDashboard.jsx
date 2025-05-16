@@ -8,7 +8,7 @@ import {
 import BasicPieChart from "./charts/PieChart";
 import SimpleBarChart from "./charts/BarChart";
 import AxiosInstance from "../AxiosInstance";
-import ProductsTable from "./charts/Table";
+import ProductsTable from "./charts/ProductsTable";
 import { useNavigate } from "react-router-dom";
 
 function HomeDashboard() {

@@ -26,6 +26,73 @@ from rest_framework.response import Response
 def is_ajax(request):
     return request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
 
+class BusinessDetailRegistration(viewsets.ViewSet):
+    permission_classes = [permissions.AllowAny]
+    
+    @action(detail=False, methods=['get'])
+    def get(self, request):
+        print("REQUEST: ", request.data)
+        
+    
+    @action(detail=False, methods=['post'])
+    def post(self, request):
+        
+        try:
+            data = request.data
+
+            business_detail_title = data['businessDetailTitle']
+            business_detail_description = data['businessDetailDescription']
+            
+            print("entered here in business detail: ", business_detail_title, business_detail_description)
+            
+            business_detail_title = business_detail_title.strip()
+        
+            businessDetail = BusinessDetail(key=business_detail_title, value=business_detail_description)
+            businessDetail.save()
+                    
+        except Exception as err:
+            print('Error here 2.0: ', err)
+            return Response({'error': 'An error occured while service detail: '}, status=500)
+        
+        # products = Product.get_all_products()
+        
+        return Response([
+            {'product_id': businessDetail.id, 'business_title': businessDetail.key}
+            ])
+
+class BusinessDetailListCreateView(generics.ListCreateAPIView):
+    queryset = BusinessDetail.objects.all()
+    serializer_class = BusinessDetailSerializer
+
+class BusinessDetailUpdate(viewsets.ViewSet):
+    @action(detail=True, methods=['put'], url_path='update-business-detail/(?P<pk>[^/.]+)')
+    def update_business_detail(self, request, pk):
+        try:
+            businessDetail = BusinessDetail.objects.get(id=pk)
+            data = request.data
+            print("Data business detail: ", data)
+            businessDetail.key = data.get('businessDetailTitle', businessDetail.key)
+            businessDetail.value = data.get('businessDetailDescription', businessDetail.value)
+            
+            businessDetail.save()
+            
+            return Response({'message': 'Business detail updated successfully'}, status=201)
+        
+        except BusinessDetail.DoesNotExist:
+            return Response({'error': 'Business detail not found'}, status=404)
+
+class BusinessDetailDelete(viewsets.ViewSet):
+    @action(detail=True, methods=['delete'], url_path='delete-business-detail/(?P<pk>[^/.]+)')
+    def delete_business_detail(self, request, pk):
+        try:
+            businessDetail = BusinessDetail.objects.get(id=pk)
+            businessDetail.delete()
+            return Response({'message': 'Business detail deleted successfully'}, status=204)
+        
+        except BusinessDetail.DoesNotExist:
+            return Response({'error': 'Business detail not found'}, status=404)
+
+# Chatbot views
 class ChatbotResponse(viewsets.ViewSet):
     permission_classes = [permissions.AllowAny]
     

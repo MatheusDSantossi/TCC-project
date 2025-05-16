@@ -53,8 +53,8 @@ function InfoDialogScreen({ infoText }) {
         >
           Informações Importantes:
         </DialogTitle>
-        <DialogContent sx={{ fontSize: "3rem" }}>
-          <DialogContentText sx={{ color: "#FFFF" }}>
+        <DialogContent >
+          <DialogContentText sx={{ fontSize: "1.4rem", color: "#FFFF"}}>
             {infoText}
           </DialogContentText>
         </DialogContent>

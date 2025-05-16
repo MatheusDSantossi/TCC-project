@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import ProductsTable from "./admin_dashboard/charts/Table";
+import ProductsTable from "./admin_dashboard/charts/ProductsTable";
 import AxiosInstance from "./AxiosInstance";
 
 const ProductList = () => {
@@ -10,6 +10,8 @@ const ProductList = () => {
     AxiosInstance.get(`api/products/`)
       // .then((response) => setMenuOptions(response.data))
       .then((response) => {
+        console.log("Response product: ", response);
+        console.log("Response product data: ", response.data);
         setProducts(response.data);
       })
       .catch((error) => console.error("Error fetching product data: ", error));

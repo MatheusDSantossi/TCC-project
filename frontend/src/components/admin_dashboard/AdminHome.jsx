@@ -26,13 +26,13 @@ const AdminHome = () => {
           <div className="flex">
             <button
               onClick={(e) => handleClick(e, "Login")}
-              className="p-1 mr-3 text-white rounded-lg text-md bg-quartiary hover:text-secondary-dark hover:bg-quartiary-dark"
+              className="p-1 mr-3 text-white rounded-lg cursor-pointer text-md bg-quartiary hover:text-secondary-dark hover:bg-quartiary-dark"
             >
               Login
             </button>
             <button
               onClick={(e) => handleClick(e)}
-              className="p-1 mr-3 text-white rounded-lg text-md bg-quartiary hover:text-secondary-dark hover:bg-quartiary-dark"
+              className="p-1 mr-3 text-white rounded-lg cursor-pointer text-md bg-quartiary hover:text-secondary-dark hover:bg-quartiary-dark"
             >
               Cadastrar
             </button>

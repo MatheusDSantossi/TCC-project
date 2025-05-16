@@ -90,16 +90,16 @@ business_name = "Supermercado Santos"
 chatbot_name = "Hecate"
 
 # My plan is to give the opportunity and way to the client put some information like the ones bellow
-info_about_the_business = [f"O {business_name} abre as 7h e fecha as 22h", 
-                           f"O {business_name} tem o valor de sempre atender os clientes com o melhor atendimento possível",
-                           "O nome do nosso gerente é Matheus",
-                           f"As promoções do {business_name} hoje são principalmente no arroz que está 50% mais barato",
-                           f"""Essas são as categorias por tipo de produto do {business_name}:
-                           Alimentos básicos, como arroz, feijão, cuscuz, macarrão, óleo, sal e açucar.
-                           Frios e laticínios, como queijo qualho, manteigas e queijo de manteiga.
-                           Bebidas, como refrigerantes, sucos em caixa, cervejas, pitú, e nescau liquido.
-                           Produtos de uso diário, como papel higiênico, bombril e outros produtos."""
-                            ]
+# info_about_the_business = [f"O {business_name} abre as 7h e fecha as 22h", 
+#                            f"O {business_name} tem o valor de sempre atender os clientes com o melhor atendimento possível",
+#                            "O nome do nosso gerente é Matheus",
+#                            f"As promoções do {business_name} hoje são principalmente no arroz que está 50% mais barato",
+#                            f"""Essas são as categorias por tipo de produto do {business_name}:
+#                            Alimentos básicos, como arroz, feijão, cuscuz, macarrão, óleo, sal e açucar.
+#                            Frios e laticínios, como queijo qualho, manteigas e queijo de manteiga.
+#                            Bebidas, como refrigerantes, sucos em caixa, cervejas, pitú, e nescau liquido.
+#                            Produtos de uso diário, como papel higiênico, bombril e outros produtos."""
+#                             ]
 
 # conversation_history = {}
 
@@ -272,6 +272,37 @@ products_available = [p["Nome"] for p in products_df.to_dict(orient='records') i
 
 # # print("Products available: ", products_available)
 # print("Matching products: ", matching_products)
+
+sql_business_detail = "SELECT * FROM chatbot_businessdetail"
+
+cur.execute(sql_business_detail)
+
+try:
+    cur.execute(sql_business_detail)
+
+    rows_business_detail = cur.fetchall()
+except (Exception, psycopg2.DatabaseError) as error:
+    rows_business_detail = []
+
+business_detail_list = []
+
+for row in rows_business_detail:
+    business_detail = {
+        "Key": row[1],
+        "Value": row[2],
+    }
+    business_detail_list.append(business_detail)
+    
+print("Business detail list: ", business_detail_list)
+
+business_detail_text = ""
+
+for business_detail in business_detail_list:    
+    # print("Business detail: ", business_detail)
+    title = business_detail["Key"]
+    description = business_detail["Value"]
+    business_detail_text += f"Information title - {title}\n"
+    business_detail_text += f"Information description - {description}\n"
 
 def for_dividing_prompt_limit():
     products_list_2 = []
@@ -724,10 +755,7 @@ def create_menu_options_prompts():
                 Prompt ideal: "Baseado na pergunta do cliente sobre "tópico relevante", forneça uma resposta clara que ajude a responder diretamente à pergunta feita e inclua recomendações relacionadas aos nossos produtos ou serviços que possam ser de interesse para o cliente."
                 
                 no lugar de tópico relevantes use as informações abaixo que se adequarem mais a pergunta do cliente.
-                
-                Informações sobre o {business_name}:\n
-                {info_about_the_business}
-                
+
                 \n
                 Alguns produtos que vendemos que podem ser do interesse do cliente:\n
                 {fetch_products_alike("refrigerante,suco,cafe")}
@@ -762,305 +790,7 @@ def create_menu_options_prompts():
 
 # print(f"Produtos similares a '{similarities['Nome']}")
 
-# def user_interaction():
-
-    # global dict_of_client_products
-    # global products_list_after_user_input
-    
-    # user_prompt = str(input("Olá, em que posso lhe ajudar hoje? "))
-
-    # # falar
-
-    # find_product = generate_and_search(user_prompt)
-
-    # # print(process_prompt(user_prompt))
-
-    # # print(f"TYPE: {type(find_product)}")
-
-    # # print(find_product.iloc[0])
-
-    # # Verificar se é um produto
-    # is_product = isinstance(find_product, pd.DataFrame)
-
-    # if is_product:
-    #     count_row = find_product.shape[0]
-    #     print(count_row)
-    #     # if count_row > 1:
-    #     if contains_a_product:
-    #         # for index, row in find_product.iteritems():
-    #         for index, row in find_product.iterrows():
-    #             # print(f"ID: {index}, Nome: {row['Nome']}, Secao: {row['Secao']}, Disponivel: {row['Disponivel']}")
-    #             dict_of_client_products = {
-    #                 "Name": row['Nome'],
-    #                 "Section": row['Secao'],
-    #                 "Price": row['PrecoVenda'],
-    #                 "Available": row['Disponivel'],
-    #             }            
-    #             products_list_after_user_input.append(dict_of_client_products)
-                
-
-
-    #         detailed_prompt = detailed_prompt = "Gerar uma descrição detalhada para um chatbot de e-commerce dos produtos que se encontram nessa lista: "
-            
-    #         for product in products_list_after_user_input: 
-    #             detailed_prompt += f"Nome do produto: {product['Name']}\n"
-    #             detailed_prompt += f"Preço do produto: {product['Price']}\n"
-    #             detailed_prompt += f"Produto está disponível (False=Não, True=Sim): {product['Available']}\n\n"
-            
-    #         # detailed_prompt += ""
-            
-    #     # print(f"DICT OF PRODUCT {dict_of_client_products}")
-    #     # else:
-            
-    #     #     ## I'M REWRINTING THE PRODUCT ON THE Name_1 space...
-    #     #     dict_of_client_products["Name_1"] = find_product.iloc[0]['Nome']
-    #     #     dict_of_client_products["Section_1"] = find_product.iloc[0]['Secao']
-    #     #     dict_of_client_products["Available_1"] = find_product.iloc[0]['Disponivel']
-            
-    #     #     detailed_prompt = f"""
-    #     #     Gerar uma descrição detalhada do produto {find_product['Nome']} para um chatbot de e-commerce
-    #     #     """
-    #     print(f"LIST OF PRODUCTS {dict_of_client_products}")
-    #     generated_detailed_prompt = model_2.generate_content(detailed_prompt)
-
-    #     # print('DETAILED PROMPT: ' + generated_detailed_prompt.text)
-    
-
-    #     # if find_product['Disponivel'].item():
-    #     if find_product['Disponivel'].any():
-    #         answer_prompt = f"""Considerando que o cliente do nosso
-    #         mercado {supermarket_name} enviou a mensagem:
-
-    #         {pre_process_prompt_grammatical(user_prompt)} 
-
-    #         e os possíveis produtos que ele deseja são esses 
-            
-    #         """
-    #         # for product in pre_processed_prompt_products_list: 
-    #         for product in products_list_after_user_input: 
-    #             answer_prompt += f"Nome do produto: {product['Name']}\n"
-    #             answer_prompt += f"Preço do produto: {product['Price']}\n"
-    #             answer_prompt += f"Seção do produto: {product['Section']}\n"
-    #             answer_prompt += f"Produto está disponível (False=Não, True=Sim): {product['Available']}\n\n"
-
-    #         # {pre_processed_prompt_products_list}.
-    #         answer_prompt += f"""
-    #         Considere também essa descrição detalhada dos produtos: 
-
-    #         {generated_detailed_prompt.text} 
-
-    #         utilize-la como um guia para melhorar a resposta para o cliente
-    #         e responda com uma frase simples e útil levando em conta todos os produtos e informações disponibilizadas. Não acrescente mais nenhum texto ou caracter desnecessário 
-    #         apenas a mensagem informando envolvendo algum detalhe do produto usando a descrição acima como guia e a seção que o
-    #         mesmo se encontra.
-            
-    #         E por fim caso a mensagem do usuário: 
-            
-    #         {pre_process_prompt_grammatical(user_prompt)} 
-            
-    #         tenha alguma palavra que pareça com lista, por exemplo,
-    #         'list', liste, listo, listw, gere uma possível lista de compras de acordo 
-    #         com os produtos disponíveis no mercado que são esses, {products_available}. Repetindo, caso se e somente se
-    #         a mensagem do usuário contenha alguma palavra que remeta a lista, caso não tenha
-    #         não gere nenhuma lista apenas a mensagem principal.
-
-    #         """
-            
-    #     else:
-    #         answer_prompt = f"""Considerando que o cliente do nosso 
-    #         mercado {supermarket_name} quer saber {pre_process_prompt_grammatical(user_prompt)} 
-    #         que o produto que ele deseja está atualmente indisponível, 
-    #         responda com uma frase simples e útil ao cliente.
-    #         Considere esse texto {generated_detailed_prompt.text} como exemplo e melhore a sua resposta.
-    #         E por fim caso a mensagem do usuário: 
-            
-    #         {pre_process_prompt_grammatical(user_prompt)} 
-            
-    #         tenha alguma palavra que pareça com lista, por exemplo,
-    #         'list', liste, listo, listw, gere uma possível lista de compras de acordo 
-    #         com os produtos disponíveis no mercado que são esses, {products_available}. Repetindo, caso se e somente se
-    #         a mensagem do usuário contenha alguma palavra que remeta a lista, caso não tenha
-    #         não gere nenhuma lista apenas a mensagem principal,
-    #         leve em consideração o produto que ele queria que estava indisponível e gere
-    #         uma lista que substitua o produto da melhor forma possível explicando o porque da lista"""
-
-    # else:
-    #     answer_prompt = f"""Considerando que o cliente do nosso 
-    #         mercado {supermarket_name} quer saber {pre_process_prompt_grammatical(user_prompt)} 
-    #         responda com uma frase simples e útil ao cliente. 
-    #         E por fim gere alguma evento ou ação para o cliente fazer
-    #         no mercado se vier a o caso, por exemplo, "Queria saber que horas o
-    #         mercado abre?", resposta, "O mercado abre as 7h e hoje temos uma grande promoção"
-    #         """
-        
-    # response = model_2.generate_content(answer_prompt)
-
-    # # global index_dict_answer
-
-    # # index_dict_answer = index_dict_answer + 1
-    # # name = f"Answer_{index_dict_answer}"
-
-    # # conversation_history[name] = response.text
-
-    # sql = """INSERT INTO conversation_history (
-    #         user_input,
-    #         chatbot_response)
-    #         VALUES (%s, %s) RETURNING *"""
-        
-    # try:
-    #     with conn.cursor() as cur:
-    #         cur.execute(sql, (pre_process_prompt_grammatical(user_prompt), response.text))
-    #         
-            
-    # except (Exception, psycopg2.DatabaseError) as error:
-    #     print(error)
-            
-    # # finally:
-    # #     conn.close()
-            
-    # print(response.text)
-
-    # while True:
-    #     # user_prompt = str(input("Posso ajudar em algo mais? "))
-
-    #     if process_prompt(pre_process_prompt_grammatical(user_prompt)):
-    #         conn.close()
-    #         break
-
-    #     # find_product = generate_and_search(user_prompt)
-    
-    #     is_product = isinstance(find_product, pd.DataFrame)
-
-    
-    #     if is_product:
-    #         count_row = find_product.shape[0]
-    #         print(count_row)
-    #         # if count_row > 1:
-    #         if contains_a_product:
-    #             # for index, row in find_product.iteritems():
-    #             for index, row in find_product.iterrows():
-    #                 # print(f"ID: {index}, Nome: {row['Nome']}, Secao: {row['Secao']}, Disponivel: {row['Disponivel']}")
-    #                 dict_of_client_products = {
-    #                     "Name": row['Nome'],
-    #                     "Section": row['Secao'],
-    #                     "Price": row['PrecoVenda'],
-    #                     "Available": row['Disponivel'],
-    #                 }            
-    #                 products_list_after_user_input.append(dict_of_client_products)
-                    
-
-
-    #             detailed_prompt = detailed_prompt = "Gerar uma descrição detalhada para um chatbot de e-commerce dos produtos que se encontram nessa lista: "
-                    
-    #             for product in products_list_after_user_input: 
-    #                 detailed_prompt += f"Nome do produto: {product['Name']}\n"
-    #                 detailed_prompt += f"Preço do produto: {product['Price']}\n"
-    #                 detailed_prompt += f"Produto está disponível (False=Não, True=Sim): {product['Available']}\n\n"
-             
-
-    #         generated_detailed_prompt = model_2.generate_content(detailed_prompt)
-
-    #         # if find_product['Disponivel'].item():
-    #         if find_product['Disponivel'].any():
-    #             answer_prompt = f"""Considerando que o cliente do nosso
-    #             mercado {supermarket_name} enviou a mensagem:
-
-    #             {pre_process_prompt_grammatical(user_prompt)} 
-
-    #             e os possíveis produtos que ele deseja são esses 
-                
-    #             """
-    #             # for product in pre_processed_prompt_products_list: 
-    #             for product in products_list_after_user_input: 
-    #                 answer_prompt += f"Nome do produto: {product['Name']}\n"
-    #                 answer_prompt += f"Preço do produto: {product['Price']}\n"
-    #                 answer_prompt += f"Seção do produto: {product['Section']}\n"
-    #                 answer_prompt += f"Produto está disponível (False=Não, True=Sim): {product['Available']}\n\n"
-
-    #             # {pre_processed_prompt_products_list}.
-    #             answer_prompt += f"""
-    #             Considere também essa descrição detalhada dos produtos: 
-
-    #             {generated_detailed_prompt.text} 
-
-    #             utilize-la como um guia para melhorar a resposta para o cliente
-    #             e responda com uma frase simples e útil levando em conta todos os produtos e informações disponibilizadas. Não acrescente mais nenhum texto ou caracter desnecessário 
-    #             apenas a mensagem informando envolvendo algum detalhe do produto usando a descrição acima como guia e a seção que o
-    #             mesmo se encontra.
-    #             E por fim caso a mensagem do usuário: 
-                
-    #             {pre_process_prompt_grammatical(user_prompt)} 
-                
-    #             tenha alguma palavra que pareça com lista, por exemplo,
-    #             'list', liste, listo, listw, gere uma possível lista de compras de acordo 
-    #             com os produtos disponíveis no mercado que são esses, {products_available}. Repetindo, caso se e somente se
-    #             a mensagem do usuário contenha alguma palavra que remeta a lista, caso não tenha
-    #             não gere nenhuma lista apenas a mensagem principal.
-
-    #             """
-                
-    #         else:
-    #             answer_prompt = f"""Considerando que o cliente do nosso 
-    #             mercado {supermarket_name} quer saber {pre_process_prompt_grammatical(user_prompt)} 
-    #             que o produto que ele deseja está atualmente indisponível, 
-    #             responda com uma frase simples e útil ao cliente.
-    #             Considere esse texto {generated_detailed_prompt.text} como exemplo e melhore a sua resposta.
-    #             E por fim caso a mensagem do usuário: 
-                
-    #             {pre_process_prompt_grammatical(user_prompt)} 
-                
-    #             tenha alguma palavra que pareça com lista, por exemplo,
-    #             'list', liste, listo, listw, gere uma possível lista de compras de acordo 
-    #             com os produtos disponíveis no mercado que são esses, {products_available}. Repetindo, caso se e somente se
-    #             a mensagem do usuário contenha alguma palavra que remeta a lista, caso não tenha
-    #             não gere nenhuma lista apenas a mensagem principal,
-    #             leve em consideração o produto que ele queria que estava indisponível e gere
-    #             uma lista que substitua o produto da melhor forma possível explicando o porque da lista"""
-
-    #     else:
-    #         answer_prompt = f"""Considerando que o cliente do nosso 
-    #             mercado {supermarket_name} quer saber {pre_process_prompt_grammatical(user_prompt)} 
-    #             responda com uma frase simples e útil ao cliente. 
-    #             E por fim gere alguma evento ou ação para o cliente fazer
-    #             no mercado se vier a o caso, por exemplo, "Queria saber que horas o
-    #             mercado abre?", resposta, "O mercado abre as 7h e hoje temos uma grande promoção"
-    #             """
-        
-
-    #     response = model_2.generate_content(answer_prompt)
-
-    #     # print(f"ANSWER PROMPT {answer_prompt}")
-
-    #     # print(response.text)
-
-    #     # index_dict_answer = index_dict_answer + 1
-    #     # name = f"Answer_{index_dict_answer}"
-
-    #     # conversation_history[name] = response.text
-    #     # print(f"\nCONVERSATION HISTORY - {conversation_history}\n")
-        
-    #     sql = """INSERT INTO conversation_history (
-    #         user_input,
-    #         chatbot_response)
-    #         VALUES (%s, %s) RETURNING *"""
-        
-    #     try:
-    #         with conn.cursor() as cur:
-    #             cur.execute(sql, (pre_process_prompt_grammatical(user_prompt), response.text))
-    #         
-            
-    #     except (Exception, psycopg2.DatabaseError) as error:
-    #         print(error)
-            
-    #     # finally:
-    #     #     conn.close()           
-            
-
-# user_interaction()
-
 # um algoritmo que descreve a inclusão de um novo topico
-
-
 
 def chatbot_response(user_prompt, text_related_to="default"):
     
@@ -1249,17 +979,15 @@ def chatbot_response(user_prompt, text_related_to="default"):
             """
             
         elif user_prompt == "Saber mais sobre nosso mercado":
+            # TODO: Improve this part
             answer_prompt = f"""
                 The customer from our store **{business_name}** has sent the following message:
 
                 "{user_prompt}"
 
-                Here is some available information about **{business_name}**:\n
+                Give useful information to them\n
                 """
-                
-            for info in info_about_the_business:
-                answer_prompt+=f"- {info}\n"
-            
+   
         else:
             
             answer_prompt = f"""The customer from our store **{business_name}** wants to know:
@@ -1272,15 +1000,9 @@ def chatbot_response(user_prompt, text_related_to="default"):
 
             - **Customer:** "What time does the store open?"  
             - **Chatbot:** "Our store opens at **7 AM**, and today we have a **big promotion** happening!"  
-
-            Additionally, consider the following store details:  
                 """
-            
-            for info in info_about_the_business:
-                answer_prompt+=f"- {info}\n"
                 
-                
-            answer_prompt += """But only return this information if it's related to the question of the client."""
+            answer_prompt += """But only return this kind of information if it's related to the question of the client."""
         
 
     if text_has_section:
@@ -1313,6 +1035,16 @@ def chatbot_response(user_prompt, text_related_to="default"):
         If the data above contains a message like "This section isn't available in our establishment,"  
         inform the customer about this issue **politely and professionally**.
         """
+        
+    answer_prompt+= f"""
+        Additionally, consider the following information about the {business_name}:\n
+    """
+    
+    answer_prompt+=business_detail_text
+    
+    answer_prompt+=f"""
+    But only, and just only use this information if it's related to the question of the client.\n
+    """
     
     answer_prompt+="""
             Based on this information, generate a **useful and engaging response** for the customer,  

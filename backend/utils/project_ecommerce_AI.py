@@ -42,6 +42,7 @@ import json
 import time
 from .prompt_searcher import *
 from .prompts import *
+from .embeddings import embed_fn
 
 # Você: quero um refrige
 
@@ -86,22 +87,8 @@ business_name = "Supermercado Santos"
 # of magic, crossroads, and the night, is often depicted 
 # as a benevolent deity who helps lost people find 
 # their way
+chatbot_name = "Hecate"                 
 
-chatbot_name = "Hecate"
-
-# My plan is to give the opportunity and way to the client put some information like the ones bellow
-# info_about_the_business = [f"O {business_name} abre as 7h e fecha as 22h", 
-#                            f"O {business_name} tem o valor de sempre atender os clientes com o melhor atendimento possível",
-#                            "O nome do nosso gerente é Matheus",
-#                            f"As promoções do {business_name} hoje são principalmente no arroz que está 50% mais barato",
-#                            f"""Essas são as categorias por tipo de produto do {business_name}:
-#                            Alimentos básicos, como arroz, feijão, cuscuz, macarrão, óleo, sal e açucar.
-#                            Frios e laticínios, como queijo qualho, manteigas e queijo de manteiga.
-#                            Bebidas, como refrigerantes, sucos em caixa, cervejas, pitú, e nescau liquido.
-#                            Produtos de uso diário, como papel higiênico, bombril e outros produtos."""
-#                             ]
-
-# conversation_history = {}
 
 # index_dict = 0
 
@@ -172,33 +159,13 @@ sections_find_in_db = find_business_sections(conn)
 
 #    content=f'O produto {title} é encontrado na {secao} com o preço de {preco_venda} reais possuindo a unidade de medida {unidade_medida}',  # Include the type of the product
 
-embed_model = 'models/text-embedding-004'
-def embed_fn(title, secao="", preco_venda=0, unidade_medida=""):
-    
-    section = find_section(title, conn)
-    
-    if section == None:
-    
-        return genai.embed_content(model=embed_model,
-                                content=f'{title}',  # I understood that this have to be the most alike the userp prompt
-                                title=title,
-                                task_type="RETRIEVAL_DOCUMENT")["embedding"]  
-    
-    return genai.embed_content(model=embed_model,
-                               content=f'{title} e seção {section}',  # I understood that this have to be the most alike the userp prompt
-                               title=title,
-                               task_type="RETRIEVAL_DOCUMENT")["embedding"]
-    
-    # return genai.embed_content(model=embed_model,
-    #                            content=f'O produto {title}',  # I understood that this have to be the most alike the userp prompt
-    #                            title=title,
-    #                            task_type="RETRIEVAL_DOCUMENT")["embedding"]
-
-# # print(embed_fn("Arroz"))
 
 
-# # df["Embeddings"] = df.apply(lambda row: embed_fn(row["Nome"], row["Secao"], row["PrecoVenda"], row['UnidadeMedida']), axis=1)
-# df["Embeddings"] = df.apply(lambda row: embed_fn(row["Nome"]), axis=1)
+# # print(embed_fn(find_section, genai, conn, "Arroz"))
+
+
+# # df["Embeddings"] = df.apply(lambda row: embed_fn(find_section, genai, conn, row["Nome"], row["Secao"], row["PrecoVenda"], row['UnidadeMedida']), axis=1)
+# df["Embeddings"] = df.apply(lambda row: embed_fn(find_section, genai, conn, row["Nome"]), axis=1)
 
 # print(df)
 
@@ -326,7 +293,7 @@ def pre_process_prompt_brand(prompt, brands_find):
 
 def pre_process_prompt_section(prompt):
     products_find_in_section = find_section(prompt, conn)
-    input_embed = embed_fn(prompt)
+    input_embed = embed_fn(find_section, genai, conn, prompt)
     products_find_using_prompt = find_similar_products_using_input_embeddings(input_embed, conn, np, cosine_similarity)
     products_alike = fetch_products_alike(prompt)
     
@@ -414,7 +381,7 @@ def pre_process_prompt(prompt):
 
     # print("PRODUCTS ALIKE: ", products_alike)
     
-    input_embed = embed_fn(fix_prompt_v1)
+    input_embed = embed_fn(find_section, genai, conn, fix_prompt_v1)
     
     # print("INPUT EMBED: ", input_embed)
     
@@ -594,7 +561,7 @@ def create_semantic_dictionary(user_input):
     semantic_dictonary = {}
     # "REFRIG. GUARANA ANTARCT PET"	"Seção 3"	6	"PC"	"22021000"	4.89	4.89	6	true
 
-    embeddings_consulta = np.array(embed_fn(user_input)).reshape(1, -1) # Reshape to 2D array for cosine similarity
+    embeddings_consulta = np.array(embed_fn(find_section, genai, conn, user_input)).reshape(1, -1) # Reshape to 2D array for cosine similarity
 
     # print(f"Embed of products: {embeddings_consulta}")
 

@@ -9,6 +9,8 @@ from django.template.loader import render_to_string
 from django.core.mail import EmailMultiAlternatives
 from django.utils.html import strip_tags
 
+from core.models import Business
+
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
         if not email:
@@ -33,6 +35,15 @@ class CustomUser(AbstractUser):
     email = models.EmailField(max_length=200, unique=True)
     birthday = models.DateField(null=True, blank=True)
     username = models.CharField(max_length=255, null=True, blank=True)
+    
+    # NEW:
+    business = models.ForeignKey(
+        Business,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        help_text="Which business this user belongs to"
+    )
     
     objects = CustomUserManager()
     

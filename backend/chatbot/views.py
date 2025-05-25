@@ -15,13 +15,15 @@ import json
 
 from django.http import JsonResponse
 
-
 from .models import *
 from .serializers import *
 
 from rest_framework import viewsets, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
+
+from core.mixins import BusinessQuerysetMixin
+from core.permissions import IsBusinessMember
 
 def is_ajax(request):
     return request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
@@ -231,8 +233,12 @@ class MenuOptionEdit(viewsets.ViewSet):
         return JsonResponse({'success': False, 'error': 'Invalid request method'})
 
 # PRODUCTS VIEWS
-class ProductRegistration(viewsets.ViewSet):
-    permission_classes = [permissions.AllowAny]
+class ProductRegistration(BusinessQuerysetMixin, viewsets.ViewSet):
+    # permission_classes = [permissions.AllowAny]
+    permission_classes = [IsBusinessMember, permissions.AllowAny]
+    
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
     
     @action(detail=False, methods=['get'])
     def get(self, request):
@@ -318,48 +324,6 @@ class ProductRegistration(viewsets.ViewSet):
                     
                 product.save()
                 result_product = product
-                
-                # if len(products) > 1:
-                #     for product in products:
-                #         print("Product: ", product)
-                #         product_synonymous = Product.get_synonymus(product)
-                #         if not product_synonymous:
-                #             synonymous = Product.generate_synonymous(product_list=product, brand=product_brand, synonyms=synonyms)
-                        
-                        
-                #         product.brand = product_brand
-                #         product.synonymous = synonymous
-                #         print("Product original quantity: ", product.quantity)
-                #         print("Product quantity: ", product_quantity_format)
-                #         print("Product brand: ", product.brand)
-                    
-                #         product.quantity = product_quantity_format
-                #         product.save()
-                        
-                # else:
-                #     product_synonymous = Product.get_synonymus(product_name)
-                #     print("SYNONYMOUS: ", product_synonymous)
-                    
-                #     product = Product.get_product_by_name(product_name)
-                    
-                #     if not product_synonymous:
-                #         synonymous_list = Product.generate_synonymous(product_list=product, brand=product_brand, synonyms=synonyms)
-                #     else:
-                #         synonymous_list = Product.get_synonymus(product_name)
-                        
-                #     print("Product name: ", product.name)
-                #     print("Product brand: ", product.brand)
-                #     print("Product quantity: ", product.quantity)
-                #     print("Product synonymous: ", product.synonymous)
-            
-                #     product.brand = product_brand
-                    
-                #     product.quantity = product_quantity_format
-                #     product.synonymous = synonymous_list
-                #     print("Product synonymous: ", product.synonymous)
-                    
-                #     product.save()
-                    
                     
         except Exception as err:
             print('Error here 2.0: ', err)

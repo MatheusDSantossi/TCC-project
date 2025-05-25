@@ -1,7 +1,8 @@
 from django.db import models
 from django.shortcuts import render
 from django.contrib.postgres.fields import ArrayField
-from utils.project_ecommerce_AI import * 
+from utils.project_ecommerce_AI import *
+from core.models import * 
 
 class Product(models.Model):
     
@@ -16,10 +17,13 @@ class Product(models.Model):
     disponivel = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     embeddings = ArrayField(models.FloatField(), default=list)
     synonymous = ArrayField(models.TextField(), default=list, blank=True)
+    #TODO: Once checked everying change the null=True to False
+    business = models.ForeignKey(Business, on_delete=models.CASCADE, related_name='%(class)ss',
+                                 null=True, help_text="Business to which the product belongs.")
 
     @staticmethod
     def get_product_by_id(ids):
-        return Product.objects.filter(id__in=ids)
+        return Product.objects.filter(product_id__in=ids)
 
     
     @staticmethod
@@ -188,7 +192,7 @@ class MenuOptionOrdered(models.Model):
     
     class Meta:
         db_table = 'menu_options_ordered'
-        
+
 class BusinessDetail(models.Model):
     
     key = models.CharField(max_length=30, default='')

@@ -11,6 +11,19 @@ from django.utils.html import strip_tags
 
 from core.models import Business
 
+import uuid
+
+class Invite(models.Model):
+    token = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+    email = models.EmailField()
+    business = models.ForeignKey(Business, on_delete=models.CASCADE)
+    used = models.BooleanField(default=False, help_text="Indicates if the invite has been used")
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField(null=True, blank=True, help_text="Optional expiration date for the invite token")
+    
+    def __str__(self):
+        return f"Invite {self.token} for {self.email}@{self.business.slug}"
+
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
         if not email:

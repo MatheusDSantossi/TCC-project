@@ -23,6 +23,8 @@ function Header() {
   const [isClicked, setIsClicked] = useState(false);
   const navigate = useNavigate();
 
+  const businessSlug = localStorage.getItem("BusinessSlug");
+
   const handleLogout = () => {
     AxiosInstance.post(`logoutall/`, {}).then(() => {
       // Clear user session data and navigate to login pagel
@@ -50,7 +52,7 @@ function Header() {
   return (
     <header className="flex items-center justify-between p-5 drop-shadow-3xl bg-primary">
       {/* <div className="flex items-center justify-around space-x-4"> */}
-      <span className="absolute mr-20 text-lg font-bold transform -translate-x-1/2 left-1/2">{businessName}</span>
+      <span className="absolute mr-20 text-lg font-bold transform -translate-x-1/2 left-1/2">Bem-vindo ao {businessName} - {businessSlug}</span>
       {/* Icons container */}
       <span className="flex items-center ml-auto space-x-4 text-xl cursor-pointer hover:text-secondary">
         <div className="flex">

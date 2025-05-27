@@ -32,9 +32,14 @@ const Login = () => {
 
       .then((response) => {
         setButtonState("success");
+        const token = response.data.token;
+        const biz = response.data.user?.business || response.data.business;
         console.log("RESPONSE: ", response);
-        localStorage.setItem("Token", response.data.token);
-        localStorage.setItem("Email", response.data.user.email);
+        console.log("RESPONSE data: ", response.data);
+        // localStorage.setItem("Token", response.data.token);
+        localStorage.setItem("Email", response.data.email);
+        localStorage.setItem("Token", token);
+        localStorage.setItem("BusinessSlug", biz);
         navigate(`/admin`);
       })
       .catch((error) => {

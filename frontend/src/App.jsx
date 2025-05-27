@@ -17,6 +17,8 @@ import ForgetPasswordReset from "./components/admin_dashboard/ForgetPasswordRese
 import useInactivityLogout from "./components/UseInactivityLogout";
 import useFavicon from "./useFavicon";
 
+import InviteRegister from "./components/InviteRegister";
+
 const LIGHT_ICON = '/logo.svg';
 const DARK_ICON = '/logo_darker.svg';
 
@@ -48,6 +50,7 @@ function App() {
           <Route exact path="/password-reset/:token" element={<ForgetPasswordReset />} />
           <Route exact path="/adminHome" element={<AdminHome />} />
           <Route exact path="/chatbot" element={<Chatbot />} />
+          <Route path="/register/invite/:token" element={<InviteRegister />} />
           
           <Route element={<ProtectedRoute />}>
             <Route exact path="/admin" element={<AdminDashboard openSidebarToggle={openSidebarToggle} OpenSidebar={OpenSidebar} />} />

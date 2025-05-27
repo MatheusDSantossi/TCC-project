@@ -105,7 +105,7 @@ const Register = () => {
               color="yellow"
               type={"submit"}
               loadingText="Loading..."
-              successText={"Cadastrador com sucesso"}
+              successText={"Cadastrado com sucesso"}
               idleText={"Cadastrar"}
               animation="true"
               rounded="true"

@@ -1,4 +1,3 @@
-# TODO: Test in the chatbot the product CAFE OURO VERDE INSTANTANEO
 import google.generativeai as genai
 
 from pathlib import Path
@@ -120,26 +119,49 @@ sections_find_in_db = find_business_sections(conn)
 # products_list = []
 
 
+# # cur.execute("""
+# #             SELECT * FROM products 
+# #             """)
 # cur.execute("""
-#             SELECT * FROM products 
+#             SELECT * FROM products_bigger_supermarket 
 #             """)
 
 # rows = cur.fetchall()
 
-# 
+
 
 # # 1	"#REFRIG. GUARANA ANTARCT PET CACULINHA"	"Seção 3"	1.2	"PC"	"22021000"	0.89	0.89	1.2	true
 # # 2	"REFRIG. GUARANA ANTARCT PET"	"Seção 3"	6	"PC"	"22021000"	4.89	4.89	6	true
 
+# # for row in rows:
+# #     products = {
+# #         "Nome": row[1],
+# #         "Secao": row[2],
+# #         "PrecoVenda": float(row[3]),
+# #         "UnidadeMedida": row[4],
+# #         "Disponivel": row[9],
+# #         "Brand": row[10],
+# #         "Quantity": row[11],
+# #     }
+
 # for row in rows:
 #     products = {
 #         "Nome": row[1],
-#         "Secao": row[2],
-#         "PrecoVenda": float(row[3]),
-#         "UnidadeMedida": row[4],
-#         "Disponivel": row[9],
-#         "Brand": row[10],
-#         "Quantity": row[11],
+#         "Code": row[2],
+#         "Barcode": row[3],
+#         "TotalCost": float(row[4]),
+#         "VendaTotal": float(row[5]),
+#         "MargemVenda": float(row[6]),
+#         "MarkupVenda": float(row[7]),
+#         "Section": row[8],
+#         "PrecoVenda": float(row[9]),
+#         "NCM": row[10],
+#         "CEST": row[11],
+#         "PrecoCusto": float(row[12]),
+#         "PrecoMinimo": row[13],
+#         "Estoque": row[14],
+#         "Ativo": row[15],
+#         "CadastroEm": row[16],
 #     }
 #     products_list.append(products)
 
@@ -148,16 +170,17 @@ sections_find_in_db = find_business_sections(conn)
 
 # # print(products_df)
 
-
 # df = pd.DataFrame(products_df)
 # # df.columns = ['Nome', 'Secao', 'Disponivel']
-# df.columns = ['Nome', 'Secao', 'PrecoVenda', 'UnidadeMedida', 'Disponivel','Brand', 'Quantity']
+# # df.columns = ['Nome', 'Secao', 'PrecoVenda', 'UnidadeMedida', 'Disponivel','Brand', 'Quantity']
+
+# df.columns = ['Nome', 'Code', 'Barcode', 'TotalCost', 'VendaTotal','MargemVenda', 'MarkupVenda', 'Section', 'PrecoVenda', 'NCM', 'CEST', 'PrecoCusto','PrecoMinimo', 'Estoque', 'Ativo', 'CadastroEm']
 
 # print(df)
 
 # embed_model = 'models/embedding-001'
 
-#    content=f'O produto {title} é encontrado na {secao} com o preço de {preco_venda} reais possuindo a unidade de medida {unidade_medida}',  # Include the type of the product
+# # content=f'O produto {title} é encontrado na {secao} com o preço de {preco_venda} reais possuindo a unidade de medida {unidade_medida}',  # Include the type of the product
 
 
 
@@ -186,12 +209,33 @@ sections_find_in_db = find_business_sections(conn)
 # ) 
 # values(%s, %s, %s, %s, %s, %s, %s, %s) RETURNING *"""
 
+# sql = """INSERT INTO products_with_embeddings_bigger(
+#     name,
+#     code,
+# 	barcode,
+# 	total_cost,
+# 	venda_total,
+# 	margem_venda,
+# 	markup_venda,
+# 	secao_produto,
+# 	preco_venda,
+# 	NCM,
+# 	CEST,
+# 	preco_custo,
+# 	preco_minimo,
+# 	disponivel,
+# 	ativo,
+# 	cadastrado_em,
+# 	embeddings
+# ) 
+# values(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING *"""
+
 # try:
 #     with conn.cursor() as cur:
 #         for record in data_tuples:
 #             cur.execute(cur.mogrify(sql, record))
 
-#     
+    
 # except (Exception, psycopg2.DatabaseError) as error:
 #     print(error)
 # finally:
@@ -199,7 +243,8 @@ sections_find_in_db = find_business_sections(conn)
 
 ## NOW I HAVE THE DF IN MY DATABASE
 
-sql = "SELECT * FROM products_with_embeddings"
+# sql = "SELECT * FROM products_with_embeddings"
+sql = "SELECT * FROM products_with_embeddings_bigger"
 
 cur = conn.cursor()
 

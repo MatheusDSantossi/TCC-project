@@ -4,6 +4,39 @@ from django.contrib.postgres.fields import ArrayField
 from utils.project_ecommerce_AI import *
 from core.models import * 
 
+class BigSuperProduct(models.Model):
+    business = models.ForeignKey(Business, on_delete=models.CASCADE)
+    name = models.CharField(max_length=255)
+    code = models.CharField(max_length=50)
+    barcode = models.CharField(max_length=50, blank=True)
+    total_cost = models.DecimalField(max_digits=12, decimal_places=2)
+    venda_total = models.DecimalField(max_digits=12, decimal_places=2)
+    margem_venda = models.DecimalField(max_digits=12, decimal_places=2)
+    markup_venda = models.DecimalField(max_digits=12, decimal_places=2)
+    secao_produto = models.CharField(max_length=255)
+    preco_venda = models.DecimalField(max_digits=12, decimal_places=2)
+    ncm = models.CharField(max_length=20, blank=True)
+    cest = models.CharField(max_length=20, blank=True)
+    preco_custo = models.DecimalField(max_digits=12, decimal_places=2)
+    preco_minimo = models.DecimalField(max_digits=12, decimal_places=2, null=True)
+    disponivel = models.DecimalField(max_digits=12, decimal_places=2)
+    ativo = models.BooleanField(default=True)
+    cadastrado_em = models.DateTimeField()
+    # IMPORTANT: Instead of using ArrayField, study to
+    # Use pgvector (VectorField)
+    # Example:
+    # from pgvector.sql import distance
+    # query_vector = embed_fn("some query")
+    # BigSuperProduct.objects.annotate(
+    #     distance=distance("embeddings", query_vector)
+    # ).order_by("distance")[:10]
+    # And postgres will perform K-NN lookups natively, at C-speed.
+    embeddings = ArrayField(models.FloatField(), default=list)
+    
+    class Meta:
+        db_table = "products_with_embeddings_bigger"
+    
+
 class Product(models.Model):
     
     product_id = models.AutoField(primary_key=True)

@@ -243,8 +243,8 @@ sections_find_in_db = find_business_sections(conn)
 
 ## NOW I HAVE THE DF IN MY DATABASE
 
-# sql = "SELECT * FROM products_with_embeddings"
-sql = "SELECT * FROM products_with_embeddings_bigger"
+sql = "SELECT * FROM products_with_embeddings"
+# sql = "SELECT * FROM products_with_embeddings_bigger"
 
 cur = conn.cursor()
 

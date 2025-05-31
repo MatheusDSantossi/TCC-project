@@ -4,12 +4,15 @@ from django.contrib.postgres.fields import ArrayField
 from utils.project_ecommerce_AI import *
 from core.models import * 
 
+# Products
+
 class BigSuperProduct(models.Model):
     business = models.ForeignKey(Business, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     code = models.CharField(max_length=50)
     barcode = models.CharField(max_length=50, blank=True)
     total_cost = models.DecimalField(max_digits=12, decimal_places=2)
+    unidade_medida = models.CharField(max_length=50, blank=True)
     venda_total = models.DecimalField(max_digits=12, decimal_places=2)
     margem_venda = models.DecimalField(max_digits=12, decimal_places=2)
     markup_venda = models.DecimalField(max_digits=12, decimal_places=2)
@@ -110,12 +113,7 @@ class Product(models.Model):
     def __str__(self):
         return super().__str__()
 
-# HERE I WANT TO CREATE A DB TABLE THAT WILL CONTAIN 
-# THE FOUR OPTIONS IN THE CHATBOT, WHAT I MEAN IS IN MY
-# CHATBOT TEMPLATE INSTEAD OF MENUOPTION I'LL GET THIS 
-# MODEL MenuOptionExtended WHICH WILL BE A TABLE THAT WILL
-# BE DROPPED AND CREATED EVERY TIME
-
+# Menu Option
 class MenuOptionExtended(models.Model):
     
     menu_extended_id = models.AutoField(primary_key=True, db_column="menu_extended_id")
@@ -204,12 +202,6 @@ class MenuOptionExtended(models.Model):
     class Meta:
         db_table = 'menu_options_extended'
 
-# HERE I WANT TO CREATE A DB TABLE THAT WILL CONTAIN 
-# THE FIVE OPTIONS IN THE CHATBOT, WHAT I MEAN IS IN MY
-# CHATBOT TEMPLATE INSTEAD OF MENUOPTION I'LL GET THIS 
-# MODEL MENUOPTIONORDERED WHICH WILL BE A TABLE THAT WILL
-# BE DROPPED AND CREATED EVERY TIME
-
 class MenuOptionOrdered(models.Model):
     
     menu_ordered_id = models.AutoField(primary_key=True)
@@ -225,6 +217,8 @@ class MenuOptionOrdered(models.Model):
     
     class Meta:
         db_table = 'menu_options_ordered'
+
+# Business 
 
 class BusinessDetail(models.Model):
     

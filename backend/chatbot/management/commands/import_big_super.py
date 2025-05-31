@@ -1,4 +1,3 @@
-import csv
 # IMPORTANT: Using pandas in this case might be a little
 # bad for memory beyond tens of thousands of rows. So, study to use
 # openpyxl for streaming
@@ -24,17 +23,18 @@ from django.core.management.base import BaseCommand
 from django.db import transaction
 from core.models import Business
 from chatbot.models import BigSuperProduct
-from ....utils.embeddings import embed_fn
+from utils.embeddings import embed_fn
+from utils.project_ecommerce_AI import genai, conn, find_section
 
 
 # IMPORTANT: Run in python shell:
 # BigSuperProduct.objects.filter(business__isnull=True).update(business=biz2)
 
 class Command(BaseCommand):
-    help = "Improt products from csv into BigSuperProduct, computing embeddings."
+    help = "Improt products from xls into BigSuperProduct, computing embeddings."
     
     def add_arguments(self, parser):
-        parser.add_argument('csvfile', type=str, help="Path to source CSV")
+        parser.add_argument('xlsfile', type=str, help="Path to source XLS")
         parser.add_argument('--business', type=str, required=True, help="Business slug for these products")
         parser.add_argument('--batch-size', type=int, default=500, help="How many records to bulk-create per batch")
 
@@ -42,31 +42,32 @@ class Command(BaseCommand):
         biz = Business.objects.get(slug=opts['business'])
         batch, size = [], opts['batch_size']
         
-        df = pd.read_excel(opts['csvfile'], sheet_name=0, dtype=str)
+        df = pd.read_excel(opts['xlsfile'], sheet_name=0, dtype=str)
         
         # with open(opts['csvfile'], newline='', encoding='utf-8') as fp:
             # reader = csv.DictReader(fp)
             # for row in reader:
         for _, row in df.iterrows():
             # Compute embedding only once
-            emb = embed_fn(row['name'])
+            emb = embed_fn(find_section, genai, conn, row['nome'])
             
             batch.append(BigSuperProduct(
                 business      = biz,
-                name          = row['name'],
-                code          = row['code'],
-                barcode       = row.get('barcode', ''),
-                total_cost    = row['total_cost'],
+                name          = row['nome'],
+                code          = row['codigo'],
+                barcode       = row.get('codigo_barras', ''),
+                unidade_medida       = row.get('unidade', ''),
+                total_cost    = row['custo_total'],
                 venda_total   = row['venda_total'],
                 margem_venda  = row['margem_venda'],
                 markup_venda  = row['markup_venda'],
-                secao_produto = row['section'],
+                secao_produto = row['secao_produto'],
                 preco_venda   = row['preco_venda'],
-                ncm           = row.get('ncm',''),
-                cest          = row.get('cest',''),
+                ncm           = row.get('NCM',''),
+                cest          = row.get('CEST',''),
                 preco_custo   = row['preco_custo'],
                 preco_minimo  = row.get('preco_minimo'),
-                disponivel    = row['disponivel'],
+                disponivel    = row['estoque'],
                 ativo         = row['ativo'] in ('True','true','1'),
                 cadastrado_em = row['cadastrado_em'],
                 embeddings    = emb,

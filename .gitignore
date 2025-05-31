@@ -3,6 +3,9 @@
 backend/venv/
 # backend/config/
 backend/test_imports.py
+backend/media/
+**/__pycache__/
+*.py[cod]
 
 melhorias.md
 synonimus_test.py

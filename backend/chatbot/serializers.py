@@ -17,5 +17,5 @@ class ProductSerializer(serializers.ModelSerializer):
 class BusinessDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = BusinessDetail
-        fields = '__all__'
-        # fields = ['id', 'key', 'value']
+        # fields = '__all__'
+        fields = ['id', 'key', 'value']

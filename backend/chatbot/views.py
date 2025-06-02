@@ -62,9 +62,19 @@ class BusinessDetailRegistration(viewsets.ViewSet):
             {'product_id': businessDetail.id, 'business_title': businessDetail.key}
             ])
 
-class BusinessDetailListCreateView(generics.ListCreateAPIView):
+class BusinessDetailListCreateView(BusinessQuerysetMixin, generics.ListCreateAPIView):
+    """
+    GET /api/business-detail/ -> list details for request.user.business
+    POST /api/business-detail/ -> create a new detail under request.user.business
+    """
     queryset = BusinessDetail.objects.all()
     serializer_class = BusinessDetailSerializer
+    
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def perform_create(self, serializer):
+        # Automatically set business = request.user.business
+        serializer.save(business=self.request.user.business)
 
 class BusinessDetailUpdate(viewsets.ViewSet):
     @action(detail=True, methods=['put'], url_path='update-business-detail/(?P<pk>[^/.]+)')
@@ -390,7 +400,7 @@ class ProductListView(generic.ListView):
     
     template_name = "product_generic_list.html"
 
-class ProductListCreateView(generics.ListCreateAPIView):
+class ProductListCreateView(BusinessQuerysetMixin, generics.ListCreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
 

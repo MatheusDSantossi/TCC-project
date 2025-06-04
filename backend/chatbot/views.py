@@ -75,6 +75,9 @@ class BusinessDetailListCreateView(BusinessQuerysetMixin, generics.ListCreateAPI
     def perform_create(self, serializer):
         # Automatically set business = request.user.business
         serializer.save(business=self.request.user.business)
+        
+class BusinessDetailRetrieveUpdateDestroyView(BusinessQuerysetMixin, generics.RetrieveUpdateDestroyAPIView):
+    pass
 
 class BusinessDetailUpdate(viewsets.ViewSet):
     @action(detail=True, methods=['put'], url_path='update-business-detail/(?P<pk>[^/.]+)')
@@ -401,7 +404,6 @@ class ProductListView(generic.ListView):
     template_name = "product_generic_list.html"
 
 class ProductListCreateView(BusinessQuerysetMixin, generics.ListCreateAPIView):
-# class ProductListCreateView(generics.ListCreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
 

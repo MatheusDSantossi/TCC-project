@@ -4,8 +4,12 @@ class BusinessQuerysetMixin:
     """
 
     def get_queryset(self):
+        user = self.request.user
+        # biz = getattr(self.request.user.business, 'Business', None)
+        biz = self.request.user.business
+        print(f"BusinessQuerysetMixin: user={user.email!r}, business={biz.slug if biz else None!r}")
+        
         qs = super().get_queryset()
-        biz = getattr(self.request.user.business, 'business', None)
         if biz is None:
             return qs.none()
         

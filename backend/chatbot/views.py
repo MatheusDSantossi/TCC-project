@@ -401,6 +401,7 @@ class ProductListView(generic.ListView):
     template_name = "product_generic_list.html"
 
 class ProductListCreateView(BusinessQuerysetMixin, generics.ListCreateAPIView):
+# class ProductListCreateView(generics.ListCreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
 

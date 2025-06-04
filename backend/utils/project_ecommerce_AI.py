@@ -263,11 +263,11 @@ for row in rows:
         "Secao": row[2],
         "PrecoVenda": float(row[3]),
         "UnidadeMedida": row[4],
-        "Disponivel": row[5],
-        "Embeddings": row[6],
-        "Synonymous": row[7],
-        "Brand": row[8],
-        "Quantity": row[9],
+        "Embeddings": row[5],
+        "Synonymous": row[6],
+        "Brand": row[7],
+        "Quantity": row[8],
+        "Disponivel": row[9],
     }
     products_list.append(products)
 

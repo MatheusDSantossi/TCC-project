@@ -40,7 +40,7 @@ def reverse_merge(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("chatbot", "0010_businessdetail_business_and_more"),
+        ("chatbot", "0011_convert_disponivel_to_decimal"),
     ]
 
     operations = [

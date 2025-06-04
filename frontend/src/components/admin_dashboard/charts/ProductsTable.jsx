@@ -54,8 +54,7 @@ export default function ProductsTable({ products_data, onProductUpdate }) {
 
   const columns = [
     {
-      // field: "product_id",
-      field: "id",
+      field: "product_id",
       headerName: <strong className="text-base">ID</strong>,
       width: 90,
       minWidth: 80,

@@ -6,7 +6,7 @@ charset-normalizer==3.4.1
 click==8.1.8
 colorama==0.4.6
 cryptography==44.0.1
-Django==5.1.4
+Django==5.2.2
 django-allauth==65.4.1
 django-cors-headers==4.6.0
 django-rest-knox==5.0.2
@@ -57,4 +57,4 @@ typing_extensions==4.12.2
 tzdata==2024.2
 uritemplate==4.1.1
 urllib3==2.3.0
-gunicorn==21.2.0
+gunicorn==23.0.0

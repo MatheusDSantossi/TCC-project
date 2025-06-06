@@ -22,7 +22,7 @@ import pandas as pd
 from django.core.management.base import BaseCommand
 from django.db import transaction
 from core.models import Business
-from chatbot.models import BigSuperProduct
+from chatbot.models import Product
 from utils.embeddings import embed_fn
 from utils.project_ecommerce_AI import genai, conn, find_section
 
@@ -31,7 +31,7 @@ from utils.project_ecommerce_AI import genai, conn, find_section
 # BigSuperProduct.objects.filter(business__isnull=True).update(business=biz2)
 
 class Command(BaseCommand):
-    help = "Improt products from xls into BigSuperProduct, computing embeddings."
+    help = "Import products from xls into Product, computing embeddings."
     
     def add_arguments(self, parser):
         parser.add_argument('xlsfile', type=str, help="Path to source XLS")
@@ -51,7 +51,8 @@ class Command(BaseCommand):
             # Compute embedding only once
             emb = embed_fn(find_section, genai, conn, row['nome'])
             
-            batch.append(BigSuperProduct(
+            # batch.append(BigSuperProduct(
+            batch.append(Product(
                 business      = biz,
                 name          = row['nome'],
                 # code          = row['codigo'],
@@ -75,8 +76,7 @@ class Command(BaseCommand):
                 
         # Flush a batch
         if len(batch) >= size:
-            BigSuperProduct.objects.bulk_create(batch)
+            Product.objects.bulk_create(batch)
             self.stdout.write(f"Inserted {len(batch)} records")
             batch = []
                     
-        

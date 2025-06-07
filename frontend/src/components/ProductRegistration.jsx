@@ -70,7 +70,7 @@ function ProductRegistration() {
 
     console.log("Product synonyms: ", productSynonyms);
 
-    AxiosInstance.post(`register-product/post/`, {
+    AxiosInstance.post(`api/products/`, {
       productName: productName.trim(),
       productBrand: productBrand.trim(),
       productQuantityFormat: productQuantityFormat.trim(),

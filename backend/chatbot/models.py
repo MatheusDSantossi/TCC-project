@@ -5,44 +5,14 @@ from utils.project_ecommerce_AI import *
 from core.models import * 
 
 # Products
-
-class BigSuperProduct(models.Model):
-    business = models.ForeignKey(Business, on_delete=models.CASCADE)
-    name = models.CharField(max_length=255)
-    code = models.CharField(max_length=50)
-    barcode = models.CharField(max_length=50, blank=True)
-    total_cost = models.DecimalField(max_digits=12, decimal_places=2)
-    unidade_medida = models.CharField(max_length=50, blank=True)
-    venda_total = models.DecimalField(max_digits=12, decimal_places=2)
-    margem_venda = models.DecimalField(max_digits=12, decimal_places=2)
-    markup_venda = models.DecimalField(max_digits=12, decimal_places=2)
-    secao_produto = models.CharField(max_length=255)
-    preco_venda = models.DecimalField(max_digits=12, decimal_places=2)
-    ncm = models.CharField(max_length=20, blank=True)
-    cest = models.CharField(max_length=20, blank=True)
-    preco_custo = models.DecimalField(max_digits=12, decimal_places=2)
-    preco_minimo = models.DecimalField(max_digits=12, decimal_places=2, null=True)
-    disponivel = models.DecimalField(max_digits=12, decimal_places=2)
-    ativo = models.BooleanField(default=True)
-    cadastrado_em = models.DateTimeField()
-    # IMPORTANT: Instead of using ArrayField, study to
-    # Use pgvector (VectorField)
-    # Example:
-    # from pgvector.sql import distance
-    # query_vector = embed_fn("some query")
-    # BigSuperProduct.objects.annotate(
-    #     distance=distance("embeddings", query_vector)
-    # ).order_by("distance")[:10]
-    # And postgres will perform K-NN lookups natively, at C-speed.
-    embeddings = ArrayField(models.FloatField(), default=list)
-    
-    class Meta:
-        db_table = "products_with_embeddings_bigger"
-    
-
 class Product(models.Model):
     
     product_id = models.AutoField(primary_key=True)
+    # TODO: Once checked everying change the null=True to False
+    business = models.ForeignKey(Business, on_delete=models.CASCADE, related_name='%(class)ss',
+                                 null=True, help_text="Business to which the product belongs.")
+
+    # Common fields
     name = models.CharField(max_length=255, default='')
     brand = models.CharField(max_length=255, default='')
     quantity = models.CharField(max_length=50, default='')
@@ -53,10 +23,7 @@ class Product(models.Model):
     disponivel = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     embeddings = ArrayField(models.FloatField(), default=list)
     synonymous = ArrayField(models.TextField(), default=list, blank=True)
-    #TODO: Once checked everying change the null=True to False
-    business = models.ForeignKey(Business, on_delete=models.CASCADE, related_name='%(class)ss',
-                                 null=True, help_text="Business to which the product belongs.")
-
+    
     @staticmethod
     def get_product_by_id(ids):
         return Product.objects.filter(product_id__in=ids)
@@ -224,6 +191,13 @@ class BusinessDetail(models.Model):
     
     key = models.CharField(max_length=30, default='')
     value = models.TextField()
+    business  = models.ForeignKey(
+        Business,
+        on_delete=models.CASCADE,
+        related_name='details',
+        null=True,                # temporarily allow null for existing rows
+        help_text="Which business this detail belongs to"
+    )
 
     @staticmethod
     def get_business_detail_by_id(ids):

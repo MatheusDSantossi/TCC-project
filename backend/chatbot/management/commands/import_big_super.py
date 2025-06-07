@@ -22,7 +22,7 @@ import pandas as pd
 from django.core.management.base import BaseCommand
 from django.db import transaction
 from core.models import Business
-from chatbot.models import BigSuperProduct
+from chatbot.models import Product
 from utils.embeddings import embed_fn
 from utils.project_ecommerce_AI import genai, conn, find_section
 
@@ -31,7 +31,7 @@ from utils.project_ecommerce_AI import genai, conn, find_section
 # BigSuperProduct.objects.filter(business__isnull=True).update(business=biz2)
 
 class Command(BaseCommand):
-    help = "Improt products from xls into BigSuperProduct, computing embeddings."
+    help = "Import products from xls into Product, computing embeddings."
     
     def add_arguments(self, parser):
         parser.add_argument('xlsfile', type=str, help="Path to source XLS")
@@ -51,32 +51,33 @@ class Command(BaseCommand):
             # Compute embedding only once
             emb = embed_fn(find_section, genai, conn, row['nome'])
             
-            batch.append(BigSuperProduct(
+            # batch.append(BigSuperProduct(
+            batch.append(Product(
                 business      = biz,
                 name          = row['nome'],
-                code          = row['codigo'],
-                barcode       = row.get('codigo_barras', ''),
+                # code          = row['codigo'],
+                # barcode       = row.get('codigo_barras', ''),
                 unidade_medida       = row.get('unidade', ''),
-                total_cost    = row['custo_total'],
-                venda_total   = row['venda_total'],
-                margem_venda  = row['margem_venda'],
-                markup_venda  = row['markup_venda'],
+                # quantity       = row.get('unidade', ''),
+                # total_cost    = row['custo_total'],
+                # venda_total   = row['venda_total'],
+                # margem_venda  = row['margem_venda'],
+                # markup_venda  = row['markup_venda'],
                 secao_produto = row['secao_produto'],
                 preco_venda   = row['preco_venda'],
-                ncm           = row.get('NCM',''),
-                cest          = row.get('CEST',''),
-                preco_custo   = row['preco_custo'],
-                preco_minimo  = row.get('preco_minimo'),
+                # ncm           = row.get('NCM',''),
+                # cest          = row.get('CEST',''),
+                # preco_custo   = row['preco_custo'],
+                # preco_minimo  = row.get('preco_minimo'),
                 disponivel    = row['estoque'],
-                ativo         = row['ativo'] in ('True','true','1'),
-                cadastrado_em = row['cadastrado_em'],
+                # ativo         = row['ativo'] in ('True','true','1'),
+                # cadastrado_em = row['cadastrado_em'],
                 embeddings    = emb,
             ))
                 
         # Flush a batch
         if len(batch) >= size:
-            BigSuperProduct.objects.bulk_create(batch)
+            Product.objects.bulk_create(batch)
             self.stdout.write(f"Inserted {len(batch)} records")
             batch = []
                     
-        

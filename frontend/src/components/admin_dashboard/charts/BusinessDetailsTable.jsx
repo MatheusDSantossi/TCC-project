@@ -20,11 +20,11 @@ export default function BusinessDetailsTable({ business_detail_data, onBusinessD
     console.log("Updated BusinessDetail: ", updatedBusinessDetail);
     try {
       const response = await AxiosInstance.put(
-        `update-business-detail/${updatedBusinessDetail.id}/`,
+        `api/business-detail/${updatedBusinessDetail.id}/`,
         {
-          businessDetailId: updatedBusinessDetail.id,
-          businessDetailTitle: updatedBusinessDetail.key,
-          businessDetailDescription: updatedBusinessDetail.value,
+          id: updatedBusinessDetail.id,
+          key: updatedBusinessDetail.key,
+          value: updatedBusinessDetail.value,
         }
       );
       console.log("BusinessDetail updated successfully: ", updatedBusinessDetail);

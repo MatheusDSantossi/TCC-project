@@ -28,84 +28,31 @@ from core.permissions import IsBusinessMember
 def is_ajax(request):
     return request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
 
-class BusinessDetailRegistration(viewsets.ViewSet):
-    permission_classes = [permissions.AllowAny]
-    
-    @action(detail=False, methods=['get'])
-    def get(self, request):
-        print("REQUEST: ", request.data)
-        
-    
-    @action(detail=False, methods=['post'])
-    def post(self, request):
-        
-        try:
-            data = request.data
-
-            business_detail_title = data['businessDetailTitle']
-            business_detail_description = data['businessDetailDescription']
-            
-            print("entered here in business detail: ", business_detail_title, business_detail_description)
-            
-            business_detail_title = business_detail_title.strip()
-        
-            businessDetail = BusinessDetail(key=business_detail_title, value=business_detail_description)
-            businessDetail.save()
-                    
-        except Exception as err:
-            print('Error here 2.0: ', err)
-            return Response({'error': 'An error occured while service detail: '}, status=500)
-        
-        # products = Product.get_all_products()
-        
-        return Response([
-            {'product_id': businessDetail.id, 'business_title': businessDetail.key}
-            ])
-
+# Business
 class BusinessDetailListCreateView(BusinessQuerysetMixin, generics.ListCreateAPIView):
     """
     GET /api/business-detail/ -> list details for request.user.business
     POST /api/business-detail/ -> create a new detail under request.user.business
     """
+    # permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
     queryset = BusinessDetail.objects.all()
     serializer_class = BusinessDetailSerializer
-    
-    permission_classes = [permissions.IsAuthenticated]
     
     def perform_create(self, serializer):
         # Automatically set business = request.user.business
         serializer.save(business=self.request.user.business)
         
 class BusinessDetailRetrieveUpdateDestroyView(BusinessQuerysetMixin, generics.RetrieveUpdateDestroyAPIView):
-    pass
+    """
+    GET    /api/business-detail/<pk>/    → retrieve one detail (must belong to request.user.business)
+    PUT    /api/business-detail/<pk>/    → update it
+    DELETE /api/business-detail/<pk>/    → delete it
+    """
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = BusinessDetail.objects.all()
+    serializer_class = BusinessDetailSerializer
 
-class BusinessDetailUpdate(viewsets.ViewSet):
-    @action(detail=True, methods=['put'], url_path='update-business-detail/(?P<pk>[^/.]+)')
-    def update_business_detail(self, request, pk):
-        try:
-            businessDetail = BusinessDetail.objects.get(id=pk)
-            data = request.data
-            print("Data business detail: ", data)
-            businessDetail.key = data.get('businessDetailTitle', businessDetail.key)
-            businessDetail.value = data.get('businessDetailDescription', businessDetail.value)
-            
-            businessDetail.save()
-            
-            return Response({'message': 'Business detail updated successfully'}, status=201)
-        
-        except BusinessDetail.DoesNotExist:
-            return Response({'error': 'Business detail not found'}, status=404)
-
-class BusinessDetailDelete(viewsets.ViewSet):
-    @action(detail=True, methods=['delete'], url_path='delete-business-detail/(?P<pk>[^/.]+)')
-    def delete_business_detail(self, request, pk):
-        try:
-            businessDetail = BusinessDetail.objects.get(id=pk)
-            businessDetail.delete()
-            return Response({'message': 'Business detail deleted successfully'}, status=204)
-        
-        except BusinessDetail.DoesNotExist:
-            return Response({'error': 'Business detail not found'}, status=404)
 
 # Chatbot views
 class ChatbotResponse(viewsets.ViewSet):
@@ -246,162 +193,162 @@ class MenuOptionEdit(viewsets.ViewSet):
         return JsonResponse({'success': False, 'error': 'Invalid request method'})
 
 # PRODUCTS VIEWS
-class ProductRegistration(BusinessQuerysetMixin, viewsets.ViewSet):
-    # permission_classes = [permissions.AllowAny]
-    permission_classes = [IsBusinessMember, permissions.AllowAny]
+# class ProductRegistration(BusinessQuerysetMixin, viewsets.ViewSet):
+#     # permission_classes = [permissions.AllowAny]
+#     permission_classes = [IsBusinessMember, permissions.AllowAny]
     
-    queryset = Product.objects.all()
-    serializer_class = ProductSerializer
+#     queryset = Product.objects.all()
+#     serializer_class = ProductSerializer
     
-    @action(detail=False, methods=['get'])
-    def get(self, request):
-        print(request.data)
-        query = request.data['search']
-        # query = request.GE.get('search', '') # Get the search term from the request
+#     @action(detail=False, methods=['get'])
+#     def get(self, request):
+#         print(request.data)
+#         query = request.data['search']
+#         # query = request.GE.get('search', '') # Get the search term from the request
         
-        if is_ajax(request) and query:
-            products = Product.objects.filter(productName__icontains=query) # Query the database
+#         if is_ajax(request) and query:
+#             products = Product.objects.filter(productName__icontains=query) # Query the database
             
-            product_names = list(products.values_list('name', flat=True).distinct()) # Get a list of product names
-            print(f"Product names: {product_names}")
-            return Response(product_names)
+#             product_names = list(products.values_list('name', flat=True).distinct()) # Get a list of product names
+#             print(f"Product names: {product_names}")
+#             return Response(product_names)
         
-        return render(request, 'register/product.html')
+#         return render(request, 'register/product.html')
     
-    @action(detail=False, methods=['post'])
-    def post(self, request):
+#     @action(detail=False, methods=['post'])
+#     def post(self, request):
         
-        try:
-            data = request.data
+#         try:
+#             data = request.data
 
-            product_name = data['productName']
-            product_brand = data['productBrand']
-            product_quantity_format = data['productQuantityFormat']
-            product_section = data['productSection']
-            price = data['productPrice']
-            metric_unity = data['productMetricUnity']
-            available = data['productAvailability']
-            synonyms = data['productSynonyms'] # Array with some synonyms the employee choose
+#             product_name = data['productName']
+#             product_brand = data['productBrand']
+#             product_quantity_format = data['productQuantityFormat']
+#             product_section = data['productSection']
+#             price = data['productPrice']
+#             metric_unity = data['productMetricUnity']
+#             available = data['productAvailability']
+#             synonyms = data['productSynonyms'] # Array with some synonyms the employee choose
 
-            print("Synonyms: ", synonyms)
+#             print("Synonyms: ", synonyms)
 
-            # products = Product.get_all_products()
+#             # products = Product.get_all_products()
             
             
-            product_name = product_name.strip()
-            product_section = "Seção " + str(product_section)
+#             product_name = product_name.strip()
+#             product_section = "Seção " + str(product_section)
             
-            print("V1_PN: ", product_name, product_section, price, metric_unity, available)
+#             print("V1_PN: ", product_name, product_section, price, metric_unity, available)
             
-            existing_product = Product.objects.filter(name=product_name, brand=product_brand).first()
+#             existing_product = Product.objects.filter(name=product_name, brand=product_brand).first()
             
-            # if not Product.objects.filter(name=product_name).exists() or not Product.objects.filter(brand=product_brand).exists():
-            if not existing_product:
-                print("Creating new Product...")
+#             # if not Product.objects.filter(name=product_name).exists() or not Product.objects.filter(brand=product_brand).exists():
+#             if not existing_product:
+#                 print("Creating new Product...")
                 
-                embeddings = Product.generate_emebed(product_name)
+#                 embeddings = Product.generate_emebed(product_name)
 
-                product = Product(name=product_name, secao_produto=product_section, preco_venda=price, unidade_medida=metric_unity, disponivel=available, embeddings=embeddings, brand=product_brand, quantity=product_quantity_format)
+#                 product = Product(name=product_name, secao_produto=product_section, preco_venda=price, unidade_medida=metric_unity, disponivel=available, embeddings=embeddings, brand=product_brand, quantity=product_quantity_format)
                 
-                Product.fetch_products_alike(product_name)
+#                 Product.fetch_products_alike(product_name)
                 
                 
-                synonymous = Product.generate_synonymous(product=product_name, brand=product_brand, synonyms=synonyms)
+#                 synonymous = Product.generate_synonymous(product=product_name, brand=product_brand, synonyms=synonyms)
                 
-                # product.brand = product_brand
-                product.synonymous = synonymous
-                print("Product original quantity: ", product.quantity)
-                print("Product quantity: ", product_quantity_format)
-                print("Product brand: ", product.brand)
+#                 # product.brand = product_brand
+#                 product.synonymous = synonymous
+#                 print("Product original quantity: ", product.quantity)
+#                 print("Product quantity: ", product_quantity_format)
+#                 print("Product brand: ", product.brand)
             
-                # product.quantity = product_quantity_format
-                product.save()
+#                 # product.quantity = product_quantity_format
+#                 product.save()
                 
-                result_product = product
+#                 result_product = product
                 
-            else:
-                print("Updating existing product...")
+#             else:
+#                 print("Updating existing product...")
                 
-                product = existing_product
+#                 product = existing_product
                 
-                product.brand = product_brand
-                product.quantity = product_quantity_format
+#                 product.brand = product_brand
+#                 product.quantity = product_quantity_format
                 
-                product_synonymous = Product.get_synonymus(product_name)
+#                 product_synonymous = Product.get_synonymus(product_name)
                 
-                if not product_synonymous:
-                    synonymous = Product.generate_synonymous(product=product_name, brand=product_brand, synonyms=synonyms)
+#                 if not product_synonymous:
+#                     synonymous = Product.generate_synonymous(product=product_name, brand=product_brand, synonyms=synonyms)
                     
-                else:
-                    product.synonymous = product_synonymous
+#                 else:
+#                     product.synonymous = product_synonymous
                     
-                product.save()
-                result_product = product
+#                 product.save()
+#                 result_product = product
                     
-        except Exception as err:
-            print('Error here 2.0: ', err)
-            return Response({'error': 'An error occured while registering the product: '}, status=500)
+#         except Exception as err:
+#             print('Error here 2.0: ', err)
+#             return Response({'error': 'An error occured while registering the product: '}, status=500)
         
-        # products = Product.get_all_products()
+#         # products = Product.get_all_products()
         
-        return Response([
-            {'product_id': result_product.product_id, 'product_name': result_product.name}
-            ])
-        # return Response([
-        #     {'product_id': product.product_id, 'product_name': product.name} for product in products
-        #     ])
+#         return Response([
+#             {'product_id': result_product.product_id, 'product_name': result_product.name}
+#             ])
+#         # return Response([
+#         #     {'product_id': product.product_id, 'product_name': product.name} for product in products
+#         #     ])
 
-class ProductUpdate(viewsets.ViewSet):
-    @action(detail=True, methods=['put'], url_path='update-product/(?P<pk>[^/.]+)')
-    def update_product(self, request, pk):
-        try:
-            product = Product.objects.get(product_id=pk)
-            data = request.data
-            print("Data product: ", data)
-            product.name = data.get('productName', product.name)
-            product.brand = data.get('productBrand', product.brand)
-            product.quantity = data.get('productQuantityFormat', product.quantity)
-            product.secao_produto = data.get('productSection', product.secao_produto)
-            product.preco_venda = data.get('productPrice', product.secao_produto)
-            product.unidade_medida = data.get('productMetricUnity', product.unidade_medida)
-            product.disponivel = data.get('productAvailability', product.disponivel)
-            product.synonymous = data.get('productLocalSynonyms', product.synonymous)
-            print("Product brand: ", product.synonymous)
-            print("Product synonyms: ", data.get('productLocalSynonyms'))
+# class ProductUpdate(viewsets.ViewSet):
+#     @action(detail=True, methods=['put'], url_path='update-product/(?P<pk>[^/.]+)')
+#     def update_product(self, request, pk):
+#         try:
+#             product = Product.objects.get(product_id=pk)
+#             data = request.data
+#             print("Data product: ", data)
+#             product.name = data.get('productName', product.name)
+#             product.brand = data.get('productBrand', product.brand)
+#             product.quantity = data.get('productQuantityFormat', product.quantity)
+#             product.secao_produto = data.get('productSection', product.secao_produto)
+#             product.preco_venda = data.get('productPrice', product.secao_produto)
+#             product.unidade_medida = data.get('productMetricUnity', product.unidade_medida)
+#             product.disponivel = data.get('productAvailability', product.disponivel)
+#             product.synonymous = data.get('productLocalSynonyms', product.synonymous)
+#             print("Product brand: ", product.synonymous)
+#             print("Product synonyms: ", data.get('productLocalSynonyms'))
             
-            product.save()
+#             product.save()
             
-            return Response({'message': 'Product updated successfully'}, status=201)
+#             return Response({'message': 'Product updated successfully'}, status=201)
         
-        except Product.DoesNotExist:
-            return Response({'error': 'Product not found'}, status=404)
+#         except Product.DoesNotExist:
+#             return Response({'error': 'Product not found'}, status=404)
 
-class ProductDelete(viewsets.ViewSet):
-    @action(detail=True, methods=['delete'], url_path='delete-product/(?P<pk>[^/.]+)')
-    def delete_product(self, request, pk):
-        try:
-            product = Product.objects.get(product_id=pk)
-            product.delete()
-            return Response({'message': 'Product deleted successfully'}, status=204)
+# class ProductDelete(viewsets.ViewSet):
+#     @action(detail=True, methods=['delete'], url_path='delete-product/(?P<pk>[^/.]+)')
+#     def delete_product(self, request, pk):
+#         try:
+#             product = Product.objects.get(product_id=pk)
+#             product.delete()
+#             return Response({'message': 'Product deleted successfully'}, status=204)
         
-        except Product.DoesNotExist:
-            return Response({'error': 'Product not found'}, status=404)
+#         except Product.DoesNotExist:
+#             return Response({'error': 'Product not found'}, status=404)
 
-class ProductListView(generic.ListView):
-    model = Product
-    context_object_name = "product_list"
+# class ProductListView(generic.ListView):
+#     model = Product
+#     context_object_name = "product_list"
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        product_list = context['product_list']
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         product_list = context['product_list']
         
-        # Limiting the embeddings to first 3 elements
-        for product in product_list:
-            product.embeddings = product.embeddings[:3]
+#         # Limiting the embeddings to first 3 elements
+#         for product in product_list:
+#             product.embeddings = product.embeddings[:3]
             
-        return context
+#         return context
     
-    template_name = "product_generic_list.html"
+#     template_name = "product_generic_list.html"
 
 class ProductListCreateView(BusinessQuerysetMixin, generics.ListCreateAPIView):
     queryset = Product.objects.all()

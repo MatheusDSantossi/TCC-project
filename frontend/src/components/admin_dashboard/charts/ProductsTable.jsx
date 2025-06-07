@@ -19,16 +19,16 @@ export default function ProductsTable({ products_data, onProductUpdate }) {
   const handleSave = async (updatedProduct) => {
     try {
       const response = await AxiosInstance.put(
-        `update-product/${updatedProduct.productId}/`,
+        `api/products/${updatedProduct.productId}/`,
         {
-          productName: updatedProduct.productName,
-          productBrand: updatedProduct.productBrand,
-          productQuantityFormat: updatedProduct.productQuantityFormat,
-          productSection: updatedProduct.productSection,
-          productPrice: updatedProduct.productPrice,
-          productMetricUnity: updatedProduct.productMetricUnity,
-          productAvailability: updatedProduct.productAvailability,
-          productLocalSynonyms: updatedProduct.productLocalSynonyms,
+          name: updatedProduct.productName,
+          brand: updatedProduct.productBrand,
+          quantity: updatedProduct.productQuantityFormat,
+          secao_produto: updatedProduct.productSection,
+          preco_venda: updatedProduct.productPrice,
+          unidade_medida: updatedProduct.productMetricUnity,
+          disponivel: updatedProduct.productAvailability,
+          synonymous: updatedProduct.productLocalSynonyms,
           // productSynonyms: updatedProduct.productSynonyms,
         }
       );

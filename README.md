@@ -33,5 +33,6 @@ O objetivo deste projeto é desenvolver um chatbot inteligente utilizando a pode
 ## Como Executar o Projeto:
 
 1. Clone este repositório:
+
    ```bash
    git clone https://github.com/MatheusDSantossi/TCC-project.git

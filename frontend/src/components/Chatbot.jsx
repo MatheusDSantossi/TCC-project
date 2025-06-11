@@ -4,7 +4,7 @@ import hecatePFP from "../assets/hecate_pfp.jpg";
 import test_image from "../assets/test_image.jpg";
 import Typewriter from "./Typewriter";
 import AxiosInstance from "./AxiosInstance";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 // import ReactTyped
 
 function Capitalize(str) {
@@ -14,24 +14,18 @@ function Capitalize(str) {
 function Chatbot() {
   const navigate = useNavigate();
 
-  const [menuOptions, setMenuOptions] = useState([]);
   const [userInput, setUserInput] = useState("");
   const [userName, setUserName] = useState("");
   const [isNameEntered, setIsNameEntered] = useState(false);
+  
+  const [menuOptions, setMenuOptions] = useState([]);
   const [hasSelectedOption, setHasSelectedOption] = useState(false);
   const [chatMessages, setChatMessages] = useState([]);
-
   const [isHecateAnswering, setIsHecateAnswering] = useState(false);
-
   const [isTypingDone, setIsTypingDone] = useState(false);
   const [pendingMenuOptions, setPendingMenuOptions] = useState(null);
-
   const [isTextRelatedTo, setIsTextRelatedTo] = useState("default");
-
   const chatContainerRef = useRef(null);
-  // const [clockFormat, setClockFormat] = useState("24-hour");
-  // const [currentTime, setCurrentTime] = useState("");
-
   const [
     showMenuOptionsAndInputAfterHecateAnswer,
     setShowMenuOptionsAndInputAfterHecateAnswer,
@@ -39,31 +33,7 @@ function Chatbot() {
 
   const [showPreviousMenuButton, setShowPreviousMenuButton] = useState(false);
 
-  // Update the clock every second
-  // useEffect(() => {
-  //   const updateClock = () => {
-  //     const now = new Date();
-
-  //     // Format time based on user's preference
-  //     if (clockFormat === "24-hour") {
-  //       const hours = String(now.getHours()).padStart(2, "0");
-  //       const minutes = String(now.getMinutes()).padStart(2, "0");
-
-  //       setCurrentTime(`${hours}:${minutes}`);
-  //     } else if (clockFormat === "12-hour") {
-  //       const hours = now.getHours() % 12 || 12; // Convert to 12-hour format
-  //       const minutes = String(now.getMinutes()).padStart(2, "0");
-  //       const amPm = now.getHours() >= 12 ? "PM" : "AM";
-  //       setCurrentTime(`${hours}:${minutes} ${amPm}`);
-  //     }
-  //   };
-
-  //   // Update every second
-  //   const interval = setInterval(updateClock, 1000);
-
-  //   // Clean up interval on component unmount
-  //   return () => clearInterval(interval);
-  // }, [clockFormat]);
+  const { businessSlug } = useParams(); // e.g. "supermarket-santos"
 
   useEffect(() => {
     if (chatContainerRef.current) {
@@ -164,7 +134,9 @@ function Chatbot() {
       const response = await AxiosInstance.post(`chatbot/post/`, {
         user_input: message,
         text_related_to: isTextRelatedTo,
+        business_slug: businessSlug,
       });
+      
       setIsHecateAnswering(false);
       const botResponse = {
         sender: "Hecate",
@@ -494,8 +466,7 @@ function Chatbot() {
                   onKeyDown={handleKeyPress}
                 />
                 <button
-                  className="flex-shrink-0 px-4 py-2 ml-2 font-bold text-black bg-yellow-400 rounded-md hover:bg-yellow-300 whitespace-nowrap
-                  cursor-pointer"
+                  className="flex-shrink-0 px-4 py-2 ml-2 font-bold text-black bg-yellow-400 rounded-md cursor-pointer hover:bg-yellow-300 whitespace-nowrap"
                   onClick={handleNameSubmit}
                 >
                   Enviar
@@ -513,8 +484,7 @@ function Chatbot() {
                 {menuOptions.map((option, index) => (
                   <button
                     key={index}
-                    className="px-4 py-2 text-lg font-bold text-black transition duration-200 bg-yellow-400 rounded-lg hover:bg-yellow-300
-                    cursor-pointer"
+                    className="px-4 py-2 text-lg font-bold text-black transition duration-200 bg-yellow-400 rounded-lg cursor-pointer hover:bg-yellow-300"
                     onClick={() => {
                       selectOption(
                         option.menu_extended_id,

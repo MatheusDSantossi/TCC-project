@@ -43,13 +43,13 @@ function App() {
       <div className="absolute top-0 left-0 z-10 w-full h-full" >
         {/* <div className="z-1" > */}
         <Routes>
-          <Route exact path="/" element={<Home />} />
+          <Route exact path="/:businessSlug" element={<Home />} />
           <Route exact path="/register" element={<Register />} />
           <Route exact path="/login" element={<Login />} />
           <Route exact path="/request/password_reset" element={<ForgetPassword />} />
           <Route exact path="/password-reset/:token" element={<ForgetPasswordReset />} />
           <Route exact path="/adminHome" element={<AdminHome />} />
-          <Route exact path="/chatbot" element={<Chatbot />} />
+          <Route exact path="/chatbot/:businessSlug" element={<Chatbot />} />
           <Route path="/register/invite/:token" element={<InviteRegister />} />
           
           <Route element={<ProtectedRoute />}>

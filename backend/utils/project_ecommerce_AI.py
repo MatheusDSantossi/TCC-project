@@ -42,6 +42,7 @@ import time
 from .prompt_searcher import *
 from .prompts import *
 from .embeddings import embed_fn
+from loaders import load_business_details, get_cached_products_df
 
 # Você: quero um refrige
 
@@ -112,212 +113,83 @@ text_has_brand = False
 sections_find_in_db = find_business_sections(conn) 
 
 # model_text_generator = models.get("text-davinci-003")
+# def load_products_and_business_detail(business):
+#     sql = f"SELECT * FROM products_with_embeddings WHERE business_id = {business}"
 
-## I HAVE THE DF IN MY DATABASE
-# cur = conn.cursor()
+#     cur = conn.cursor()
 
-# products_list = []
+#     try:
+#         cur.execute(sql)
 
+#         rows = cur.fetchall()
+#     except (Exception, psycopg2.DatabaseError) as error:
+#         rows = []
+        
+#     products_list = []
 
-# # cur.execute("""
-# #             SELECT * FROM products 
-# #             """)
-# cur.execute("""
-#             SELECT * FROM products_bigger_supermarket 
-#             """)
+#     for row in rows:
+#         products = {
+#             "Nome": row[1],
+#             "Secao": row[2],
+#             "PrecoVenda": float(row[3]),
+#             "UnidadeMedida": row[4],
+#             "Embeddings": row[5],
+#             "Synonymous": row[6],
+#             "Brand": row[7],
+#             "Quantity": row[8],
+#             "Disponivel": row[9],
+#         }
+#         products_list.append(products)
 
-# rows = cur.fetchall()
+#     products_df = pd.DataFrame(products_list)
 
+#     print("PRODUCTS DF: ", products_df)
 
+#     # List of available products (I can keep that in the DB as well)
+#     products_available = [p["Nome"] for p in products_df.to_dict(orient='records') if p['Disponivel'] > 0]
 
-# # 1	"#REFRIG. GUARANA ANTARCT PET CACULINHA"	"Seção 3"	1.2	"PC"	"22021000"	0.89	0.89	1.2	true
-# # 2	"REFRIG. GUARANA ANTARCT PET"	"Seção 3"	6	"PC"	"22021000"	4.89	4.89	6	true
+#     # search_term = "REF"
 
-# # for row in rows:
-# #     products = {
-# #         "Nome": row[1],
-# #         "Secao": row[2],
-# #         "PrecoVenda": float(row[3]),
-# #         "UnidadeMedida": row[4],
-# #         "Disponivel": row[9],
-# #         "Brand": row[10],
-# #         "Quantity": row[11],
-# #     }
+#     # matching_products = [name for name in products_available if search_term in name]
 
-# for row in rows:
-#     products = {
-#         "Nome": row[1],
-#         "Code": row[2],
-#         "Barcode": row[3],
-#         "TotalCost": float(row[4]),
-#         "VendaTotal": float(row[5]),
-#         "MargemVenda": float(row[6]),
-#         "MarkupVenda": float(row[7]),
-#         "Section": row[8],
-#         "PrecoVenda": float(row[9]),
-#         "NCM": row[10],
-#         "CEST": row[11],
-#         "PrecoCusto": float(row[12]),
-#         "PrecoMinimo": row[13],
-#         "Estoque": row[14],
-#         "Ativo": row[15],
-#         "CadastroEm": row[16],
-#     }
-#     products_list.append(products)
+#     # # print("Products available: ", products_available)
+#     # print("Matching products: ", matching_products)
 
+#     sql_business_detail = f"SELECT * FROM chatbot_businessdetail WHERE business_id = {business}"
 
-# products_df = pd.DataFrame(products_list)
+#     cur.execute(sql_business_detail)
 
-# # print(products_df)
+#     try:
+#         cur.execute(sql_business_detail)
 
-# df = pd.DataFrame(products_df)
-# # df.columns = ['Nome', 'Secao', 'Disponivel']
-# # df.columns = ['Nome', 'Secao', 'PrecoVenda', 'UnidadeMedida', 'Disponivel','Brand', 'Quantity']
+#         rows_business_detail = cur.fetchall()
+#     except (Exception, psycopg2.DatabaseError) as error:
+#         rows_business_detail = []
 
-# df.columns = ['Nome', 'Code', 'Barcode', 'TotalCost', 'VendaTotal','MargemVenda', 'MarkupVenda', 'Section', 'PrecoVenda', 'NCM', 'CEST', 'PrecoCusto','PrecoMinimo', 'Estoque', 'Ativo', 'CadastroEm']
+#     business_detail_list = []
 
-# print(df)
+#     for row in rows_business_detail:
+#         business_detail = {
+#             "Key": row[1],
+#             "Value": row[2],
+#         }
+#         business_detail_list.append(business_detail)
+        
+#     print("Business detail list: ", business_detail_list)
 
-# embed_model = 'models/embedding-001'
+#     business_detail_text = ""
 
-# # content=f'O produto {title} é encontrado na {secao} com o preço de {preco_venda} reais possuindo a unidade de medida {unidade_medida}',  # Include the type of the product
+#     for business_detail in business_detail_list:    
+#         # print("Business detail: ", business_detail)
+#         title = business_detail["Key"]
+#         description = business_detail["Value"]
+#         business_detail_text += f"Information title - {title}\n"
+#         business_detail_text += f"Information description - {description}\n"
 
-
-
-# # print(embed_fn(find_section, genai, conn, "Arroz"))
-
-
-# # df["Embeddings"] = df.apply(lambda row: embed_fn(find_section, genai, conn, row["Nome"], row["Secao"], row["PrecoVenda"], row['UnidadeMedida']), axis=1)
-# df["Embeddings"] = df.apply(lambda row: embed_fn(find_section, genai, conn, row["Nome"]), axis=1)
-
-# print(df)
-
-# # Transformar DataFrame em uma lista de tuplas
-# data_tuples = [tuple(x) for x in df.to_numpy()]
-
-# # print("Data tuples: ", data_tuples)
-
-# sql = """INSERT INTO products_with_embeddings(
-#     name,
-#     secao_produto,
-#     preco_venda,
-#     unidade_medida,
-#     disponivel,
-#     brand,
-#     quantity,
-#     embeddings
-# ) 
-# values(%s, %s, %s, %s, %s, %s, %s, %s) RETURNING *"""
-
-# sql = """INSERT INTO products_with_embeddings_bigger(
-#     name,
-#     code,
-# 	barcode,
-# 	total_cost,
-# 	venda_total,
-# 	margem_venda,
-# 	markup_venda,
-# 	secao_produto,
-# 	preco_venda,
-# 	NCM,
-# 	CEST,
-# 	preco_custo,
-# 	preco_minimo,
-# 	disponivel,
-# 	ativo,
-# 	cadastrado_em,
-# 	embeddings
-# ) 
-# values(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING *"""
-
-# try:
-#     with conn.cursor() as cur:
-#         for record in data_tuples:
-#             cur.execute(cur.mogrify(sql, record))
-
-    
-# except (Exception, psycopg2.DatabaseError) as error:
-#     print(error)
-# finally:
-#     conn.close()
-
-## NOW I HAVE THE DF IN MY DATABASE
-
-sql = "SELECT * FROM products_with_embeddings"
-# sql = "SELECT * FROM products_with_embeddings_bigger"
-
-cur = conn.cursor()
-
-try:
-    cur.execute(sql)
-
-    rows = cur.fetchall()
-except (Exception, psycopg2.DatabaseError) as error:
-    rows = []
-    
-products_list = []
-
-for row in rows:
-    products = {
-        "Nome": row[1],
-        "Secao": row[2],
-        "PrecoVenda": float(row[3]),
-        "UnidadeMedida": row[4],
-        "Embeddings": row[5],
-        "Synonymous": row[6],
-        "Brand": row[7],
-        "Quantity": row[8],
-        "Disponivel": row[9],
-    }
-    products_list.append(products)
-
-products_df = pd.DataFrame(products_list)
-
-print("PRODUCTS DF: ", products_df)
-
-# List of available products (I can keep that in the DB as well)
-products_available = [p["Nome"] for p in products_df.to_dict(orient='records') if p['Disponivel'] > 0]
-
-# search_term = "REF"
-
-# matching_products = [name for name in products_available if search_term in name]
-
-# # print("Products available: ", products_available)
-# print("Matching products: ", matching_products)
-
-sql_business_detail = "SELECT * FROM chatbot_businessdetail"
-
-cur.execute(sql_business_detail)
-
-try:
-    cur.execute(sql_business_detail)
-
-    rows_business_detail = cur.fetchall()
-except (Exception, psycopg2.DatabaseError) as error:
-    rows_business_detail = []
-
-business_detail_list = []
-
-for row in rows_business_detail:
-    business_detail = {
-        "Key": row[1],
-        "Value": row[2],
-    }
-    business_detail_list.append(business_detail)
-    
-print("Business detail list: ", business_detail_list)
-
-business_detail_text = ""
-
-for business_detail in business_detail_list:    
-    # print("Business detail: ", business_detail)
-    title = business_detail["Key"]
-    description = business_detail["Value"]
-    business_detail_text += f"Information title - {title}\n"
-    business_detail_text += f"Information description - {description}\n"
-
-def for_dividing_prompt_limit():
+def for_dividing_prompt_limit(business):
     products_list_2 = []
+    
+    products_df = get_cached_products_df(business, conn)
     
     for p in products_df.to_dict(orient='records'):
         # prompt += p['Nome']
@@ -593,9 +465,9 @@ def pre_process_prompt(prompt):
 # print(pre_process_prompt("Quero um cafe que custa 12 reais que está na seção 1 qual o nome desse cafe?"))
 
 
-def create_semantic_dictionary(user_input):
+def create_semantic_dictionary(user_input, business):
     """
-    Creaates a semantic dictionary based on embeddings.
+    Creates a semantic dictionary based on embeddings.
 
     Args:
         df (DataFrame): DataFrame with the products
@@ -603,6 +475,7 @@ def create_semantic_dictionary(user_input):
     Returns:
         A dictionary where the keys are the products and the values are similar products lists
     """
+    products_df = get_cached_products_df(business, conn)
     semantic_dictonary = {}
     # "REFRIG. GUARANA ANTARCT PET"	"Seção 3"	6	"PC"	"22021000"	4.89	4.89	6	true
 
@@ -611,12 +484,12 @@ def create_semantic_dictionary(user_input):
     # print(f"Embed of products: {embeddings_consulta}")
 
     for i, row in products_df.iterrows():
-        # print(f"ROW EMBED{row['Embeddings']}")
-        product_embedding = np.array(row['Embeddings']).reshape(1, -1) # Ensure the product embedding is in the right shape
+
+        product_embedding = np.array(row['embeddings']).reshape(1, -1) # Ensure the product embedding is in the right shape
         
         similarity = cosine_similarity(embeddings_consulta, product_embedding)[0][0]
         
-        semantic_dictonary[row["Nome"]] = similarity
+        semantic_dictonary[row["name"]] = similarity
 
     return semantic_dictonary
 
@@ -645,7 +518,8 @@ def encontrar_produtos_similares(semantic_dictionary, threshold=0.5):
 
 
 # Função para identificar produtos na consulta do usuário
-def find_similarity_products(prompt, embeddings_products=None):
+def find_similarity_products(prompt, embeddings_products=None, business=None):
+    products_df = get_cached_products_df(business, conn)
     # in teh answer I have to distinguish between the answers with products and the answerrs without products (Olá, quero saber onde fica a seção 2)
 
     # avatar 
@@ -666,8 +540,8 @@ def find_similarity_products(prompt, embeddings_products=None):
     new_prompt = prompt.lower()
     new_prompt_without_spaces = new_prompt.strip()
     
-    products_df['Nome'] = products_df['Nome'].str.lower()
-    products_df['Nome'] = products_df['Nome'].apply(lambda x: unicodedata.normalize('NFKD', x).encode('ascii', 'ignore').decode('ascii'))
+    products_df['name'] = products_df['name'].str.lower()
+    products_df['name'] = products_df['name'].apply(lambda x: unicodedata.normalize('NFKD', x).encode('ascii', 'ignore').decode('ascii'))
     
     # print("ULTIMO CHARACTER " + new_prompt.strip()[-1])
 
@@ -696,7 +570,7 @@ def find_similarity_products(prompt, embeddings_products=None):
         
         new_prompt_clean = preprocess_text(new_prompt_without_spaces)
         print("new prompt clean: ", new_prompt_clean)
-        products_df['Cleaned_Name'] = products_df['Nome'].apply(preprocess_text)
+        products_df['Cleaned_Name'] = products_df['name'].apply(preprocess_text)
 
         # Using TF-IDF to text comparation
         tfidf_vectorizer = TfidfVectorizer()
@@ -726,9 +600,9 @@ def find_similarity_products(prompt, embeddings_products=None):
     return prompt
 
 
-def generate_and_search(prompt):
-   
-    similarities = find_similarity_products(prompt, np.stack(products_df["Embeddings"]))
+def generate_and_search(prompt, business):
+    products_df = get_cached_products_df(business, conn)
+    similarities = find_similarity_products(prompt, np.stack(products_df["embeddings"]), business)
 
     if isinstance(similarities, list):  
 
@@ -785,7 +659,7 @@ def create_menu_options_prompts():
             menu_prompt_generate = generate_content_model.generate_content(menu_prompt)
             response = menu_prompt_generate.text
             
-            cur.execute(query_add, (response, option[0]))
+            cursor.execute(query_add, (response, option[0]))
                
     
 # user_input = "Onde fica o Refrigerante e Detergente e suco"
@@ -804,10 +678,24 @@ def create_menu_options_prompts():
 
 # um algoritmo que descreve a inclusão de um novo topico
 
-def chatbot_response(user_prompt, text_related_to="default"):
+def chatbot_response(user_prompt, text_related_to="default", business=None):
     
     global dict_of_client_products
     global products_list_after_user_input
+    
+    business_detail_list = load_business_details(business, conn)
+    
+    business_detail_text = "" 
+    for k, v in business_detail_list.items():
+        business_detail_text += k
+        business_detail_text += ":\n"
+        business_detail_text += v
+        
+    products_df = get_cached_products_df(business, conn)
+
+    print("Products df: ", products_df)
+
+    products_available = [p["name"] for p in products_df.to_dict(orient='records') if p['disponivel'] > 0]
 
     print("Text related to: ", text_related_to)
 
@@ -823,7 +711,7 @@ def chatbot_response(user_prompt, text_related_to="default"):
     else:
         fix_prompt_v1 = pre_process_prompt_grammatical(user_prompt)
         
-    find_product = generate_and_search(fix_prompt_v1)
+    find_product = generate_and_search(fix_prompt_v1, business)
 
     is_product = isinstance(find_product, pd.DataFrame)
     
@@ -850,13 +738,13 @@ def chatbot_response(user_prompt, text_related_to="default"):
             for index, row in find_product.iterrows():
             # print(f"ID: {index}, Nome: {row['Nome']}, Secao: {row['Secao']}, Disponivel: {row['Disponivel']}")
                 dict_of_client_products = {
-                    "Name": row['Nome'],
-                    "Brand": row["Brand"],
-                    "Section": row['Secao'],
-                    "Price": row['PrecoVenda'],
-                    "Available": row['Disponivel'],
-                    "Quantity": row['Quantity'],
-                    "Metric": row['UnidadeMedida'],
+                    "Name": row['name'],
+                    "Brand": row["brand"],
+                    "Section": row['secao_produto'],
+                    "Price": row['preco_venda'],
+                    "Available": row['disponivel'],
+                    "Quantity": row['quantity'],
+                    "Metric": row['unidade_medida'],
                 }            
                 products_list_after_user_input.append(dict_of_client_products)                
         
@@ -903,7 +791,7 @@ def chatbot_response(user_prompt, text_related_to="default"):
         # TODO: Check why the product when I search for section
 
         # if find_product['Disponivel'].item():
-        if find_product['Disponivel'].any():
+        if find_product['disponivel'].any():
             answer_prompt = f"""Considering that the customer of our store **{business_name}** sent the following message:
 
             "{fix_prompt_v1}"
@@ -1117,10 +1005,10 @@ def generate_synonymous(product=None, product_list=None, brand=None, synonyms=No
                 for index, row in products.iterrows():
 
                     products_dict = {
-                        "Name": row['Nome'],
-                        "Section": row['Secao'],
-                        "Price": row['PrecoVenda'],
-                        "Available": row['Disponivel'],
+                        "Name": row['name'],
+                        "Section": row['secao_produto'],
+                        "Price": row['preco_venda'],
+                        "Available": row['disponivel'],
                     }            
                     product_synonymous_list.append(products_dict)
                     # print("GENERATE SYNONYMOUS PRODUCT", products_dict["Name"])
@@ -1145,10 +1033,10 @@ def generate_synonymous(product=None, product_list=None, brand=None, synonyms=No
             for index, row in products.iterrows():
 
                 products_dict = {
-                    "Name": row['Nome'],
-                    "Section": row['Secao'],
-                    "Price": row['PrecoVenda'],
-                    "Available": row['Disponivel'],
+                    "Name": row['name'],
+                    "Section": row['secao_produto'],
+                    "Price": row['preco_venda'],
+                    "Available": row['disponivel'],
                 }            
                 product_synonymous_list.append(products_dict)
                 # print("GENERATE SYNONYMOUS PRODUCT", products_dict["Name"])

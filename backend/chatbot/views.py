@@ -62,6 +62,8 @@ class ChatbotResponse(viewsets.ViewSet):
     def post(self, request):
         data = request.data
         
+        print("CHATBOR RESPONSE: ", data)
+        
         user_input = data.get('user_input')
         text_related_to = data.get('text_related_to')
         business = data.get('business_slug')
@@ -70,15 +72,19 @@ class ChatbotResponse(viewsets.ViewSet):
             return Response({'error': 'No input provided'}, status=400)
         
         # Validating business
-        try:
-            biz = Business.objects.get(slug=business)
-        except Business.DoesNotExist:
-            return Response({'error': f'Unkown business: {business}'}, status=404)
+        if business:
+            # I'm checking if the business was sent, because I use chatbot
+            # in two differents places and in one of them the slug isn't send.
+            # TODO: It's interesting to change this approach
+            try:
+                 biz = Business.objects.get(slug=business)
+            except Business.DoesNotExist:
+                 return Response({'error': f'Unkown business: {business}'}, status=404)
         
-        
+    
         # Call the chatbot_response logic
         response = chatbot_response(user_input, text_related_to, biz.id)
-        
+                    
         print("The response is: ", response)
         
         return Response({"response": response}, status=200)

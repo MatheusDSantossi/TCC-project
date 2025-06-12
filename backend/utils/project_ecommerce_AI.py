@@ -750,7 +750,7 @@ def chatbot_response(user_prompt, text_related_to="default", business=None):
         
             prompt_intro = "Generate a detailed yet compact description for an e-commerce chatbot using the following product data:\n\n"
                 
-            print("products_list_after_user_input: ", products_list_after_user_input)
+            # print("products_list_after_user_input: ", products_list_after_user_input)
                 
             name_of_product = ""
             matching_products = []
@@ -775,7 +775,7 @@ def chatbot_response(user_prompt, text_related_to="default", business=None):
                 matching_products = [name for name in products_available if first_letter_of_product.upper() in name]
             else:
                 matching_products = products_available[:20]
-        print("Matching products: ", matching_products)
+        # print("Matching products: ", matching_products)
         # Generate a text stream
         # By default, the model returns a response after 
         # completing the entire text generation process. 

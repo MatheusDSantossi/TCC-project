@@ -34,6 +34,12 @@ function Chatbot() {
   const [showPreviousMenuButton, setShowPreviousMenuButton] = useState(false);
 
   const { businessSlug } = useParams(); // e.g. "supermarket-santos"
+  const localBusinessSlug = localStorage.getItem("BusinessSlug") || null;
+
+  const finalBusinessSlug = businessSlug || localBusinessSlug;
+
+  const url = `/${finalBusinessSlug}`
+
 
   useEffect(() => {
     if (chatContainerRef.current) {
@@ -104,7 +110,7 @@ function Chatbot() {
       setChatMessages((prevMessages) => [...prevMessages, hecateMessage]);
     }, 3000);
     setTimeout(() => {
-      navigate("/");
+      navigate(url);
     }, 8000);
   };
 
@@ -130,11 +136,12 @@ function Chatbot() {
 
     try {
       console.log("Sending message...");
+
       // Await the Axios POST request
       const response = await AxiosInstance.post(`chatbot/post/`, {
         user_input: message,
         text_related_to: isTextRelatedTo,
-        business_slug: businessSlug,
+        business_slug: finalBusinessSlug,
       });
       
       setIsHecateAnswering(false);

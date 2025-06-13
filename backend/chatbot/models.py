@@ -1,84 +1,40 @@
 from django.db import models
-from django.shortcuts import render
-from django.contrib.postgres.fields import ArrayField
+from django.contrib.postgres.fields import JSONField
 from utils.project_ecommerce_AI import *
-from core.models import * 
+from core.models import Business
+from backend.chatbot.managers.product import ProductManager
 
 # Products
 class Product(models.Model):
     
     product_id = models.AutoField(primary_key=True)
-    # TODO: Once checked everying change the null=True to False
     business = models.ForeignKey(Business, on_delete=models.CASCADE, related_name='%(class)ss',
-                                 null=True, help_text="Business to which the product belongs.")
+                                 null=False, help_text="Business to which the product belongs.")
 
     # Common fields
-    name = models.CharField(max_length=255, default='')
+    name = models.CharField(max_length=255)
     brand = models.CharField(max_length=255, default='')
     quantity = models.CharField(max_length=50, default='')
-    secao_produto = models.CharField(max_length=255, default='')
-    preco_venda = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    unidade_medida = models.CharField(max_length=255, default='')
-    # disponivel = models.BooleanField(default=True)
-    disponivel = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    embeddings = ArrayField(models.FloatField(), default=list)
-    synonymous = ArrayField(models.TextField(), default=list, blank=True)
-    
-    @staticmethod
-    def get_product_by_id(ids):
-        return Product.objects.filter(product_id__in=ids)
+    section = models.CharField(max_length=255)
+    price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    unit = models.CharField(max_length=255, default='')
+    stock = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    # embeddings = ArrayField(models.FloatField(), default=list)
+    embeddings = JSONField(models.FloatField(), default=list)
+    synonymous = JSONField(models.TextField(), default=list, blank=True)
+    # synonymous = ArrayField(models.TextField(), default=list, blank=True)
 
-    
-    @staticmethod
-    def get_all_products():
-        return Product.objects.all()
-    
-    @staticmethod
-    def get_product_by_name(product_name):
-        if product_name:
-            # return Product.objects.filter(name=name)
-            return Product.objects.get(name=product_name)
-        # return Product.get_all_products()
-        return None
-    
-    def get_product_by_section(section):
-        if section:
-            return Product.objects.filter(secao_produto=section)
-        return None
-    
-    @staticmethod
-    def generate_synonymous(product=None, product_list=None, brand=None, synonyms=None):
-        if product_list:
-            return generate_synonymous(product_list=product_list, brand=brand, synonyms=synonyms)
-        else:
-            return generate_synonymous(product=product, brand=brand, synonyms=synonyms)
-
-    @staticmethod
-    def fetch_products_alike(product_name):
-        print(fetch_products_alike(product_name))
-        
-    @staticmethod
-    def get_synonymus(name):
-        product = Product.objects.filter(name=name).first()
-        if product:
-            return product.synonymous
-        return None
-    
-    @staticmethod
-    def generate_emebed(productName):
-        # embed_fn(product.nome)
-        return embed_fn(productName)
-    
-    @staticmethod
-    def fix_product_name(productName):
-        return pre_process_prompt_grammatical(productName)
+    objects = ProductManager()
+    # Example of how to use it:
+    # Product.objects.by_section("Beverages").available()
     
     class Meta:
         db_table = 'products_with_embeddings'
+        ordering = ["name"]
 
 
     def __str__(self):
-        return super().__str__()
+        return f"{self.name} ({self.brand})"
 
 # Menu Option
 class MenuOptionExtended(models.Model):

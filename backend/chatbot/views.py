@@ -25,6 +25,8 @@ from rest_framework.response import Response
 from core.mixins import BusinessQuerysetMixin
 from core.permissions import IsBusinessMember
 
+# from .services.product_ai import 
+
 def is_ajax(request):
     return request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
 
@@ -368,6 +370,7 @@ class MenuOptionEdit(viewsets.ViewSet):
     
 #     template_name = "product_generic_list.html"
 
+# TODO: How can I modify this, because for example, I want to add synonyms when it doesn't have. In this case, I'll need to call my generate_synonmys function and edit the product before saving it.
 class ProductListCreateView(BusinessQuerysetMixin, generics.ListCreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer

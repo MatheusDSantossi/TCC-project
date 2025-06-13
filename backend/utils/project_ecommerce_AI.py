@@ -1,3 +1,5 @@
+# TODO: Check the name, I've renamed some columns like disponivel to stock
+
 import google.generativeai as genai
 
 from pathlib import Path

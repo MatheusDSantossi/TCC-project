@@ -7,7 +7,7 @@ User = get_user_model()
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
-        fields = ['product_id', 'name', 'brand', 'quantity', 'secao_produto', 'preco_venda', 'unidade_medida', 'disponivel', 'synonymous']
+        fields = ['product_id', 'name', 'brand', 'quantity', 'section', 'price', 'unit', 'stock', 'synonymous']
     
     def create(self, validated_data):
         biz = getattr(self.context['request'].user, 'business', None)

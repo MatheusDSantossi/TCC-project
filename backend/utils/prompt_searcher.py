@@ -8,7 +8,7 @@ def find_business_sections(conn):
         with conn.cursor() as cursor:
 
             cursor.execute("""
-                            SELECT DISTINCT secao_produto FROM products_with_embeddings
+                            SELECT DISTINCT section FROM products_with_embeddings
                             """)
             
             sections_in_database = cursor.fetchall()
@@ -33,10 +33,10 @@ def find_section(text, conn):
         
         # return match.group(1)
         with conn.cursor() as cursor:
-        #     # cursor.execute("SELECT name FROM products_with_embeddings WHERE secao_produto = %s", (match.group(1),))
+        #     # cursor.execute("SELECT name FROM products_with_embeddings WHERE section = %s", (match.group(1),))
             
         #     cursor.execute("""
-        #                    SELECT DISTINCT secao_produto FROM products_with_embeddings
+        #                    SELECT DISTINCT section FROM products_with_embeddings
         #                    """)
             
         #     sections_in_database = cursor.fetchall()
@@ -49,8 +49,8 @@ def find_section(text, conn):
                 print("Section found in database")
             
                 cursor.execute("""
-                            SELECT name, secao_produto FROM products_with_embeddings 
-                            WHERE secao_produto = %s
+                            SELECT name, section FROM products_with_embeddings 
+                            WHERE section = %s
                             LIMIT 20
                             """, (section,))
                 return cursor.fetchall()
@@ -71,8 +71,8 @@ def find_price(text, conn):
         # return float(match.group())
         with conn.cursor() as cursor:
             cursor.execute("""
-                           SELECT name, preco_venda FROM products_with_embeddings 
-                           WHERE preco_venda = %s
+                           SELECT name, price FROM products_with_embeddings 
+                           WHERE price = %s
                            LIMIT 20
                            """, (price_with_point,))
             return cursor.fetchall()
@@ -152,8 +152,8 @@ def find_quantity(text, conn):
        with conn.cursor() as cursor:
             if metric and quantity:
                 cursor.execute("""
-                    SELECT name, quantity, unidade_medida FROM products_with_embeddings
-                    WHERE quantity = %s OR unidade_medida = %s
+                    SELECT name, quantity, unit FROM products_with_embeddings
+                    WHERE quantity = %s OR unit = %s
                     LIMIT 20
                 """, (quantity, metric))
             elif quantity:
@@ -164,8 +164,8 @@ def find_quantity(text, conn):
                 """, (quantity,))
             elif metric:
                 cursor.execute("""
-                    SELECT name, unidade_medida FROM products_with_embeddings
-                    WHERE unidade_medida = %s
+                    SELECT name, unit FROM products_with_embeddings
+                    WHERE unit = %s
                     LIMIT 20
                 """, (metric,))
             
@@ -224,14 +224,14 @@ def find_similar_products_using_input_embeddings(input_embed, conn, np, cosine_s
         
         product_details = []
         for product_id, similarity in similar_products:
-            cursor.execute("SELECT name, secao_produto, preco_venda, quantity, unidade_medida FROM products_with_embeddings WHERE product_id = %s", (product_id,)
+            cursor.execute("SELECT name, section, price, quantity, unit FROM products_with_embeddings WHERE product_id = %s", (product_id,)
                            )
             product_row = cursor.fetchone()
             product_details.append({
                 # "product_id": product_id,
                 "nome": product_row[0],
-                "preco_venda": product_row[1],
-                "secao_produto": product_row[2],
+                "price": product_row[1],
+                "section": product_row[2],
                 # "similarity": similarity
             })
             
@@ -256,8 +256,9 @@ def find_using_synonyms(text, conn):
                     SELECT name 
                     FROM products_with_embeddings 
                     WHERE EXISTS ( 
-                        SELECT *
-                        FROM unnest(synonymous) AS elem
+                        SELECT 1
+                        FROM jsonb_array_elements_text(COALESCE(synonymous, '[]'::jsonb)
+                        ) AS elem
                         WHERE {conditions}
                     )
                     LIMIT 30;
@@ -267,8 +268,9 @@ def find_using_synonyms(text, conn):
     cursor.execute("""
                 SELECT name, synonymous FROM products_with_embeddings 
                 WHERE EXISTS (
-                    SELECT *
-                    FROM unnest(synonymous) AS elem
+                    SELECT 1
+                    FROM jsonb_array_elements_text(COALESCE(synonymous, '[]'::jsonb) 
+                    ) AS elem
                     WHERE elem LIKE %s
                 )
                 LIMIT 30;

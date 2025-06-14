@@ -6,9 +6,9 @@ class ProductQuerySet(models.QuerySet):
     def by_name(self, name):
         return self.filter(name__iexact=name)
     def by_section(self, section):
-        return self.filter(secao_produto__iexact = section)
+        return self.filter(section__iexact = section)
     def available(self):
-        return self.filter(disponivel__gt=0)
+        return self.filter(stock__gt=0)
     
 class ProductManager(models.Manager):
     def get_queryset(self):

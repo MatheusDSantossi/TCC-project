@@ -50,15 +50,15 @@ function ProductRegistration() {
     );
 
     if (selectedProduct) {
-      const numberOfSection = selectedProduct.secao_produto.slice(-1);
+      const numberOfSection = selectedProduct.section.slice(-1);
       console.log("Selected product in PREGISTER: ", selectedProduct)
       console.log("Number of section: " + numberOfSection);
       setProductBrand(selectedProduct.brand);
       setProductQuantityFormat(selectedProduct.quantity);
       setProductSection(numberOfSection);
-      setProductPrice(selectedProduct.preco_venda);
-      setProductMetricUnity(selectedProduct.unidade_medida);
-      setProductAvailibility(selectedProduct.disponivel);
+      setProductPrice(selectedProduct.price);
+      setProductMetricUnity(selectedProduct.unit);
+      setProductAvailibility(selectedProduct.stock);
       setProductSynonyms(selectedProduct.synonymous);
     }
   };

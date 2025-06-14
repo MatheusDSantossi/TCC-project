@@ -39,10 +39,10 @@ function ProductEdit({ open, onClose, product, onSave, refreshTable }) {
         productName: product.name || "",
         productBrand: product.brand || "",
         productQuantityFormat: product.quantity || "",
-        productSection: product.secao_produto || 0,
-        productPrice: product.preco_venda,
-        productMetricUnity: product.unidade_medida,
-        productAvailability: product.disponivel,
+        productSection: product.section || 0,
+        productPrice: product.price,
+        productMetricUnity: product.unit,
+        productAvailability: product.stock,
         productSynonyms: product.synonymous,
       });
       setResetKey((prev) => prev + 1);

@@ -18,11 +18,11 @@ function HomeDashboard() {
 
   const totalProducts = products.length;
   const availableProducts = products.filter(
-    (p) => parseFloat(p.disponivel) > 0
+    (p) => parseFloat(p.stock) > 0
   ).length;
   const averagePrice =
     products.reduce(
-      (sum, product) => sum + parseFloat(product.preco_venda || 0),
+      (sum, product) => sum + parseFloat(product.price || 0),
       0
     ) / totalProducts || 0;
 
@@ -78,7 +78,7 @@ function HomeDashboard() {
           <p className="text-2xl font-bold text-primary">
             {loading
               ? "Loading..."
-              : products.filter((p) => parseFloat(p.disponivel) < 10).length}
+              : products.filter((p) => parseFloat(p.stock) < 10).length}
           </p>
         </div>
       </div>

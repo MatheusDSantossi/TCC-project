@@ -8,13 +8,13 @@ function BasicPieChart({ products_data }) {
 
   const productSectionList = products_data
     .slice(0, 10)
-    .map((product) => product.secao_produto);
+    .map((product) => product.section);
   const productIdList = products_data
     .slice(0, 10)
     .map((product) => product.product_id);
   const productAvailabilityList = products_data
     .slice(0, 10)
-    .map((product) => parseFloat(product.disponivel));
+    .map((product) => parseFloat(product.stock));
 
   const [productSectionListV2, setProductSectionListV2] = useState([
     ...new Set(productSectionList),

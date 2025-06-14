@@ -1,8 +1,8 @@
 from django.db import models
-from django.contrib.postgres.fields import JSONField
+from django.db.models import JSONField
 from utils.project_ecommerce_AI import *
 from core.models import Business
-from backend.chatbot.managers.product import ProductManager
+from .managers.product import ProductManager
 
 # Products
 class Product(models.Model):
@@ -19,10 +19,8 @@ class Product(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     unit = models.CharField(max_length=255, default='')
     stock = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    # embeddings = ArrayField(models.FloatField(), default=list)
     embeddings = JSONField(models.FloatField(), default=list)
     synonymous = JSONField(models.TextField(), default=list, blank=True)
-    # synonymous = ArrayField(models.TextField(), default=list, blank=True)
 
     objects = ProductManager()
     # Example of how to use it:
@@ -31,7 +29,6 @@ class Product(models.Model):
     class Meta:
         db_table = 'products_with_embeddings'
         ordering = ["name"]
-
 
     def __str__(self):
         return f"{self.name} ({self.brand})"

@@ -29,7 +29,6 @@ from fuzzywuzzy import fuzz
 
 from config.config import SECRET_KEY
 
-import psycopg2
 from config.database_connection import conn
 
 import re
@@ -601,7 +600,9 @@ def find_similarity_products(prompt, embeddings_products=None, business=None):
 
 
 def generate_and_search(prompt, business):
+    print("Business gen and ser: ", business)
     products_df = get_cached_products_df(business, conn)
+    print("Products df generate and serach: ", products_df)
     similarities = find_similarity_products(prompt, np.stack(products_df["embeddings"]), business)
 
     if isinstance(similarities, list):  
@@ -980,7 +981,7 @@ def chatbot_response(user_prompt, text_related_to="default", business=None):
 # print(chatbot_response("Quais produtos de 1KG vocês têm?"))
 # print(chatbot_response("Quero um produto de 500G"))
 # print(find_quantity("macarrao pilar 26X600G", conn))
-def generate_synonymous(product=None, product_list=None, brand=None, synonyms=None):
+def generate_synonymous(product=None, product_list=None, brand=None, synonyms=None, business=None):
     # TODO: Fix this structure because brand can't be None
     products_dict = {}
     product_synonymous_list = []
@@ -993,9 +994,9 @@ def generate_synonymous(product=None, product_list=None, brand=None, synonyms=No
         
         # semantic_dictorinary = create_semantic_dictionary(product)
         if brand:
-            products = generate_and_search(brand)
+            products = generate_and_search(brand, business)
         else:
-            products = generate_and_search(original_product)
+            products = generate_and_search(original_product, business)
         
         if not isinstance(products, str):
             # print("products value: ", products)
@@ -1021,9 +1022,9 @@ def generate_synonymous(product=None, product_list=None, brand=None, synonyms=No
         
         # semantic_dictorinary = create_semantic_dictionary(product)
         if brand:
-            products = generate_and_search(brand)
+            products = generate_and_search(brand, business)
         else:
-            products = generate_and_search(original_product)
+            products = generate_and_search(original_product, business)
         
         
     if not isinstance(products, str):
@@ -1216,8 +1217,7 @@ def generate_synonymous(product=None, product_list=None, brand=None, synonyms=No
         sanitized_synonymous_list = str(synonymous_list).replace('[', '{').replace(']', '}')
         
         print("Sanitized synonyms:", sanitized_synonymous_list)
-        
-        
+ 
         if isinstance(product, dict):
             print("product: ", product['Name'])
             product = product['Name']
@@ -1230,10 +1230,10 @@ def generate_synonymous(product=None, product_list=None, brand=None, synonyms=No
                         UPDATE products_with_embeddings
                         SET synonymous = %s
                         WHERE name = %s
-                        """, (sanitized_synonymous_list, original_product))
+                        """, (synonymous_list, original_product))
             
                 
-        return sanitized_synonymous_list
+        return synonymous_list
     
     except Exception as e:
         print("Error generating synonyms: ", e)

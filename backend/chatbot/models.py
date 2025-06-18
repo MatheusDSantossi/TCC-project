@@ -20,7 +20,7 @@ class Product(models.Model):
     unit = models.CharField(max_length=255, default='')
     stock = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     embeddings = JSONField(models.FloatField(), default=list)
-    synonymous = JSONField(models.TextField(), default=list, blank=True)
+    synonymous = JSONField(models.TextField(), default=list, blank=True, null=True)
 
     objects = ProductManager()
     # Example of how to use it:

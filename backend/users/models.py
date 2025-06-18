@@ -13,6 +13,15 @@ from core.models import Business
 
 import uuid
 
+class InviteManager(models.Manager):
+    def get_business_for_email(self, email):
+        try:
+            # Get the latest valid invite for the email
+            invite = self.get(email=email, used=True)
+            return invite.business
+        except Invite.DoesNotExist:
+            return None
+
 class Invite(models.Model):
     token = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
     email = models.EmailField()
@@ -21,8 +30,11 @@ class Invite(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField(null=True, blank=True, help_text="Optional expiration date for the invite token")
     
+    objects = InviteManager()
+    
     def __str__(self):
         return f"Invite {self.token} for {self.email}@{self.business.slug}"
+    
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
@@ -43,6 +55,15 @@ class CustomUserManager(BaseUserManager):
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
         return self.create_user(email, password, **extra_fields)
+    
+    def get_business_for_email(self, email):
+        try:
+            # Get the latest valid invite for the email
+            invite = self.get(email=email)
+            return invite.business
+        except Invite.DoesNotExist:
+            return None
+
 
 class CustomUser(AbstractUser):
     email = models.EmailField(max_length=200, unique=True)

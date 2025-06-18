@@ -18,5 +18,3 @@ urlpatterns = [
     path("api/products/", ProductListCreateView.as_view(), name='productListCreate'),
     path("api/products/<int:pk>/", ProductRetrieveUpdateDestroyView.as_view(), name='productRetrieveUpdateDestroy'),
 ]
-
-print(f"urlpatters: {urlpatterns}")

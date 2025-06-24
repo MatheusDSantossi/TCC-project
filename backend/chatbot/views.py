@@ -96,58 +96,56 @@ class ChatbotResponse(viewsets.ViewSet):
 
 class MenuOptionsView(viewsets.ViewSet):
     permission_classes = [permissions.AllowAny]
-    
-    # MenuOptionExtended.createMenusOptions()
-    # MenuOptionExtended.delete_and_recreate_menuOption()
-    
+
     @action(detail=False, methods=['post'])
     def post(self, request):
+        """If no `selected_option_id` provided, return only the *root* menu options. Otherwise return the children of the selected option."""
+        
+        sel_id = request.data.get("selected_option_id")
         
         data = request.data
         print(data["selected_option_id"])
         selected_option_id = data["selected_option_id"]
         
-        if not selected_option_id:
-            return Response({'error': 'No option ID provided'}, status=400) 
+        if sel_id is None:
+            # Root nodes = those with no parents
+            roots = MenuOptionExtended.objects.filter(previous_options__isnull=True).order_by("menu_extended_id")
+            
+            payload = [
+                {"menu_extended_id": opt.menu_extended_id, "menu_extended_id": opt.description} for opt in roots
+            ]
+            
+            return Response(payload)
         
-        # Fetch all menu options from the database
+        # ---- Subsequent load: look up children
         
         try:
-            # Get the sequence from the POST request
-            selected_option_id = MenuOptionExtended.objects.get(menu_extended_id=selected_option_id)
-            # Get the related options for the selected menu option
-            next_options = selected_option_id.next_options.all()
+            parent = MenuOptionExtended.objects.get(pk=sel_id)
             
-            print("next option exist: ", next_options.exists())
-            
-            if next_options.exists():
-            
-                print(f"Next options for ID {selected_option_id.menu_extended_id}:  {next_options}")
-                response_data = [
-                {'menu_extended_id': option.menu_extended_id, 'menu_option_description': option.menu_option_description} for option in next_options]
-                print("Response data:", response_data)
-                return Response(response_data)
-            else:
-                print("No more options available")
-                response_data = 'No more options available'
-                return Response(response_data)
-                # return Response({'data': 'No more options available'}, status=200)
-
-            
-        # if next_options:
             
         except MenuOptionExtended.DoesNotExist:
-            return JsonResponse({'error': 'The selected option is not selected'}, status=400)
+            return Response({'error': 'The selected option ID is invalid'}, status=400)
 
+        children = parent.next_options.all().order_by("menu_extended_id")
+        
+        if not children:
+            return Response({"message": "No more options available"})
+        
+        payload = [
+            {"menu_extended_id": opt.menu_extended_id, "description": opt.description} for opt in children
+        ]
+        
+        return Response(payload)
     
     @action(detail=False, methods=['get'])    
     def get(self, request):         
-        all_options = list(MenuOptionExtended.get_all_menuOptions())
-        total_option = len(all_options)  
-        all_options_only_4 = all_options[:5]
+        all_options = list(MenuOptionExtended.objects.all().order_by("menu_extended_id"))
+        # total_option = len(all_options)
+          
+        sample = all_options[:5]
         print("All options : ", all_options)
         return Response([
-            {'menu_extended_id': option.menu_extended_id, 'menu_option_description': option.menu_option_description} for option in all_options_only_4
+            {'menu_extended_id': option.menu_extended_id, 'description': option.description} for option in sample
             ])
 
 class MenuOptionEdit(viewsets.ViewSet):
@@ -155,7 +153,7 @@ class MenuOptionEdit(viewsets.ViewSet):
     
     def get(self, request):
         # Fetch all menu options from the database
-        all_options = list(MenuOptionExtended.get_all_menuOptions())
+        all_options = list(MenuOptionExtended.objects.all().order_by("menu_extended_id"))
         
         # Get 4 random options
         menu_options = all_options

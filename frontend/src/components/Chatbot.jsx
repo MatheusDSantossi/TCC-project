@@ -155,7 +155,7 @@ function Chatbot() {
       };
       setChatMessages((prevMessages) => [...prevMessages, botResponse]);
 
-      // showingMenuOptions();
+      // showingptions();
 
       // setHasSelectedOption(false);
       // fetchMenuOptions();
@@ -214,7 +214,7 @@ function Chatbot() {
         console.log("isHecateAnswering: ", isHecateAnswering);
         console.log("MenuOptions lenght: ", menuOptions.length);
 
-        if (response.data === "No more options available") {
+        if (response.data.message === "No more options available") {
           let answer = "Digite sua dúvida.";
           if (optionText === "Digitar o nome do produto") {
             answer = "Digite o nome do produto.";
@@ -495,12 +495,12 @@ function Chatbot() {
                     onClick={() => {
                       selectOption(
                         option.menu_extended_id,
-                        option.menu_option_description,
+                        option.description,
                         1
                       );
                     }}
                   >
-                    {option.menu_option_description}
+                    {option.description}
                   </button>
                 ))}
               </div>

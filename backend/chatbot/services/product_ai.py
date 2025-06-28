@@ -2,7 +2,7 @@ from utils.project_ecommerce_AI import (
     generate_synonymous as _gen_syn,
     fetch_products_alike as _fetch_alike,
     pre_process_prompt_grammatical,
-    genai
+    genai, chatbot_response
 )
 from utils.prompt_searcher import find_section
 from config.database_connection import conn

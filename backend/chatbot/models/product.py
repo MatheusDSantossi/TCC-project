@@ -1,7 +1,7 @@
 from django.db import models
 from django.db.models import JSONField
 from core.models import Business
-from managers.product import ProductManager
+from chatbot.managers.product import ProductManager
 
 # Products
 class Product(models.Model):

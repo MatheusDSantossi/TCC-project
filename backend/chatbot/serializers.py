@@ -19,3 +19,8 @@ class BusinessDetailSerializer(serializers.ModelSerializer):
         model = BusinessDetail
         # fields = '__all__'
         fields = ['id', 'key', 'value']
+        
+class ChatbotRequestSerializer(serializers.Serializer):
+    user_input = serializers.CharField(max_length=1000)
+    text_related_to = serializers.CharField(max_length=255, required=False, allow_null=True)
+    business_slug = serializers.SlugField(required=False, allow_null=True)

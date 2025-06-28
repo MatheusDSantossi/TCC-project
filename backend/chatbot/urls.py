@@ -1,11 +1,11 @@
 from django.urls import path, include
 
 from rest_framework.routers import DefaultRouter
-from .views import *
+from .views import ChatbotResponse, MenuOptionsView, BusinessDetailListCreateView, BusinessDetailRetrieveUpdateDestroyView, ProductRetrieveUpdateDestroyView, ProductListCreateView
 
 router = DefaultRouter()
 router.register('menu-options', MenuOptionsView, basename='menuOptions')
-router.register('chatbot', ChatbotResponse, basename='chatbotResponse')
+router.register(r'chatbot', ChatbotResponse, basename='chatbot')
 # urlpatterns = router.urls
 
 urlpatterns = [ 

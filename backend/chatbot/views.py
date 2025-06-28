@@ -1,33 +1,30 @@
 from django.shortcuts import render
 from django.http import JsonResponse
 from utils.project_ecommerce_AI import chatbot_response
-from django.views import generic
 from rest_framework import generics
 from django.core.cache import cache
 
 from django.shortcuts import render, redirect
 
-from django.contrib.auth.hashers import check_password
-from django.views import View
-from django.views.decorators.csrf import ensure_csrf_cookie
-
 import json
 
 from django.http import JsonResponse
 
-from .models import *
+from .models import BusinessDetail, MenuOptionExtended, Product
+from.serializers import BusinessDetailSerializer, ProductSerializer, ChatbotRequestSerializer
 from users.models import CustomUser
 from core.models import Business
-from .serializers import *
 
 from rest_framework import viewsets, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from core.mixins import BusinessQuerysetMixin
-from core.permissions import IsBusinessMember
 
 from .services.product_ai import generate_synonyms_for, generate_embedding
+
+from .services.business import resolve_business
+from.services.chatbot import generate_chatbot_response
 
 def is_ajax(request):
     return request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
@@ -59,40 +56,43 @@ class BusinessDetailRetrieveUpdateDestroyView(BusinessQuerysetMixin, generics.Re
 
 
 # Chatbot views
-class ChatbotResponse(viewsets.ViewSet):
-    permission_classes = [permissions.AllowAny]
+class ChatbotResponse(viewsets.GenericViewSet):
+    """
+    POST /api/chatbot/
+    {
+        "user_input": "...",
+        "text_related_to": "...",   # optional
+        "business_slug": "supermakert-santos"   # optional
+    }
+    """
+    serializer_class = ChatbotRequestSerializer
+    permission_classes = [] # or [AllowAny]
     
     @action(detail=False, methods=['post'])
     def post(self, request):
         data = request.data
         
+        # Validate input
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        
         print("CHATBOR RESPONSE: ", data)
         
-        user_input = data.get('user_input')
-        text_related_to = data.get('text_related_to')
-        business = data.get('business_slug')
+        # Resolve business (or 404)
+        business = serializer.validated_data.get("business_slug")
+        business_id = Business.objects.get_id_by_name(business)
+        biz = resolve_business(business_id)
         
-        if not user_input:
-            return Response({'error': 'No input provided'}, status=400)
         
-        # Validating business
-        if business:
-            # I'm checking if the business was sent, because I use chatbot
-            # in two differents places and in one of them the slug isn't send.
-            # TODO: It's interesting to change this approach
-            try:
-                 biz = Business.objects.get(slug=business)
-            except Business.DoesNotExist:
-                 return Response({'error': f'Unkown business: {business}'}, status=404)
+        # Delegate to chatbot service
+        resp_text = generate_chatbot_response(
+            user_iput=serializer.validated_data["user_input"],
+            context=serializer.validated_data["text_related_to"],
+            business_id=(biz.id if biz else None)
+        )
         
-    
-        # Call the chatbot_response logic
-        response = chatbot_response(user_input, text_related_to, biz.id)
-                    
-        print("The response is: ", response)
-        
-        return Response({"response": response}, status=200)
-
+        # Return a consistent, serializable paylaod
+        return Response({"response": resp_text}, status=status.HTTP_200_OK)
 
 class MenuOptionsView(viewsets.ViewSet):
     permission_classes = [permissions.AllowAny]
@@ -148,69 +148,69 @@ class MenuOptionsView(viewsets.ViewSet):
             {'menu_extended_id': option.menu_extended_id, 'description': option.description} for option in sample
             ])
 
-class MenuOptionEdit(viewsets.ViewSet):
-    permission_classes = [permissions.AllowAny]
+# class MenuOptionEdit(viewsets.ViewSet):
+#     permission_classes = [permissions.AllowAny]
     
-    def get(self, request):
-        # Fetch all menu options from the database
-        all_options = list(MenuOptionExtended.objects.all().order_by("menu_extended_id"))
+#     def get(self, request):
+#         # Fetch all menu options from the database
+#         all_options = list(MenuOptionExtended.objects.all().order_by("menu_extended_id"))
         
-        # Get 4 random options
-        menu_options = all_options
+#         # Get 4 random options
+#         menu_options = all_options
         
-        context = {
-            'menu_options': menu_options,
-        }
+#         context = {
+#             'menu_options': menu_options,
+#         }
         
-        query = request.GET.get('search', '') # Get the search term from the request
+#         query = request.GET.get('search', '') # Get the search term from the request
         
-        if is_ajax(request) and query:
-            menuOptions = MenuOptionExtended.objects.filter(productName__icontains=query) # Query the database
+#         if is_ajax(request) and query:
+#             menuOptions = MenuOptionExtended.objects.filter(productName__icontains=query) # Query the database
             
-            menuOption_name = list(menuOptions.values('menuOptionName', flat=True).distinct()) # Get a list of product names
-            return JsonResponse(menuOption_name, safe=False)
+#             menuOption_name = list(menuOptions.values('menuOptionName', flat=True).distinct()) # Get a list of product names
+#             return JsonResponse(menuOption_name, safe=False)
         
-        return render(request, 'chatbot/edit_menu_options_list.html', context)
+#         return render(request, 'chatbot/edit_menu_options_list.html', context)
     
     
     
-    def post(self, request):
+#     def post(self, request):
         
-        menuOptionDescription = request.POST.get('menuOptionDescriptionInput')
+#         menuOptionDescription = request.POST.get('menuOptionDescriptionInput')
         
-        menuOptions = MenuOptionOrdered.get_all_menuOptions()
+#         menuOptions = MenuOptionOrdered.get_all_menuOptions()
         
-        menuOption = MenuOptionOrdered(menu_option_description=menuOptionDescription)
+#         menuOption = MenuOptionOrdered(menu_option_description=menuOptionDescription)
         
-        menuOption.save()
+#         menuOption.save()
            
-        return redirect('index')
+#         return redirect('index')
     
-    def save_menu_order(request):
-        if request.method == 'POST':
-            # invalidate the cache (if used)
-            cache.clear()
+#     def save_menu_order(request):
+#         if request.method == 'POST':
+#             # invalidate the cache (if used)
+#             cache.clear()
             
-            try:
-                data = json.loads(request.body)
-                menu_options = data.get('menuOptions', [])
+#             try:
+#                 data = json.loads(request.body)
+#                 menu_options = data.get('menuOptions', [])
                 
-                MenuOptionOrdered.objects.all().delete()
+#                 MenuOptionOrdered.objects.all().delete()
                 
-                # for description in menu_options[:4]:
-                for description in menu_options[:4]:
-                    menu_option = MenuOptionOrdered(menu_option_description=description)
-                    menu_option.save()
+#                 # for description in menu_options[:4]:
+#                 for description in menu_options[:4]:
+#                     menu_option = MenuOptionOrdered(menu_option_description=description)
+#                     menu_option.save()
                     
-                # Fetcg tge updated menu options to ensure it reflets in the next request
-                menu_options = list(MenuOptionOrdered.get_all_menuOptions())
+#                 # Fetcg tge updated menu options to ensure it reflets in the next request
+#                 menu_options = list(MenuOptionOrdered.get_all_menuOptions())
                     
-                return JsonResponse({'success': True, 'menuOptions': [opt.menu_option_description for opt in menu_options]})
+#                 return JsonResponse({'success': True, 'menuOptions': [opt.menu_option_description for opt in menu_options]})
                 
-            except Exception as e:
-                return JsonResponse({'success': False, 'error': str(e)})
+#             except Exception as e:
+#                 return JsonResponse({'success': False, 'error': str(e)})
             
-        return JsonResponse({'success': False, 'error': 'Invalid request method'})
+#         return JsonResponse({'success': False, 'error': 'Invalid request method'})
 
 # PRODUCTS VIEWS
 # class ProductRegistration(BusinessQuerysetMixin, viewsets.ViewSet):

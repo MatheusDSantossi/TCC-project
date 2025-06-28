@@ -1,5 +1,5 @@
 from django.db import models
-from managers.menuoption import MenuOptionManager
+from chatbot.managers.menuoption import MenuOptionManager # could also be something like this ..chatbot.managers.menuoption import ** because, I'm already in chatbot package 
 
 class MenuOptionExtended(models.Model):
     

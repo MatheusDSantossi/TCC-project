@@ -6,7 +6,6 @@ from .views import ChatbotResponse, MenuOptionsView, BusinessDetailListCreateVie
 router = DefaultRouter()
 router.register('menu-options', MenuOptionsView, basename='menuOptions')
 router.register(r'chatbot', ChatbotResponse, basename='chatbot')
-# urlpatterns = router.urls
 
 urlpatterns = [ 
     path('', include(router.urls)),

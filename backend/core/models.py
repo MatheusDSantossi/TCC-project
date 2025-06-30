@@ -6,6 +6,11 @@ class BusinessManager(models.Manager):
             return self.get(slug=slug).id
         except Business.DoesNotExist:
             return None
+    def get_id_by_name(self, name):
+        try:
+            return self.get(name=name).id
+        except Business.DoesNotExist:
+            return None
 
 class Business(models.Model):
     """

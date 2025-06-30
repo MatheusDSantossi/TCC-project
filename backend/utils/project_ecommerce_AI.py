@@ -683,7 +683,7 @@ def chatbot_response(user_prompt, text_related_to="default", business=None):
     
     global dict_of_client_products
     global products_list_after_user_input
-    
+
     business_detail_list = load_business_details(business, conn)
     
     business_detail_text = "" 

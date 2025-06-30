@@ -1,9 +1,9 @@
 from django.db import models
 
 class BusinessManager(models.Manager):
-    def get_id_by_name(self, name):
+    def get_id_by_slug(self, slug):
         try:
-            return self.get(name=name).id
+            return self.get(slug=slug).id
         except Business.DoesNotExist:
             return None
 

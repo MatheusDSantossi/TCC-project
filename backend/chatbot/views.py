@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import JsonResponse
 from utils.project_ecommerce_AI import chatbot_response
-from rest_framework import generics
+from rest_framework import generics, status
 from django.core.cache import cache
 
 from django.shortcuts import render, redirect
@@ -80,15 +80,15 @@ class ChatbotResponse(viewsets.GenericViewSet):
         
         # Resolve business (or 404)
         business = serializer.validated_data.get("business_slug")
-        business_id = Business.objects.get_id_by_name(business)
-        biz = resolve_business(business_id)
-        
+        print("Business in view: ", business)
+        biz = Business.objects.get_id_by_slug(business)
+        print("Business id in view: ", biz)
         
         # Delegate to chatbot service
         resp_text = generate_chatbot_response(
             user_iput=serializer.validated_data["user_input"],
             context=serializer.validated_data["text_related_to"],
-            business_id=(biz.id if biz else None)
+            business_id=(biz if biz else None)
         )
         
         # Return a consistent, serializable paylaod

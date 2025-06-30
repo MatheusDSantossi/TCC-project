@@ -4,6 +4,10 @@ from knox.models import AuthToken
 from django.contrib.auth import get_user_model, authenticate
 User = get_user_model()
 
+class InviteRegisterSerializer(serializers.Serializer):
+    token = serializers.CharField()
+    password = serializers.CharField(min_length=8, write_only=True)
+
 class InviteDetailSerializer(serializers.ModelSerializer):
     business = serializers.SlugRelatedField(read_only=True, slug_field='slug')
     

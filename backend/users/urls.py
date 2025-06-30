@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.urls import path
 from rest_framework.routers import DefaultRouter
-from .views import *
+from .views import InviteDetailView, InviteRegisterView, RegisterViewSet, LoginViewset, UserViewset
 
 router = DefaultRouter()
 router.register('register', RegisterViewSet, basename='register')

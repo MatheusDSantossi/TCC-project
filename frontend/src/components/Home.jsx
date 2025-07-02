@@ -8,6 +8,8 @@ import hugeRobotHand from "../assets/huge_robot_hand.png";
 import hugeRobotHand2 from "../assets/huge_robot_hand_2.png";
 import { motion } from "framer-motion";
 
+// TODO: Create a screen to the / url where I want to allow the client to type the name of their business to access it from this page.
+
 const Home = () => {
   const navigate = useNavigate();
   const { businessSlug } = useParams();

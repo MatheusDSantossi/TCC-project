@@ -24,6 +24,8 @@ function ProductRegistration() {
 
   const [buttonState, setButtonState] = useState("idle");
 
+  // TODO: The process of getting the list of possible products is taking a way too long time.
+  
   const GetProductList = (productName) => {
     if (productName.length > 3) {
       AxiosInstance.get(`api/products/?search=${productName}`)
@@ -50,15 +52,15 @@ function ProductRegistration() {
     );
 
     if (selectedProduct) {
-      const numberOfSection = selectedProduct.secao_produto.slice(-1);
+      const numberOfSection = selectedProduct.section.slice(-1);
       console.log("Selected product in PREGISTER: ", selectedProduct)
       console.log("Number of section: " + numberOfSection);
       setProductBrand(selectedProduct.brand);
       setProductQuantityFormat(selectedProduct.quantity);
       setProductSection(numberOfSection);
-      setProductPrice(selectedProduct.preco_venda);
-      setProductMetricUnity(selectedProduct.unidade_medida);
-      setProductAvailibility(selectedProduct.disponivel);
+      setProductPrice(selectedProduct.price);
+      setProductMetricUnity(selectedProduct.unit);
+      setProductAvailibility(selectedProduct.stock);
       setProductSynonyms(selectedProduct.synonymous);
     }
   };
@@ -71,14 +73,14 @@ function ProductRegistration() {
     console.log("Product synonyms: ", productSynonyms);
 
     AxiosInstance.post(`api/products/`, {
-      productName: productName.trim(),
-      productBrand: productBrand.trim(),
-      productQuantityFormat: productQuantityFormat.trim(),
-      productSection: Number(productSection),
-      productPrice: productPrice,
-      productMetricUnity: productMetricUnity.trim(),
-      productAvailability: productAvailability,
-      productSynonyms: productSynonyms,
+      name: productName.trim(),
+      brand: productBrand.trim(),
+      quantity: productQuantityFormat.trim(),
+      section: Number(productSection),
+      price: productPrice,
+      unit: productMetricUnity.trim(),
+      stock: productAvailability,
+      synonymous: productSynonyms,
     })
       .then((response) => {
         if (!response) {

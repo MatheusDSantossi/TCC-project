@@ -29,7 +29,6 @@ from fuzzywuzzy import fuzz
 
 from config.config import SECRET_KEY
 
-import psycopg2
 from config.database_connection import conn
 
 import re
@@ -137,7 +136,7 @@ sections_find_in_db = find_business_sections(conn)
 #             "Synonymous": row[6],
 #             "Brand": row[7],
 #             "Quantity": row[8],
-#             "Disponivel": row[9],
+#             "stock": row[9],
 #         }
 #         products_list.append(products)
 
@@ -146,7 +145,7 @@ sections_find_in_db = find_business_sections(conn)
 #     print("PRODUCTS DF: ", products_df)
 
 #     # List of available products (I can keep that in the DB as well)
-#     products_available = [p["Nome"] for p in products_df.to_dict(orient='records') if p['Disponivel'] > 0]
+#     products_available = [p["Nome"] for p in products_df.to_dict(orient='records') if p['stock'] > 0]
 
 #     # search_term = "REF"
 
@@ -264,7 +263,7 @@ def fetch_products_alike(product_name):
         
         
         query = """
-            SELECT name, secao_produto, preco_venda FROM products_with_embeddings
+            SELECT name, section, price FROM products_with_embeddings
             WHERE SIMILARITY(name, %s) > 0.1
             LIMIT 30;
         """
@@ -601,7 +600,9 @@ def find_similarity_products(prompt, embeddings_products=None, business=None):
 
 
 def generate_and_search(prompt, business):
+    print("Business gen and ser: ", business)
     products_df = get_cached_products_df(business, conn)
+    print("Products df generate and serach: ", products_df)
     similarities = find_similarity_products(prompt, np.stack(products_df["embeddings"]), business)
 
     if isinstance(similarities, list):  
@@ -682,7 +683,7 @@ def chatbot_response(user_prompt, text_related_to="default", business=None):
     
     global dict_of_client_products
     global products_list_after_user_input
-    
+
     business_detail_list = load_business_details(business, conn)
     
     business_detail_text = "" 
@@ -695,7 +696,7 @@ def chatbot_response(user_prompt, text_related_to="default", business=None):
 
     print("Products df: ", products_df)
 
-    products_available = [p["name"] for p in products_df.to_dict(orient='records') if p['disponivel'] > 0]
+    products_available = [p["name"] for p in products_df.to_dict(orient='records') if p['stock'] > 0]
 
     print("Text related to: ", text_related_to)
 
@@ -736,15 +737,15 @@ def chatbot_response(user_prompt, text_related_to="default", business=None):
         if contains_a_product:
             # for index, row in find_product.iteritems():
             for index, row in find_product.iterrows():
-            # print(f"ID: {index}, Nome: {row['Nome']}, Secao: {row['Secao']}, Disponivel: {row['Disponivel']}")
+            # print(f"ID: {index}, Nome: {row['Nome']}, Secao: {row['Secao']}, stock: {row['stock']}")
                 dict_of_client_products = {
                     "Name": row['name'],
                     "Brand": row["brand"],
-                    "Section": row['secao_produto'],
-                    "Price": row['preco_venda'],
-                    "Available": row['disponivel'],
+                    "Section": row['section'],
+                    "Price": row['price'],
+                    "Available": row['stock'],
                     "Quantity": row['quantity'],
-                    "Metric": row['unidade_medida'],
+                    "Metric": row['unit'],
                 }            
                 products_list_after_user_input.append(dict_of_client_products)                
         
@@ -790,8 +791,8 @@ def chatbot_response(user_prompt, text_related_to="default", business=None):
         
         # TODO: Check why the product when I search for section
 
-        # if find_product['Disponivel'].item():
-        if find_product['disponivel'].any():
+        # if find_product['stock'].item():
+        if find_product['stock'].any():
             answer_prompt = f"""Considering that the customer of our store **{business_name}** sent the following message:
 
             "{fix_prompt_v1}"
@@ -849,7 +850,7 @@ def chatbot_response(user_prompt, text_related_to="default", business=None):
             with conn.cursor() as cursor:
                 
                 sql_query = """
-                SELECT name, secao_produto, preco_venda, disponivel FROM products_with_embeddings
+                SELECT name, section, price, stock FROM products_with_embeddings
                 ORDER BY RANDOM() LIMIT 20;
                 """
                 
@@ -980,7 +981,7 @@ def chatbot_response(user_prompt, text_related_to="default", business=None):
 # print(chatbot_response("Quais produtos de 1KG vocês têm?"))
 # print(chatbot_response("Quero um produto de 500G"))
 # print(find_quantity("macarrao pilar 26X600G", conn))
-def generate_synonymous(product=None, product_list=None, brand=None, synonyms=None):
+def generate_synonymous(product=None, product_list=None, brand=None, synonyms=None, business=None):
     # TODO: Fix this structure because brand can't be None
     products_dict = {}
     product_synonymous_list = []
@@ -993,9 +994,9 @@ def generate_synonymous(product=None, product_list=None, brand=None, synonyms=No
         
         # semantic_dictorinary = create_semantic_dictionary(product)
         if brand:
-            products = generate_and_search(brand)
+            products = generate_and_search(brand, business)
         else:
-            products = generate_and_search(original_product)
+            products = generate_and_search(original_product, business)
         
         if not isinstance(products, str):
             # print("products value: ", products)
@@ -1006,9 +1007,9 @@ def generate_synonymous(product=None, product_list=None, brand=None, synonyms=No
 
                     products_dict = {
                         "Name": row['name'],
-                        "Section": row['secao_produto'],
-                        "Price": row['preco_venda'],
-                        "Available": row['disponivel'],
+                        "Section": row['section'],
+                        "Price": row['price'],
+                        "Available": row['stock'],
                     }            
                     product_synonymous_list.append(products_dict)
                     # print("GENERATE SYNONYMOUS PRODUCT", products_dict["Name"])
@@ -1021,9 +1022,9 @@ def generate_synonymous(product=None, product_list=None, brand=None, synonyms=No
         
         # semantic_dictorinary = create_semantic_dictionary(product)
         if brand:
-            products = generate_and_search(brand)
+            products = generate_and_search(brand, business)
         else:
-            products = generate_and_search(original_product)
+            products = generate_and_search(original_product, business)
         
         
     if not isinstance(products, str):
@@ -1034,9 +1035,9 @@ def generate_synonymous(product=None, product_list=None, brand=None, synonyms=No
 
                 products_dict = {
                     "Name": row['name'],
-                    "Section": row['secao_produto'],
-                    "Price": row['preco_venda'],
-                    "Available": row['disponivel'],
+                    "Section": row['section'],
+                    "Price": row['price'],
+                    "Available": row['stock'],
                 }            
                 product_synonymous_list.append(products_dict)
                 # print("GENERATE SYNONYMOUS PRODUCT", products_dict["Name"])
@@ -1216,8 +1217,7 @@ def generate_synonymous(product=None, product_list=None, brand=None, synonyms=No
         sanitized_synonymous_list = str(synonymous_list).replace('[', '{').replace(']', '}')
         
         print("Sanitized synonyms:", sanitized_synonymous_list)
-        
-        
+ 
         if isinstance(product, dict):
             print("product: ", product['Name'])
             product = product['Name']
@@ -1230,10 +1230,10 @@ def generate_synonymous(product=None, product_list=None, brand=None, synonyms=No
                         UPDATE products_with_embeddings
                         SET synonymous = %s
                         WHERE name = %s
-                        """, (sanitized_synonymous_list, original_product))
+                        """, (synonymous_list, original_product))
             
                 
-        return sanitized_synonymous_list
+        return synonymous_list
     
     except Exception as e:
         print("Error generating synonyms: ", e)

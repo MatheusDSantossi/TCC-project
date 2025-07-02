@@ -1,19 +1,17 @@
 # Backend
 /backend copy/venv 
 backend/venv/
-# backend/config/
 backend/test_imports.py
 backend/media/
 **/__pycache__/
 *.py[cod]
 
+# Random
 melhorias.md
 synonimus_test.py
 TCC-project/
 **/settings.py
 Relação de produtos 16_05_2025.xls
-# chabot_project/config.py
-# chabot_project/database_connection.py
 
 # ENV
 /*/.env

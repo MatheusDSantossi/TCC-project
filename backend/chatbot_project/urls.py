@@ -7,6 +7,7 @@ urlpatterns = [
     path("accounts/", include("allauth.urls")),
     path("", include("users.urls")),
     path("", include("chatbot.urls")),
+    path("", include("core.urls")),
     # path("api/auth/", include("knox.urls")),
     
     path("logout/", knox_views.LogoutView.as_view(), name='knox_logout'),

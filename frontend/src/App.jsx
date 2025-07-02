@@ -19,6 +19,8 @@ import useFavicon from "./useFavicon";
 
 import InviteRegister from "./components/InviteRegister";
 
+import InformBusiness from "./components/InformBusiness";
+
 const LIGHT_ICON = '/logo.svg';
 const DARK_ICON = '/logo_darker.svg';
 
@@ -43,10 +45,12 @@ function App() {
       <div className="absolute top-0 left-0 z-10 w-full h-full" >
         {/* <div className="z-1" > */}
         <Routes>
+          <Route exact path="/" element={<InformBusiness />} />
           <Route exact path="/:businessSlug" element={<Home />} />
           <Route exact path="/register" element={<Register />} />
           <Route exact path="/login" element={<Login />} />
-          <Route exact path="/request/password_reset" element={<ForgetPassword />} />
+          <
+          Route exact path="/request/password_reset" element={<ForgetPassword />} />
           <Route exact path="/password-reset/:token" element={<ForgetPasswordReset />} />
           <Route exact path="/adminHome" element={<AdminHome />} />
           <Route exact path="/chatbot/:businessSlug" element={<Chatbot />} />

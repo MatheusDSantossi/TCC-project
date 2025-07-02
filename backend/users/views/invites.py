@@ -1,4 +1,4 @@
-from rest_framework import mixins, viewsets, generics
+from rest_framework import mixins, viewsets, generics, permissions
 from users.serializers import serializers, InviteDetailSerializer, InviteRegisterSerializer
 from users.models import Invite
 from rest_framework.response import Response
@@ -76,6 +76,19 @@ class InviteRegisterView(generics.CreateAPIView):
         return Response({"detail": "Registration succesful."}, status=201)
 
 class InviteDetailView(generics.RetrieveAPIView):
-    queryset = Invite.objects.filter(used=False)
+    permission_classes = [permissions.AllowAny]
+    # queryset = Invite.objects.filter(used=False)
     lookup_field = 'token'
     serializer_class = InviteDetailSerializer
+    
+    def get_object(self):
+        try:
+            invite = Invite.objects.get(token=self.kwargs["token"], used=False)
+        
+        except Invite.DoesNotExist:
+            raise NameError("Link de convite inválido ou expirado.")
+        
+        if invite.expires_at and invite.expires_at < timezone.now():
+            raise NameError("Link de convite inválido ou expirado.")
+        
+        return invite

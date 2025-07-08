@@ -13,7 +13,7 @@ class BusinessListCreateView(generics.ListCreateAPIView):
     permission_classes = [permissions.AllowAny]
     queryset = Business.objects.all()
     serializer_class = BusinessSerializer
-    
+    ''
         
 class BusinessDetailRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     """

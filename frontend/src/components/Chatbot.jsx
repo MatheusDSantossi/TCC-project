@@ -521,14 +521,14 @@ function Chatbot() {
             isTypingDone && (
               <div className="flex justify-between">
                 <button
-                  className="h-10 px-6 ml-2 font-bold text-black bg-yellow-400 hover:bg-yellow-300 rounded-r-md"
+                  className="h-10 px-6 ml-2 font-bold text-black bg-yellow-400 cursor-pointer hover:bg-yellow-300 rounded-r-md"
                   onClick={showingMenuOptions}
                 >
                   {/* onClick={showingMenuOptions()} */}
                   Voltar para a lista de opções
                 </button>
                 <button
-                  className="h-10 px-6 ml-2 font-bold text-black bg-yellow-400 hover:bg-yellow-300 rounded-r-md"
+                  className="h-10 px-6 ml-2 font-bold text-black bg-yellow-400 cursor-pointer hover:bg-yellow-300 rounded-r-md"
                   onClick={handleSessionEnding}
                 >
                   {/* onClick={showingMenuOptions()} */}

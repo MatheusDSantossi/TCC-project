@@ -2,65 +2,92 @@ import unicodedata
 import re
 import psycopg2
 
-KNOWN_BRANDS = [ "ANTARCT", "ANTARC", "LOPES", "CAMIL", "FUGINI", "BABY ROGER", "OUROLUX", "AMAFIL", "SORA", "YPE", "PILAO", "BEM TE VI", "PURO SABOR", "GAROTO", "BAYGON", "HELLMANNS", "ASSOLAN", "PALACIO", "COQUEIRO", "POPULAR", "VITAMASSA", "TOBOGA", "BRILUX", "OMO", "POLITRIZ", "ARCOVERDE", "BETANIA", "CAMPONESA", "PRETINHO", "NESTLE", "VITARELLA", "PRIMOR", "DELICIA", "FORTALEZA", "EVEN", "LUX", "PALMOLIVE", "PHEBO", "TANG", "ALMA FLORES", "SENADOR", "ROSA BRANCA", "SEDA", "NIVEA", "LEGO", "KIT KAT", "DOLCE GUSTO", "NUTELLA", "COCO LÁ", "COSMOPOLITAN", "L'OREAL", "SABO", "WONDER", "TRES COROAS", "LEITE COOP", "CERELAC", "FRUTIGRA", "LIVIA", "CALDENTE", "SABORINHO", "ARAGOA", "PENFOLDS", "COSIPA", "BRASIL CHEESE", "WONDER", "PANAMERICANA", "CRESIL", "REXONA", "SUAVE", "BARUEL" "STA CLARA", "SANTA CLARA", "MARATA", "LACTA", "CAPRICE", "COLGATE", "TUCS", "DOVE", "CLEAR", "SKALA", "NATHALYA", "TIXAN", "PETINHO", "MILI", "PRIVAX", "YOKI", "FRISCO", "FREEGELLS", "EMARE", "NUTRIMEL", "ARCOR", "TRESEMME", "TABU", "P&G", "SOFRUTA", "PILAR", "SBP", "EMBARE", "SUBLIME", "TRIDENT", "ZERO-CAL", "BIC", "QUAKER", "TRELOSO" "LIFEBUOY" "PIRACANJUBA" "ACONCHEGO", "DISOFLOR", "PARANA", "HALLS", "ELETR", "KOLENE", "FRINENSE", "PETRIBU", "ATOL", "AZULIM", "NINHO", "STA.CLARA", "LACTA", "TORCIDA", "STELLA DORO", "TIO JOAO", "PALMEIRON", "CHOKOLOT", "ITAIPAVA", "CLOSE UP", "MARAJOARA", "BOAVISTENSE", "PINHO SOL", "FARMAX", "BARUEL", "SCALA", "ALIANCA", "LIFEBUOY", "PROTEX", "SORRISO", "ARIEL", "3M", "BRILHUS", "PITU", "PAJEU", "BRILHANTE", "FLORAL", "LISTERINE", "INTIMUS", "SUAVE", "MOLICO", "MONANGE", "PAIXAO", "GALLO" "JOHNSONS BABY", "GELLUS" "CLUB SOCIAL", "KNORR", "PANSONIC", "VELUD", "FREEG", "FREEGELLS", "MAXIMO BRILHO", "IDEAL", "URCA", "WYDA", "FRUCTUS", "DAFRUTA", "MINHOTO", "ITALAC", "GABOARDI", "MUNDIAL", "PANTENE", "MARILAN", "PIRACANJUBA", "OURO VERDE", "IGUAL", "TODDYNHO", "BAUDUCO", "FACEPA", "MAURICEA"  # Add more brands as needed
-] 
+import logging
+from typing import List, Optional, Dict
 
-KNOWN_METRICS = [
-    "UN", "CX", "PT", "PCT", "PR", "CXT", "CT", "CXA" , "KG", "G", "M"
-]
+from django.db.models import Q
 
-def find_business_sections(conn):
-    try:
-        with conn.cursor() as cursor:
+from chatbot.models import Product
+from utils.brands_utils import find_brands_in_text
+from utils.metrics_utils import extract_metric_and_quantity
 
-            cursor.execute("""
-                            SELECT DISTINCT section FROM products_with_embeddings
-                            """)
-            
-            sections_in_database = cursor.fetchall()
-    except (Exception, psycopg2.DatabaseError) as error:
-        print("Error fetching sections from database:", error)
-        sections_in_database = []
-    return sections_in_database
+logger = logging.getLogger(__name__)
 
-def find_section(text, conn):
+# def find_business_sections(conn):
+def find_business_sections(business_id: Optional[int] = None) -> List[str]:
+    """
+    Return a sorted list of distinct product sections.
+    If business_id is provided, only sections for that business. However if it isn't provide, my product change based on the chatbot website url (I have to verify this)
+    """
+    qs = Product.objects.values_list("section", flat=True)
+    
+    if business_id is not None:
+        qs = qs.filter(business_id=business_id)
+        
+        
+    # Fetch all raw secitons strings
+    raw_sections = list(qs)
+    
+    # Normalize: strip whitespace and ignore empty strings
+    normalized = {
+        sec.strip()
+        for sec in raw_sections
+        if sec and sec.strip()
+    }
+    
+    # Sort case-insensitively
+    sections = sorted(normalized, key=str.lower)
+    
+    logger.debug("Found sections (%d): %r", len(sections), sections)
+    
+    return sections
+    
+def find_section(text: str, conn, business_id: Optional[int] = None):
     # Define the regular expression to match "section" followed by a letter or a number
     pattern = r'\bseção\s([a-zA-Z0-9]+)\b'
     
     # Search for the pattern in the input text (case-insensitive)
     match = re.search(pattern, text, re.IGNORECASE)
     
+    print("section Text (find section): ", text)
     
     # if a match is found, return the matched section
     if match:
+        
         section = match.group(1)
         
         section = "Seção " + section
         
-        # return match.group(1)
-        with conn.cursor() as cursor:
-        #     # cursor.execute("SELECT name FROM products_with_embeddings WHERE section = %s", (match.group(1),))
-            
-        #     cursor.execute("""
-        #                    SELECT DISTINCT section FROM products_with_embeddings
-        #                    """)
-            
-        #     sections_in_database = cursor.fetchall()
-            sections_in_database = find_business_sections(conn)
-            
-            print("Sections in database: ", sections_in_database)
-            print("Length of Sections in database: ", len(sections_in_database))
+        print("Section after normalize: ", section)
         
-            if section in [s[0] for s in sections_in_database]:
-                print("Section found in database")
+        qs = Product.objects.filter(section=section)
+    
+        if business_id is not None:
+            qs = qs.filter(business_id=business_id)
             
-                cursor.execute("""
-                            SELECT name, section FROM products_with_embeddings 
-                            WHERE section = %s
-                            LIMIT 20
-                            """, (section,))
-                return cursor.fetchall()
-            return ["This section isn't available in our establishment"]
+        qs = qs.values("name", "section")[:30]
+    
+        print("List of products (find section): ", list(qs))
+        
+        return list(qs)
+    
+        # return match.group(1)
+        # with conn.cursor() as cursor:
+        #     sections_in_database = find_business_sections()
+            
+        #     print("Sections in database: ", sections_in_database)
+        #     print("Length of Sections in database: ", len(sections_in_database))
+        
+        #     if section in sections_in_database:
+        #         print("Section found in database: ", section)
+            
+        #         cursor.execute("""
+        #                     SELECT name, section FROM products_with_embeddings 
+        #                     WHERE section = %s
+        #                     LIMIT 20
+        #                     """, (section,))
+        #         return cursor.fetchall()
+        #     return ["This section isn't available in our establishment"]
     return None
 
 def find_price(text, conn):
@@ -90,41 +117,40 @@ def remove_accents(input_str):
     nfkd_form = unicodedata.normalize('NFKD', input_str)
     return u''.join([c for c in nfkd_form if not unicodedata.combining(c)])
 
-def find_brand(text, conn):
+# def find_brand(text, conn):
+def find_brand(text: str, business_id: Optional[int]= None) -> Optional[List[Dict]]:
+    """
+    Look for known brand names in `text`. If found, return up to 30 matching products (name and brand). Returns None if no brand match.
+    """
     
-    brand = None
-    text_lower = text.lower()
-    brand_clean = remove_accents(text_lower)
+    print("Text (find_brand): ", text)
     
-    # Creating a set of normalized brand names
-    normalized_brands = {
-        remove_accents(brand).lower(): brand for brand in KNOWN_BRANDS
-        }
+    normalize_text = remove_accents(text).upper()
     
-    # Tokenized input text
-    tokens = re.findall(r'\b\w+\b', brand_clean)
+    # Normalize & detect brands
+    brands = find_brands_in_text(normalize_text)
     
-    # Check for exact matches in tokens
-    for token in tokens:
-        # if known_brand.lower() in text.lower():
-        if token in normalized_brands:
-            brand = normalized_brands[token]
-            print(f"Normalized brand match found: {brand}(Original: {text})")
-            break
+    if not brands:
+        return None
+
+
+    brand = brands[0] # use the first match
+    logger.debug("Brand match: %s in text: %r", brands, text)
+    
+    # Query via ORM
+    qs = Product.objects.filter(brand__iexact=brand)
+    
+    if business_id is not None:
+        qs = qs.filter(business_id=business_id)
         
-    if brand:
-        print(f"Exact brand match found: {brand}")
-        with conn.cursor() as cursor:
-            
-            cursor.execute("""
-                            SELECT name, brand FROM products_with_embeddings 
-                            WHERE brand = %s
-                            LIMIT 30
-                            """, (brand,))
-            
-            return cursor.fetchall()
+    qs = qs.values("name", "brand")[:30]
     
-    return None
+    print("List of products (find brand): ", list(qs))
+    
+    return list(qs) or None
+
+    
+    
     
 def find_quantity(text, conn):
 

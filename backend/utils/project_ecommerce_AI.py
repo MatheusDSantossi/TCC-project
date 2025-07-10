@@ -109,7 +109,9 @@ products_list_after_user_input = []
 
 text_has_section = False
 text_has_brand = False
-sections_find_in_db = find_business_sections(conn) 
+sections_find_in_db = find_business_sections() 
+
+print("Sections found in db: ", sections_find_in_db)
 
 # model_text_generator = models.get("text-davinci-003")
 # def load_products_and_business_detail(business):
@@ -288,6 +290,7 @@ def pre_process_prompt(prompt):
     
     global text_has_section 
     global text_has_brand 
+
     # fix_prompt_v1 = pre_process_prompt_grammatical(prompt)
     # print(f"FIXED 1 {fix_prompt_v1}")
     fix_prompt_v1 = prompt
@@ -302,9 +305,11 @@ def pre_process_prompt(prompt):
     # print("INPUT EMBED: ", input_embed)
     
     products_find_in_section = find_section(fix_prompt_v1, conn)
+    print("Products find in section: ", products_find_in_section)
+    
     products_find_with_price = find_price(fix_prompt_v1, conn)
     products_find_using_prompt = find_similar_products_using_input_embeddings(input_embed, conn, np, cosine_similarity)
-    products_find_using_brand = find_brand(fix_prompt_v1, conn)
+    products_find_using_brand = find_brand(fix_prompt_v1)
     products_find_using_metric_or_quantity = find_quantity(fix_prompt_v1, conn)
     products_find_using_synonyms = find_using_synonyms(fix_prompt_v1, conn)
     
@@ -517,8 +522,7 @@ def encontrar_produtos_similares(semantic_dictionary, threshold=0.5):
 
 
 # Função para identificar produtos na consulta do usuário
-def find_similarity_products(prompt, embeddings_products=None, business=None):
-    products_df = get_cached_products_df(business, conn)
+def find_similarity_products(prompt, products_df, embeddings_products=None, business=None):
     # in teh answer I have to distinguish between the answers with products and the answerrs without products (Olá, quero saber onde fica a seção 2)
 
     # avatar 
@@ -529,6 +533,8 @@ def find_similarity_products(prompt, embeddings_products=None, business=None):
     global pre_processed_prompt_products_list
     global pattern
     global contains_a_product
+
+    print("Prompt before pre_process_prompt: ", prompt)
 
     fix_response = pre_process_prompt(prompt)
 
@@ -600,10 +606,10 @@ def find_similarity_products(prompt, embeddings_products=None, business=None):
 
 
 def generate_and_search(prompt, business):
-    print("Business gen and ser: ", business)
+    # print("Business gen and ser: ", business)
     products_df = get_cached_products_df(business, conn)
-    print("Products df generate and serach: ", products_df)
-    similarities = find_similarity_products(prompt, np.stack(products_df["embeddings"]), business)
+    # print("Products df generate and serach: ", products_df)
+    similarities = find_similarity_products(prompt, products_df, np.stack(products_df["embeddings"]), business)
 
     if isinstance(similarities, list):  
 
@@ -700,18 +706,26 @@ def chatbot_response(user_prompt, text_related_to="default", business=None):
 
     print("Text related to: ", text_related_to)
 
+    # TODO: Check these texts, because I think the brand, secitons are returning text not products
+    
     if text_related_to == "brand":
         brands_find = fetch_brands_alike(user_prompt)
         
         brand = pre_process_prompt_brand(user_prompt, brands_find)
-        fix_prompt_v1 = f"I want a product of this brand {user_prompt}, it has some products like these ones {brand}, which ones do you recommend?"
+        fix_prompt_v1 = f"Our client send this message {user_prompt} and probably their message mentioned this brand(s) {brand}"
+        
+        #, it has some products like these ones {brand}, which ones do you recommend?"
         
     elif text_related_to == "section":
-        sections = pre_process_prompt_section(user_prompt)
-        fix_prompt_v1 = f"I want a product of this section {user_prompt}, which have some produtcst like this {sections}, which ones do you recommend?"
+        sections_products = pre_process_prompt_section(user_prompt)
+        fix_prompt_v1 = f"Our client send this message {user_prompt} and some products available in the section mentioned are these ones {sections_products}"
+        
+        #, which have some produtcst like this {sections}, which ones do you recommend?"
     else:
         fix_prompt_v1 = pre_process_prompt_grammatical(user_prompt)
-        
+    
+    print("Fixed prompt v1 (chatbot response)>", fix_prompt_v1)
+    
     find_product = generate_and_search(fix_prompt_v1, business)
 
     is_product = isinstance(find_product, pd.DataFrame)
@@ -790,6 +804,8 @@ def chatbot_response(user_prompt, text_related_to="default", business=None):
         generated_detailed_prompt = generate_content_model.generate_content(detailed_prompt)
         
         # TODO: Check why the product when I search for section
+
+        print("Stock find product: ", find_product['stock'])
 
         # if find_product['stock'].item():
         if find_product['stock'].any():

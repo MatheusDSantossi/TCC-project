@@ -11,7 +11,6 @@ class BusinessDetailListCreateView(BusinessQuerysetMixin, generics.ListCreateAPI
     GET /api/business-detail/ -> list details for request.user.business
     POST /api/business-detail/ -> create a new detail under request.user.business
     """
-    # permission_classes = [permissions.IsAuthenticated]
     permission_classes = [permissions.IsAuthenticated]
     queryset = BusinessDetail.objects.all()
     serializer_class = BusinessDetailSerializer

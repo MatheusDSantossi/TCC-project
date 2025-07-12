@@ -1,6 +1,6 @@
 import unicodedata
 import re
-import psycopg2
+from decimal import Decimal
 
 import logging
 from typing import List, Optional, Dict
@@ -42,7 +42,7 @@ def find_business_sections(business_id: Optional[int] = None) -> List[str]:
     
     return sections
     
-def find_section(text: str, conn, business_id: Optional[int] = None):
+def find_section(text: str, business_id: Optional[int] = None):
     # Define the regular expression to match "section" followed by a letter or a number
     pattern = r'\bseção\s([a-zA-Z0-9]+)\b'
     
@@ -65,51 +65,40 @@ def find_section(text: str, conn, business_id: Optional[int] = None):
         if business_id is not None:
             qs = qs.filter(business_id=business_id)
             
-        qs = qs.values("name", "section")[:30]
+        results = qs.values("name", "section")[:30]
     
-        print("List of products (find section): ", list(qs))
+        print("List of products (find section): ", list(results))
         
-        return list(qs)
-    
-        # return match.group(1)
-        # with conn.cursor() as cursor:
-        #     sections_in_database = find_business_sections()
-            
-        #     print("Sections in database: ", sections_in_database)
-        #     print("Length of Sections in database: ", len(sections_in_database))
-        
-        #     if section in sections_in_database:
-        #         print("Section found in database: ", section)
-            
-        #         cursor.execute("""
-        #                     SELECT name, section FROM products_with_embeddings 
-        #                     WHERE section = %s
-        #                     LIMIT 20
-        #                     """, (section,))
-        #         return cursor.fetchall()
-        #     return ["This section isn't available in our establishment"]
+        return list(results)
+
     return None
 
-def find_price(text, conn):
+def find_price(text, conn, business_id: Optional[int] = None):
     # Define the regular expression to match a price in the form of $99.99
     pattern = r'\b\d{1,3}(?:[.,]\d{2})\b'
     
     # Search for the pattern in the input text
     match = re.search(pattern, text)
     
+    # +- 5 cents of difference in the price
+    delta = Decimal("0.05")
+    
     # if a match is found, return the matched price
     if match:
         price = match.group()
-        price_with_point = price.replace(',', '.')
-        # return float(match.group())
-        with conn.cursor() as cursor:
-            cursor.execute("""
-                           SELECT name, price FROM products_with_embeddings 
-                           WHERE price = %s
-                           LIMIT 20
-                           """, (price_with_point,))
-            return cursor.fetchall()
-    
+        price_with_point = Decimal(price.replace(',', '.'))
+                
+        qs = Product.objects.filter(price__gte=price_with_point - delta, price__lte=price_with_point + delta)
+        
+        if business_id is not None:
+            qs = qs.filter(business_id=business_id)
+              
+        results = qs.values_list("name", "price")[:30]
+        
+        print("Products find with the same price: ", list(results))
+        
+        return list(results)
+        
     return None
 
 def remove_accents(input_str):
@@ -266,7 +255,9 @@ def find_similar_products_using_input_embeddings(input_embed, conn, np, cosine_s
                 "section": product_row[2],
                 # "similarity": similarity
             })
-            
+        
+        # print("Product details: ", product_details[:30])
+        
         return product_details[:30]
 
 def find_using_synonyms(text, conn):

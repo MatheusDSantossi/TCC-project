@@ -279,14 +279,15 @@ def fetch_products_alike(product_name):
         products = cursor.fetchall()
         
             
-        for product in products:
-            if product[0] not in product_dict:
-                product_dict[product[0]] = []
-            product_dict[product[0]].extend(product[1].split(","))
+        for name, section, price in products:
+            if name not in product_dict:
+                product_dict[name] = []
+            product_dict[name].extend(section.split(","))
+            product_dict[name].append(price)
             
     return product_dict
 
-def pre_process_prompt(prompt):
+def pre_process_prompt(prompt, business = None):
     
     global text_has_section 
     global text_has_brand 
@@ -304,12 +305,12 @@ def pre_process_prompt(prompt):
     
     # print("INPUT EMBED: ", input_embed)
     
-    products_find_in_section = find_section(fix_prompt_v1, conn)
+    products_find_in_section = find_section(fix_prompt_v1, business)
     print("Products find in section: ", products_find_in_section)
     
-    products_find_with_price = find_price(fix_prompt_v1, conn)
+    products_find_with_price = find_price(fix_prompt_v1, conn, business)
     products_find_using_prompt = find_similar_products_using_input_embeddings(input_embed, conn, np, cosine_similarity)
-    products_find_using_brand = find_brand(fix_prompt_v1)
+    products_find_using_brand = find_brand(fix_prompt_v1, business)
     products_find_using_metric_or_quantity = find_quantity(fix_prompt_v1, conn)
     products_find_using_synonyms = find_using_synonyms(fix_prompt_v1, conn)
     
@@ -536,11 +537,11 @@ def find_similarity_products(prompt, products_df, embeddings_products=None, busi
 
     print("Prompt before pre_process_prompt: ", prompt)
 
-    fix_response = pre_process_prompt(prompt)
+    fix_response = pre_process_prompt(prompt, business)
 
     prompt = fix_response
     
-    print("CHATBOT RETURN: ", prompt)
+    print("Prompt after pre_process_prompt:: ", prompt)
     
     new_prompt = prompt.lower()
     new_prompt_without_spaces = new_prompt.strip()

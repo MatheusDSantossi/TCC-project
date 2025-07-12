@@ -5,7 +5,7 @@ import test_image from "../assets/test_image.jpg";
 import Typewriter from "./Typewriter";
 import AxiosInstance from "./AxiosInstance";
 import { useNavigate, useParams } from "react-router-dom";
-// import ReactTyped
+import { HashLoader } from "react-spinners"
 
 function Capitalize(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
@@ -509,9 +509,18 @@ function Chatbot() {
           )}
           {/* Put as the chatbot is saying that instead of a simple span */}
           {isHecateAnswering && (
-            <span className="text-2xl font-bold text-primary">
+            // <span className="text-2xl font-bold text-primary">
+            //   Estou processando. Aguarde um instante.
+            // </span>
+            <span className="flex text-2xl font-bold text-primary">
               Estou processando. Aguarde um instante.
-            </span>
+              <div className="mr-8"></div>
+              <HashLoader 
+              color="#012921"
+              size={30}
+              aria-label="Loading Spinner"
+              />
+              </span>
           )}
 
           {showMenuOptionsAndInputAfterHecateAnswer &&

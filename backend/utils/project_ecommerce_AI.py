@@ -305,13 +305,17 @@ def pre_process_prompt(prompt, business = None):
     
     # print("INPUT EMBED: ", input_embed)
     
-    products_find_in_section = find_section(fix_prompt_v1, business)
+    products_find_in_section = find_section(text=fix_prompt_v1,  business_id=business)
     print("Products find in section: ", products_find_in_section)
     
-    products_find_with_price = find_price(fix_prompt_v1, conn, business)
+    products_find_with_price = find_price(text=fix_prompt_v1, business_id=business)
+    print("Products find in price: ", products_find_with_price)
+    
+    products_find_using_metric_or_quantity = find_quantity(text=fix_prompt_v1, business_id=business)
+    print("Products find using metric or quantity: ", products_find_using_metric_or_quantity)
+    
     products_find_using_prompt = find_similar_products_using_input_embeddings(input_embed, conn, np, cosine_similarity)
     products_find_using_brand = find_brand(fix_prompt_v1, business)
-    products_find_using_metric_or_quantity = find_quantity(fix_prompt_v1, conn)
     products_find_using_synonyms = find_using_synonyms(fix_prompt_v1, conn)
     
     fix_prompt_v2 = fix_prompt_v1

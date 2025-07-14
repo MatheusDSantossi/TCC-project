@@ -73,7 +73,7 @@ def find_section(text: str, business_id: Optional[int] = None):
 
     return None
 
-def find_price(text, conn, business_id: Optional[int] = None):
+def find_price(text, business_id: Optional[int] = None):
     # Define the regular expression to match a price in the form of $99.99
     pattern = r'\b\d{1,3}(?:[.,]\d{2})\b'
     
@@ -106,7 +106,6 @@ def remove_accents(input_str):
     nfkd_form = unicodedata.normalize('NFKD', input_str)
     return u''.join([c for c in nfkd_form if not unicodedata.combining(c)])
 
-# def find_brand(text, conn):
 def find_brand(text: str, business_id: Optional[int]= None) -> Optional[List[Dict]]:
     """
     Look for known brand names in `text`. If found, return up to 30 matching products (name and brand). Returns None if no brand match.
@@ -137,67 +136,83 @@ def find_brand(text: str, business_id: Optional[int]= None) -> Optional[List[Dic
     print("List of products (find brand): ", list(qs))
     
     return list(qs) or None
-
     
     
+def find_quantity(text: str, business_id: Optional[int] = None) -> Optional[List[Dict]]:
+    """
+    Extract quantity/unit information from text and find matching products. 
+    Returns a list of product dictionaries or None if no matches found.
+    """
+    # Preprocess text
+    normalized_text = remove_accents(text).upper()
+    logger.debug(f"Processing quantity for text: {normalized_text}")
+    print(f"Processing quantity for text: {normalized_text}")
     
-def find_quantity(text, conn):
-
-    metric = None
-    quantity = None
+    # Extract quantity and metric using regex
+    metric, quantity = None, None
 
     # Regex info:
     #   - an "x" with another number and then some letters (e.g., "1 X 24 500G")
     #   - or a standalone number with a unit (e.g., "500G", "500ML", "500MT")
-    quantity_pattern = r"\b\d+\s*(?:[Xx]\s*\d+\s*[A-Za-z]+|\s?(?:KG|G|ML|L|MT|CX|PT|PCT|UN))\b"
-    quantity_match = re.search(quantity_pattern, text, re.IGNORECASE)
-
+    quantity_pattern = r"\b\d+\s*(?:[Xx]\s*\d+\s*[A-Za-z]+|\s?(?:KG|G|ML|L|MT|CX|PT|PCT|UN|LTS|GR))\b"
     
-    if quantity_match:
-        quantity = quantity_match.group().strip()
-        text = text.replace(quantity, '').strip()
-        
-        # Extract the trailing letters from the quantity as the metric.
-        m = re.search(r"[A-Za-z]+$", quantity)
-        
-        if m:
-            metric = m.group().upper()
+    match = re.search(quantity_pattern, normalized_text)
     
-    # Check for known metrics
-    name = text.strip()
-    print("Product name: ", name)
-    print("Product metric: ", metric)
-    print("Product quantity: ", quantity)
-    if metric or quantity:
-        
-       with conn.cursor() as cursor:
-            if metric and quantity:
-                cursor.execute("""
-                    SELECT name, quantity, unit FROM products_with_embeddings
-                    WHERE quantity = %s OR unit = %s
-                    LIMIT 20
-                """, (quantity, metric))
-            elif quantity:
-                cursor.execute("""
-                    SELECT name, quantity FROM products_with_embeddings
-                    WHERE quantity = %s
-                    LIMIT 20
-                """, (quantity,))
-            elif metric:
-                cursor.execute("""
-                    SELECT name, unit FROM products_with_embeddings
-                    WHERE unit = %s
-                    LIMIT 20
-                """, (metric,))
-            
-            # Fetch and return the results
-            results = cursor.fetchall()
-            if len(results) == 0:
-                return None
-            # return [row[0] for row in results]
-            return results
+    if not match:
+        logger.debug("No quantity/unity pattern found")
+        print("No quantity/unity pattern found")
+        return None
+    
 
-    return None
+    quantity_str = match.group().strip()
+    
+    # Split of trailing letters as metric
+    metric_match = re.search(r"[A-Za-z]+$", quantity_str)
+    
+    metric = metric_match.group().upper() if metric_match else None
+    quantity = quantity_str
+    
+    logger.debug("Extracted quantity=%r, metric=%r", quantity, metric)
+    print(f"Extracted quantity={quantity}, and metric={metric}")
+    
+    # Build ORM query
+    query = Q()
+    
+    if quantity:
+        query |= Q(quantity__iexact=quantity)
+    
+    if metric:
+        query |= Q(unit__iexact=metric)
+    
+    if not query:
+        logger.debug("No valid quantity or metric found")
+        
+        return None    
+    
+    # Execute query
+    qs = Product.objects.filter(query)
+    
+    if business_id:
+        qs = qs.filter(business_id=business_id)
+    
+    print(f"Found before name filter {len(qs)} matching products")
+    
+    # TODO: Think about a efficient way to narrow by product name. Considering that the text contains more than the product name.
+    name_filter = normalized_text.replace(quantity_str, "").strip()
+    
+    # if name_filter:
+    #     qs = qs.filter(name__icontains=name_filter)
+    
+    results = qs.values("name", "quantity", "unit")[:30]
+    
+    if not results:
+        logger.debug("No matching products found")
+        print("No matching products found")
+        return None
+    
+    logger.debug(f"Found {len(results)} matching products")
+    print(f"Found {len(results)} matching products")
+    return list(results)
 
 # TODO: Fix this function because the return is not good
 def find_similar_products_using_input_embeddings(input_embed, conn, np, cosine_similarity):

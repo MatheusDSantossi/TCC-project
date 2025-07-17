@@ -1,10 +1,13 @@
 import unicodedata
 import re
 from decimal import Decimal
+import numpy as np
+from sklearn.metrics.pairwise import cosine_similarity
 
 import logging
 from typing import List, Optional, Dict
 
+from django.db import transaction
 from django.db.models import Q
 
 from chatbot.models import Product
@@ -215,65 +218,60 @@ def find_quantity(text: str, business_id: Optional[int] = None) -> Optional[List
     return list(results)
 
 # TODO: Fix this function because the return is not good
-def find_similar_products_using_input_embeddings(input_embed, conn, np, cosine_similarity):
+def find_similar_products_using_input_embeddings(input_embed: List[float], threshold: float = 0.5, top_k: int = 20, business_id: Optional[int]= None) -> List[Dict]:
+    """
+    Given an input embedding, find the top_k most-similar products (similarity > threshold) and return their details + score.
+    """
     
-
-    with conn.cursor() as cursor:
+    # Pull all IDs + embeddings in one go:
+    qs = Product.objects.values_list("product_id", "embeddings")
+    
+    if business_id is not None:
+        qs = qs.filter(business_id=business_id)
         
-        # query = "CREATE EXTENSION IF NOT EXISTS vector"
+    rows = list(qs) # list of (id, [float, ...])
+    
+    product_ids, embeddings = zip(*rows)
+    embeddings = [np.array(e, dtype=np.float32) for e in embeddings]
+    
+    # Compute similarity scores
+    input_vec = np.array(input_embed, dtype=np.float32).reshape(1, -1)
+    sims = cosine_similarity(input_vec, embeddings)[0] 
+    
+    # Pick the ones above your cutoff and sort
+    idxs = np.argsort(sims)[::-1]
+    similar = [
+        (product_ids[i], float(sims[i]))
+        for i in idxs
+        if sims[i] > threshold
+    ][:top_k]
+    
+    if not similar:
+        return []
+    
+    # Fetch all those product details in one ORM hit
+    ids = [pid for pid, _ in similar]
+    prods = Product.objects.filter(product_id__in=ids).in_bulk(field_name="product_id")
+    
+    # Build your return list, preserving the similarity order
+    result = []
+    for pid, score in similar:
+        p = prods.get(pid)
+        if not p:
+            continue
         
-        # cursor.execute(query)
-        # conn.commit()
-        
-        query = """
-            SELECT product_id, embeddings FROM products_with_embeddings
-            LIMIT 10
-        """
-        
-        cursor.execute(query)
-        
-        rows = cursor.fetchall()
-        
-        # conn.commit()
-        
-        # Convert the embeddings to a numpy arrays
-        product_ids = [row[0] for row in rows]
-        embeddings = [np.array(row[1], dtype=np.float32) for row in rows]
-        
-        # Convert the input embeddings to a numpy array
-        input_embedding = np.array(input_embed, dtype=np.float32)
-        
-        # embeddings_testing(input_embedding, embeddings)
-                
-        # similarities = cosine_similarity([input_embed], embeddings)[0]
-        similarities = cosine_similarity([input_embedding], embeddings)[0]
-        
-        # Find the most similar embeddings and their indices
-        most_similar_indices = np.argsort(similarities)[::-1][:20]
-        
-        # Fetch the products_ids and similarities for the top similar products
-        
-        threshold = 0.5
-        
-        similar_products = [(product_ids[idx], similarities[idx]) for idx in most_similar_indices if similarities[idx] > threshold]
-        # similar_products = [(product_ids[idx], similarities[idx]) for idx in most_similar_indices]
-        
-        product_details = []
-        for product_id, similarity in similar_products:
-            cursor.execute("SELECT name, section, price, quantity, unit FROM products_with_embeddings WHERE product_id = %s", (product_id,)
-                           )
-            product_row = cursor.fetchone()
-            product_details.append({
-                # "product_id": product_id,
-                "nome": product_row[0],
-                "price": product_row[1],
-                "section": product_row[2],
-                # "similarity": similarity
-            })
-        
-        # print("Product details: ", product_details[:30])
-        
-        return product_details[:30]
+    result.append({
+        "product_id": pid,
+        "name": p.name,
+        "section": p.section,
+        "price": Decimal(p.price),
+        "quantity": p.quantity,
+        "unit": p.unit,
+        "similarity": round(score, 4),
+    })
+    
+    
+    return result
 
 def find_using_synonyms(text, conn):
     cursor = conn.cursor()

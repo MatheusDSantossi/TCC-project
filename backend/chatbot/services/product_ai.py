@@ -14,8 +14,8 @@ def generate_synonyms_for(product_list=None, brand=None, synonyms=None, product=
 def find_similar_products(name):
     return _fetch_alike(name)
 
-def generate_embedding(name):
-    return embed_fn(genai=genai, conn=conn, title=name, find_section=find_section)
+def generate_embedding(name, business):
+    return embed_fn(genai=genai, business=business, title=name, find_section=find_section)
 
 def normalize_text(text):
     return pre_process_prompt_grammatical(text)

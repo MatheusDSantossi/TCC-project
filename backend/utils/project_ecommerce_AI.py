@@ -10,12 +10,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 
-import nltk
-from nltk.tokenize import word_tokenize
-from nltk.tag import pos_tag
-from nltk.chunk import conlltags2tree, tree2conlltags
-from nltk.stem import WordNetLemmatizer
-from nltk.metrics import edit_distance
+from prompts.prompt_preprocessing import pre_process_prompt, pre_process_prompt_brand, pre_process_prompt_section, pre_process_prompt_grammatical
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -39,7 +34,7 @@ import json
 
 import time
 from .prompt_searcher import *
-from .prompts import *
+# from .prompts import *
 from .embeddings import embed_fn
 from loaders import load_business_details, get_cached_products_df
 
@@ -111,130 +106,7 @@ text_has_section = False
 text_has_brand = False
 sections_find_in_db = find_business_sections() 
 
-print("Sections found in db: ", sections_find_in_db)
-
-# model_text_generator = models.get("text-davinci-003")
-# def load_products_and_business_detail(business):
-#     sql = f"SELECT * FROM products_with_embeddings WHERE business_id = {business}"
-
-#     cur = conn.cursor()
-
-#     try:
-#         cur.execute(sql)
-
-#         rows = cur.fetchall()
-#     except (Exception, psycopg2.DatabaseError) as error:
-#         rows = []
-        
-#     products_list = []
-
-#     for row in rows:
-#         products = {
-#             "Nome": row[1],
-#             "Secao": row[2],
-#             "PrecoVenda": float(row[3]),
-#             "UnidadeMedida": row[4],
-#             "Embeddings": row[5],
-#             "Synonymous": row[6],
-#             "Brand": row[7],
-#             "Quantity": row[8],
-#             "stock": row[9],
-#         }
-#         products_list.append(products)
-
-#     products_df = pd.DataFrame(products_list)
-
-#     print("PRODUCTS DF: ", products_df)
-
-#     # List of available products (I can keep that in the DB as well)
-#     products_available = [p["Nome"] for p in products_df.to_dict(orient='records') if p['stock'] > 0]
-
-#     # search_term = "REF"
-
-#     # matching_products = [name for name in products_available if search_term in name]
-
-#     # # print("Products available: ", products_available)
-#     # print("Matching products: ", matching_products)
-
-#     sql_business_detail = f"SELECT * FROM chatbot_businessdetail WHERE business_id = {business}"
-
-#     cur.execute(sql_business_detail)
-
-#     try:
-#         cur.execute(sql_business_detail)
-
-#         rows_business_detail = cur.fetchall()
-#     except (Exception, psycopg2.DatabaseError) as error:
-#         rows_business_detail = []
-
-#     business_detail_list = []
-
-#     for row in rows_business_detail:
-#         business_detail = {
-#             "Key": row[1],
-#             "Value": row[2],
-#         }
-#         business_detail_list.append(business_detail)
-        
-#     print("Business detail list: ", business_detail_list)
-
-#     business_detail_text = ""
-
-#     for business_detail in business_detail_list:    
-#         # print("Business detail: ", business_detail)
-#         title = business_detail["Key"]
-#         description = business_detail["Value"]
-#         business_detail_text += f"Information title - {title}\n"
-#         business_detail_text += f"Information description - {description}\n"
-
-def for_dividing_prompt_limit(business):
-    products_list_2 = []
-    
-    products_df = get_cached_products_df(business, conn)
-    
-    for p in products_df.to_dict(orient='records'):
-        # prompt += p['Nome']
-        products_list_2.append(p['Nome'])
-        
-    max_prompt_size = 425
-    
-    for i in range(0, max_prompt_size):
-        prompt+= products_list_2[i]
-
-def pre_process_prompt_brand(prompt, brands_find):
-    fix_prompt = pre_process_prompt_grammatical_brand_fix_prompt(prompt, business_name, brands_find)
-    
-    pre_processed_prompt = generate_content_model.generate_content(fix_prompt)
-    
-    # time.sleep(3)
-    return pre_processed_prompt.text
-
-def pre_process_prompt_section(prompt):
-    products_find_in_section = find_section(prompt, conn)
-    input_embed = embed_fn(find_section, genai, conn, prompt)
-    products_find_using_prompt = find_similar_products_using_input_embeddings(input_embed, conn, np, cosine_similarity)
-    products_alike = fetch_products_alike(prompt)
-    
-    fix_prompt = products_find_in_section_fix_prompt(products_find_in_section, products_find_using_prompt, products_alike, prompt)
-
-
-    
-    pre_processed_prompt = generate_content_model.generate_content(fix_prompt)
-    
-    # time.sleep(3)
-    return pre_processed_prompt.text
-
-def pre_process_prompt_grammatical(prompt):
-    
-    fix_prompt = pre_process_prompt_grammatical_fix_prompt(prompt, business_name)
-    
-    time.sleep(3)
-    
-    pre_processed_prompt = generate_content_model.generate_content(fix_prompt)
-
-    # Problema agora é identificar mais de um produto :)
-
-    return pre_processed_prompt.text
+# print("Sections found in db: ", sections_find_in_db)
 
 def fetch_brands_alike(product_brand):
     print("ENTERED FETCH BRANDS!!")
@@ -287,187 +159,7 @@ def fetch_products_alike(product_name):
             
     return product_dict
 
-def pre_process_prompt(prompt, business = None):
-    
-    global text_has_section 
-    global text_has_brand 
 
-    # fix_prompt_v1 = pre_process_prompt_grammatical(prompt)
-    # print(f"FIXED 1 {fix_prompt_v1}")
-    fix_prompt_v1 = prompt
-    print(f"PROMPT 1 {fix_prompt_v1}")
-    
-    products_alike = fetch_products_alike(fix_prompt_v1)
-
-    # print("PRODUCTS ALIKE: ", products_alike)
-    
-    input_embed = embed_fn(find_section, genai, conn, fix_prompt_v1)
-    
-    # print("INPUT EMBED: ", input_embed)
-    
-    products_find_in_section = find_section(text=fix_prompt_v1,  business_id=business)
-    print("Products find in section: ", products_find_in_section)
-    
-    products_find_with_price = find_price(text=fix_prompt_v1, business_id=business)
-    print("Products find in price: ", products_find_with_price)
-    
-    products_find_using_metric_or_quantity = find_quantity(text=fix_prompt_v1, business_id=business)
-    print("Products find using metric or quantity: ", products_find_using_metric_or_quantity)
-    
-    products_find_using_prompt = find_similar_products_using_input_embeddings(input_embed, conn, np, cosine_similarity)
-    products_find_using_brand = find_brand(fix_prompt_v1, business)
-    products_find_using_synonyms = find_using_synonyms(fix_prompt_v1, conn)
-    
-    fix_prompt_v2 = fix_prompt_v1
-    
-    if (products_find_in_section is not None 
-    and products_find_with_price is not None 
-    and products_find_using_brand is not None 
-    and products_find_using_metric_or_quantity is not None):
-        text_has_section = True
-        text_has_brand = True
-        # Match all conditions
-        fix_prompt_v2 = products_match_all_conditions(
-            products_find_in_section, 
-            products_find_with_price, 
-            products_find_using_brand, 
-            products_find_using_metric_or_quantity, 
-            products_find_using_prompt, 
-            products_alike, 
-            fix_prompt_v1
-        )
-
-    elif (products_find_in_section is not None 
-        and products_find_with_price is not None 
-        and products_find_using_brand is not None):
-        text_has_section = True
-        text_has_brand = True
-        # Match section, price, and brand
-        fix_prompt_v2 = products_match_section_price_and_brand(
-            products_find_in_section, 
-            products_find_with_price, 
-            products_find_using_brand, 
-            products_find_using_prompt, 
-            products_alike, 
-            fix_prompt_v1
-        )
-
-    elif (products_find_in_section is not None 
-        and products_find_with_price is not None):
-        text_has_section = True
-        # Match section and price
-        fix_prompt_v2 = products_match_section_and_price(
-            products_find_in_section, 
-            products_find_with_price, 
-            products_find_using_prompt, 
-            products_alike, 
-            fix_prompt_v1
-        )
-    elif (products_find_in_section is not None and products_find_using_brand is not None):
-        text_has_brand = True
-        text_has_section = True
-        products_match_section_and_brand(products_find_in_section, products_find_using_brand, products_find_using_prompt, products_alike, fix_prompt_v1)
-
-    elif (products_find_in_section is not None and products_find_using_metric_or_quantity is not None):
-        text_has_section = True
-        products_match_section_and_metric_or_quantity(products_find_in_section, products_find_using_metric_or_quantity, products_find_using_prompt, products_alike, fix_prompt_v1)
-
-
-    elif (products_find_with_price is not None 
-        and products_find_using_brand is not None 
-        and products_find_using_metric_or_quantity is not None):
-        text_has_brand = True
-        
-        # Match price, brand, and metric
-        fix_prompt_v2 = products_match_price_brand_and_metric(
-            products_find_with_price, 
-            products_find_using_brand, 
-            products_find_using_metric_or_quantity, 
-            products_find_using_prompt, 
-            products_alike, 
-            fix_prompt_v1
-        )
-
-    elif (products_find_with_price is not None 
-        and products_find_using_brand is not None):
-        text_has_brand = True
-        
-        # Match price and brand
-        fix_prompt_v2 = products_match_price_and_brand(
-            products_find_with_price, 
-            products_find_using_brand, 
-            products_find_using_prompt, 
-            products_alike, 
-            fix_prompt_v1
-        )
-    
-    elif (products_find_with_price is not None 
-        and products_find_using_metric_or_quantity is not None):
-        # Match price and brand
-        fix_prompt_v2 = products_match_price_and_quantity_or_metric(products_find_with_price, products_find_using_metric_or_quantity, products_find_using_prompt, products_alike, fix_prompt_v1)
-
-    elif products_find_in_section is not None:
-        text_has_section = True
-        
-        # Only match section
-        fix_prompt_v2 = products_find_in_section_fix_prompt(
-            products_find_in_section, 
-            products_find_using_prompt, 
-            products_alike, 
-            fix_prompt_v1
-        )
-
-    elif products_find_with_price is not None:
-        # Only match price
-        fix_prompt_v2 = products_find_with_price_fix_prompt(
-            products_find_with_price, 
-            products_find_using_prompt, 
-            products_alike, 
-            fix_prompt_v1
-        )
-
-    elif products_find_using_brand is not None:
-        text_has_brand = True
-        
-        # Only match brand
-        fix_prompt_v2 = products_find_with_brand_fix_prompt(
-            products_find_using_brand, 
-            products_find_using_prompt, 
-            products_alike, 
-            fix_prompt_v1
-        )
-
-    elif products_find_using_metric_or_quantity is not None:
-        # Only match metric or quantity
-        fix_prompt_v2 = products_find_with_metric_or_quantity_fix_prompt(
-            products_find_using_metric_or_quantity, 
-            products_find_using_prompt, 
-            products_alike, 
-            fix_prompt_v1
-        )
-    elif products_find_using_synonyms is not None and products_find_using_metric_or_quantity is None and products_find_using_brand is None and products_find_using_prompt is None and products_find_with_price is None:
-        fix_prompt_v2 = products_find_with_synonyms(
-            products_find_using_synonyms,
-            products_find_using_prompt, 
-            products_alike, 
-            fix_prompt_v1
-        )
-
-    else:
-        # Fallback if no conditions match
-        fix_prompt_v2 = products_find_general_fix_prompt(
-            products_alike, 
-            products_find_using_prompt, 
-            fix_prompt_v1
-        )
-    
-    time.sleep(3) # a little sleep to avoid overflow of questions to Gemini API
-    
-    print("FIX_PROMP_V2: ", fix_prompt_v2)
-    
-    pre_processed_prompt = generate_content_model.generate_content(fix_prompt_v2)
-
-    return pre_processed_prompt.text
 
 # pre_process_prompt("quais produtos custam 2.30")
 
@@ -541,7 +233,7 @@ def find_similarity_products(prompt, products_df, embeddings_products=None, busi
 
     print("Prompt before pre_process_prompt: ", prompt)
 
-    fix_response = pre_process_prompt(prompt, business)
+    fix_response = pre_process_prompt(prompt, find_section, find_price, find_brand, find_quantity, find_using_synonyms, find_similar_products_using_input_embeddings, embed_fn, fetch_brands_alike, generate_content_model, conn, business)
 
     prompt = fix_response
     
@@ -622,58 +314,7 @@ def generate_and_search(prompt, business):
 
     return similarities
 
-def create_menu_options_prompts():
-    query_select = """
-        SELECT menu_option_description FROM menu_options 
-        WHERE prompts IS NULL
-    """
-    with conn.cursor() as cursor:
-        cursor.execute(query_select)
-        options = cursor.fetchall()
-        
-        for option in options:
-            print("OPTIONS: ", option[0])
-            menu_prompt = f"""
-                Considerando que a seguinte pergunta foi feita por um cliente: "{option[0]}"
 
-                Para criar o melhor prompt possível para essa pergunta, leve em consideração os seguintes pontos:
-
-                1. **Contexto**: O cliente está fazendo uma pergunta relacionada ao nosso supermercado. O objetivo é fornecer uma resposta precisa, direta e informativa, com base nos produtos e serviços que oferecemos.
-                
-                2. **Clareza**: O prompt deve ser claro o suficiente para que a IA entenda a intenção por trás da pergunta e seja capaz de gerar uma resposta que atenda às expectativas do cliente. Evite ambiguidades e garanta que a pergunta seja compreensível.
-                
-                3. **Personalização**: Sempre que possível, personalize o prompt para refletir a experiência do cliente em nosso supermercado. Isso pode incluir informações sobre produtos disponíveis, ofertas, recomendações personalizadas ou detalhes que mostrem atenção ao cliente.
-                
-                4. **Estilo e Tom**: A resposta gerada deve ser amigável e profissional, mantendo um tom acolhedor que reflita o atendimento ao cliente que nosso supermercado oferece. 
-
-                5. **Objetivo**: Certifique-se de que o prompt gerado guiará a IA a fornecer informações úteis e relevantes sobre os produtos ou serviços que o cliente busca.
-
-                Exemplo de como gerar um prompt para essa pergunta:
-                Pergunta do cliente: "{option[0]}"
-                Prompt ideal: "Baseado na pergunta do cliente sobre "tópico relevante", forneça uma resposta clara que ajude a responder diretamente à pergunta feita e inclua recomendações relacionadas aos nossos produtos ou serviços que possam ser de interesse para o cliente."
-                
-                no lugar de tópico relevantes use as informações abaixo que se adequarem mais a pergunta do cliente.
-
-                \n
-                Alguns produtos que vendemos que podem ser do interesse do cliente:\n
-                {fetch_products_alike("refrigerante,suco,cafe")}
-                
-                \n
-                
-                Use a estrutura acima e ajuste para a pergunta dada.
-                                                    """
-            query_add = """
-                UPDATE menu_options
-                SET prompts = %s
-                WHERE menu_option_description = %s
-            """
-            
-            menu_prompt_generate = generate_content_model.generate_content(menu_prompt)
-            response = menu_prompt_generate.text
-            
-            cursor.execute(query_add, (response, option[0]))
-               
-    
 # user_input = "Onde fica o Refrigerante e Detergente e suco"
 
 # user_input_processed = pre_process_prompt(user_input)
@@ -716,18 +357,18 @@ def chatbot_response(user_prompt, text_related_to="default", business=None):
     if text_related_to == "brand":
         brands_find = fetch_brands_alike(user_prompt)
         
-        brand = pre_process_prompt_brand(user_prompt, brands_find)
+        brand = pre_process_prompt_brand(user_prompt, brands_find, business_name, generate_content_model)
         fix_prompt_v1 = f"Our client send this message {user_prompt} and probably their message mentioned this brand(s) {brand}"
         
         #, it has some products like these ones {brand}, which ones do you recommend?"
         
     elif text_related_to == "section":
-        sections_products = pre_process_prompt_section(user_prompt)
+        sections_products = pre_process_prompt_section(user_prompt, find_section, find_similar_products_using_input_embeddings, conn, embed_fn, fetch_products_alike, generate_content_model, business)
         fix_prompt_v1 = f"Our client send this message {user_prompt} and some products available in the section mentioned are these ones {sections_products}"
         
         #, which have some produtcst like this {sections}, which ones do you recommend?"
     else:
-        fix_prompt_v1 = pre_process_prompt_grammatical(user_prompt)
+        fix_prompt_v1 = pre_process_prompt_grammatical(user_prompt, business_name, generate_content_model)
     
     print("Fixed prompt v1 (chatbot response)>", fix_prompt_v1)
     
@@ -943,7 +584,7 @@ def chatbot_response(user_prompt, text_related_to="default", business=None):
         """
     
 
-    section_products = find_section(fix_prompt_v1, conn)
+    section_products = find_section(fix_prompt_v1, business)
     
     if section_products:
         answer_prompt+=f"""
@@ -1075,7 +716,7 @@ def generate_synonymous(product=None, product_list=None, brand=None, synonyms=No
     
     if not products_dict:
     
-        new_product = pre_process_prompt_grammatical(original_product)
+        new_product = pre_process_prompt_grammatical(original_product, business_name, generate_content_model)
         
         print("New product: ", new_product)
         prompt = """Generate all possible synonyms for the product names listed below. Follow these rules carefully:
@@ -1117,7 +758,7 @@ def generate_synonymous(product=None, product_list=None, brand=None, synonyms=No
     
     elif product_list: 
         print("Original product elid: ", original_product)
-        new_product = pre_process_prompt_grammatical(original_product)
+        new_product = pre_process_prompt_grammatical(original_product, business_name, generate_content_model)
         
         print("New_product: ", new_product)
         

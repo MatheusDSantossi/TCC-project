@@ -1,11 +1,12 @@
+import google.generativeai as genai
+
 from utils.project_ecommerce_AI import (
     generate_synonymous as _gen_syn,
-    fetch_products_alike as _fetch_alike,
-    pre_process_prompt_grammatical,
-    genai, chatbot_response
+    chatbot_response
 )
-from utils.prompt_searcher import find_section
-from config.database_connection import conn
+from utils.prompts.prompt_preprocessing import pre_process_prompt_grammatical
+from utils.search.trigram import fetch_products_alike as _fetch_alike
+from utils.prompts.prompt_searcher import find_section
 from utils.embeddings import embed_fn
 
 def generate_synonyms_for(product_list=None, brand=None, synonyms=None, product=None, business=None):

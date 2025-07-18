@@ -1,9 +1,11 @@
-from utils.prompts_utils import * 
+from .prompts_utils import * 
 
 import google.generativeai as genai
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 import time
+
+from django.db import connection
 
 def handle_all_conditions(ctx):
     return products_match_all_conditions(ctx["section"], ctx["price"],
@@ -208,15 +210,14 @@ CONDITIONS = [
     ),
 ]
 
-
-def pre_process_prompt(prompt, find_section, find_price, find_brand, find_quantity, find_using_synonyms, find_similar_products_using_input_embeddings, embed_fn, fetch_products_alike, generate_content_model, conn, business=None):
+def pre_process_prompt(prompt, find_section, find_price, find_brand, find_quantity, find_using_synonyms, find_similar_products_using_input_embeddings, embed_fn, fetch_products_alike, generate_content_model, business=None):
     ctx = {
         "raw": prompt,
         "section": find_section(prompt, business_id=business),
         "price": find_price(prompt, business_id=business),
         "brand": find_brand(prompt, business_id=business),
         "quantity": find_quantity(prompt, business_id=business),
-        "synonyms": find_using_synonyms(prompt, conn),
+        "synonyms": find_using_synonyms(prompt, connection),
         "sim_embeddings": find_similar_products_using_input_embeddings(embed_fn(find_section, genai, business, prompt), business_id=business),
         "alike": fetch_products_alike(prompt),
     }
@@ -239,7 +240,7 @@ def pre_process_prompt_brand(prompt, brands_find, business_name, generate_conten
     # time.sleep(3)
     return pre_processed_prompt.text
 
-def pre_process_prompt_section(prompt, find_section, find_similar_products_using_input_embeddings, conn, embed_fn, fetch_products_alike, generate_content_model, business):
+def pre_process_prompt_section(prompt, find_section, find_similar_products_using_input_embeddings, embed_fn, fetch_products_alike, generate_content_model, business):
     products_find_in_section = find_section(prompt, business_id=business)
     input_embed = embed_fn(find_section, genai, business, prompt)
     products_find_using_prompt = find_similar_products_using_input_embeddings(input_embed=input_embed, business_id=business)
@@ -264,7 +265,8 @@ def pre_process_prompt_grammatical(prompt, business_name, generate_content_model
     return pre_processed_prompt.text
 
 
-def create_menu_options_prompts(fetch_products_alike, conn, generate_content_model):
+# def create_menu_options_prompts(fetch_products_alike, connection, generate_content_model):
+def create_menu_options_prompts(fetch_products_alike, generate_content_model):
     """
     Function to create the menu options based on the user registration (NOT USED FOR NOW)
     """
@@ -272,7 +274,7 @@ def create_menu_options_prompts(fetch_products_alike, conn, generate_content_mod
         SELECT menu_option_description FROM menu_options 
         WHERE prompts IS NULL
     """
-    with conn.cursor() as cursor:
+    with connection.cursor() as cursor:
         cursor.execute(query_select)
         options = cursor.fetchall()
         

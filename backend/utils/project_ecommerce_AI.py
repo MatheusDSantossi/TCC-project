@@ -11,6 +11,7 @@ import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 from prompts.prompt_preprocessing import pre_process_prompt, pre_process_prompt_brand, pre_process_prompt_section, pre_process_prompt_grammatical
+from prompts.prompt_searcher import find_business_sections, find_section, find_brand, find_price, find_quantity, find_using_synonyms, find_similar_products_using_input_embeddings
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -33,10 +34,15 @@ import ast
 import json
 
 import time
-from .prompt_searcher import *
-# from .prompts import *
+
 from .embeddings import embed_fn
 from loaders import load_business_details, get_cached_products_df
+
+from search.trigram import fetch_brands_alike, fetch_products_alike
+
+from prompts.prompt_preprocessor import preprocess_with_ai
+from regex_extractor import extract_product_list
+from tfidf_matcher import tfidf_match
 
 # Você: quero um refrige
 
@@ -108,199 +114,74 @@ sections_find_in_db = find_business_sections()
 
 # print("Sections found in db: ", sections_find_in_db)
 
-def fetch_brands_alike(product_brand):
-    print("ENTERED FETCH BRANDS!!")
-    with conn.cursor() as cursor:
-        
-        cursor.execute("CREATE EXTENSION IF NOT EXISTS pg_trgm;")
-        
-        
-        query = """
-            SELECT DISTINCT brand FROM products_with_embeddings
-            WHERE SIMILARITY(brand, %s) > 0.1
-            LIMIT 30;
-        """
-        
-        # for keyword in product_name:
-        cursor.execute(query, (product_brand,))
-        rows = cursor.fetchall()
-        
-        unique_brands = [row[0] for row in rows]
-        print("Unique brands: ", unique_brands)
-            
-    return unique_brands
-
-def fetch_products_alike(product_name):
-    with conn.cursor() as cursor:
-        
-        cursor.execute("CREATE EXTENSION IF NOT EXISTS pg_trgm;")
-        
-        
-        query = """
-            SELECT name, section, price FROM products_with_embeddings
-            WHERE SIMILARITY(name, %s) > 0.1
-            LIMIT 30;
-        """
-        
-        # print(type(product_name))
-        
-        product_dict = {}
-        
-        # for keyword in product_name:
-        cursor.execute(query, (product_name,))
-        products = cursor.fetchall()
-        
-            
-        for name, section, price in products:
-            if name not in product_dict:
-                product_dict[name] = []
-            product_dict[name].extend(section.split(","))
-            product_dict[name].append(price)
-            
-    return product_dict
-
-
 
 # pre_process_prompt("quais produtos custam 2.30")
 
 # print(pre_process_prompt("Quero um cafe que custa 12 reais que está na seção 1 qual o nome desse cafe?"))
 
-
-def create_semantic_dictionary(user_input, business):
-    """
-    Creates a semantic dictionary based on embeddings.
-
-    Args:
-        df (DataFrame): DataFrame with the products
-
-    Returns:
-        A dictionary where the keys are the products and the values are similar products lists
-    """
-    products_df = get_cached_products_df(business, conn)
-    semantic_dictonary = {}
-    # "REFRIG. GUARANA ANTARCT PET"	"Seção 3"	6	"PC"	"22021000"	4.89	4.89	6	true
-
-    embeddings_consulta = np.array(embed_fn(find_section, genai, conn, user_input)).reshape(1, -1) # Reshape to 2D array for cosine similarity
-
-    # print(f"Embed of products: {embeddings_consulta}")
-
-    for i, row in products_df.iterrows():
-
-        product_embedding = np.array(row['embeddings']).reshape(1, -1) # Ensure the product embedding is in the right shape
-        
-        similarity = cosine_similarity(embeddings_consulta, product_embedding)[0][0]
-        
-        semantic_dictonary[row["name"]] = similarity
-
-    return semantic_dictonary
-
-# print("SEMANTIC DIC: ",create_semantic_dictionary("Quais os produtos da seção 1"))
-
-
-def encontrar_produtos_similares(semantic_dictionary, threshold=0.5):
-    """
-    Encontra produtos similares à consulta do usuário com base em embeddings.
-
-    Args:
-        consulta: A consulta do usuário como texto.
-        threshold: O limiar de similaridade (0.0 a 1.0).
-
-    Returns:
-        Uma lista de nomes de produtos similares.
-    """
-
-    # doc_consulta = nlp(consulta)
-    # embeddings_consulta = doc_consulta.vector
-
-
-    similar_products = [product for product, similarity in semantic_dictionary.items() if similarity > threshold]
-
-    return similar_products
-
+def normalize(s: str) -> str:
+    # 1) lowercase
+    s = s.lower()
+    # 2) decompose accents
+    s = unicodedata.normalize("NFKD", s)
+    # 3) drop combined marks
+    s = "".join(ch for ch in s if not unicodedata.combining(ch))
+    # 4) strip all punctuation (non-word, non-space)
+    s = re.sub(r"[^\w\s]", "", s)
+    # 5) collapse multiple whitespace into one, then trim
+    s = re.sub(r"\s+", " ", s).strip()
+    return s
 
 # Função para identificar produtos na consulta do usuário
+# TODO: Improve the general returns.
 def find_similarity_products(prompt, products_df, embeddings_products=None, business=None):
-    # in teh answer I have to distinguish between the answers with products and the answerrs without products (Olá, quero saber onde fica a seção 2)
 
-    # avatar 
-    # prompt_for_detail = "Gerar uma descrição detalhada do produto [nome do produto] para um chatbot de e-commerce"
- 
-    # fix_response = model_2.generate_content(pre_process_prompt(prompt))
-
-    global pre_processed_prompt_products_list
-    global pattern
-    global contains_a_product
-
-    print("Prompt before pre_process_prompt: ", prompt)
-
-    fix_response = pre_process_prompt(prompt, find_section, find_price, find_brand, find_quantity, find_using_synonyms, find_similar_products_using_input_embeddings, embed_fn, fetch_brands_alike, generate_content_model, conn, business)
-
-    prompt = fix_response
+    # Run AI preprocessor
+    ai_text = preprocess_with_ai(prompt, find_section, find_price, find_brand, find_quantity, find_using_synonyms, find_similar_products_using_input_embeddings, fetch_products_alike, generate_content_model, business)
     
-    print("Prompt after pre_process_prompt:: ", prompt)
+    # Trying to pull out explicit product  names
+    extracted = extract_product_list(ai_text)
     
-    new_prompt = prompt.lower()
-    new_prompt_without_spaces = new_prompt.strip()
+    print("=== DEBUG: extracted names from AI prompt ===", extracted)
+    print("=== DEBUG: products_df has", len(products_df), "rows ===")
+    print("=== DEBUG: first 10 product names ===", products_df["name"].head(10).tolist())
     
-    products_df['name'] = products_df['name'].str.lower()
-    products_df['name'] = products_df['name'].apply(lambda x: unicodedata.normalize('NFKD', x).encode('ascii', 'ignore').decode('ascii'))
-    
-    # print("ULTIMO CHARACTER " + new_prompt.strip()[-1])
-
-    match = re.search(pattern, new_prompt)
-
-    if match:
-        # extracting the correspondent group to the pattern
-        product_string = match.group(1)
-
-        pre_processed_prompt_products_list = [product.strip() for product in product_string.split(',')]
-
-    print("PRE_PROCESSED_PROMPT_PRODUCT: ", pre_processed_prompt_products_list)
-    # PRE_PROCESSED_PROMPT_PRODUCT:  ['DES.ALMA FLORES SPRAY PCT 1 X 12 90ML', 'DES.ALMA FLORES SPRAY C.BRANCAS CXA 1 X 12 90ML', 'DES.SENADOR SPRAY SEDUCTION CXA 1 X 12 90ML', 'DES.SENADOR SPRAY CLASSIC CXA 1 X 12 90ML']
-    
-    
-    if new_prompt_without_spaces not in ['produto na', 'texto ra']:
-        print("new_prompt: ", new_prompt_without_spaces)
-        # generate_synonymous(pre_processed_prompt_products_list)
-
-        contains_a_product = True
-
-        def preprocess_text(text):
-            text = text.lower()
-            text = re.sub(r'[^\w\s]', '', text)
-            return text.strip()
+    if extracted:
         
-        new_prompt_clean = preprocess_text(new_prompt_without_spaces)
-        print("new prompt clean: ", new_prompt_clean)
-        products_df['Cleaned_Name'] = products_df['name'].apply(preprocess_text)
-
-        # Using TF-IDF to text comparation
-        tfidf_vectorizer = TfidfVectorizer()
-        tfidf_matrix = tfidf_vectorizer.fit_transform([new_prompt_clean] + products_df['Cleaned_Name'].tolist())  
-
-        similarities = cosine_similarity(tfidf_matrix[0], tfidf_matrix[1:]).flatten()
-
-        # Getting the products index with similarity above the threshold
-
-        threshold = 0.3
-        # threshold = 0.5
-        similar_index = np.where(similarities > threshold)[0]
-        sorted_index = similar_index[np.argsort(-similarities[similar_index])]
-        # index = np.argsort(similarities)[0][::-1]
-
-        similar_products = sorted_index.tolist()
+        products_df["Cleaned_Name"] = products_df["name"].apply(normalize)
         
-        print("Similar products: ", similar_products)
-
-        # return index[0]
-        # return index[:5].tolist()
-        # return index[:quantity_products].tolist()
-        # print(f"INDEX LIST {index[:5].tolist()}")
-        return similar_products
-
-    contains_a_product = False
-    return prompt
-
+        # Debug 
+        print("==== DEBUG cleaned names (first 10):")
+        print(products_df["Cleaned_Name"].head(10).tolist())
+        
+        # Build your `names` list from that cleaned column
+        names = products_df["Cleaned_Name"].tolist()
+        
+        print("===== DEBUG sample names[100:110]:", names[100:110])
+        
+        # Match the extracted ones
+        indices = [] 
+        
+        for prod in extracted:
+            prod_norm = normalize(prod)
+            
+            if prod_norm in names:
+              indices.append(names.index(prod_norm))  
+              
+            else:
+                print(f"  → '{prod}' (normalized '{prod_norm}') not in cleaned names")
+        
+        print("Matched indices: ", indices)
+        return indices
+    
+    # Fallback: TF-IDF match
+    clean = ai_text.lower().strip()
+    products_df["Cleaned_Name"] = (
+        products_df["name"].str.lower()
+        .apply(lambda x: unicodedata.normalize("NFKD", x).encode("ascii", "ignore").decode("ascii").strip())
+    )
+    
+    return tfidf_match(clean, products_df["Cleaned_Name"])
 
 def generate_and_search(prompt, business):
     # print("Business gen and ser: ", business)
@@ -363,7 +244,7 @@ def chatbot_response(user_prompt, text_related_to="default", business=None):
         #, it has some products like these ones {brand}, which ones do you recommend?"
         
     elif text_related_to == "section":
-        sections_products = pre_process_prompt_section(user_prompt, find_section, find_similar_products_using_input_embeddings, conn, embed_fn, fetch_products_alike, generate_content_model, business)
+        sections_products = pre_process_prompt_section(user_prompt, find_section, find_similar_products_using_input_embeddings, embed_fn, fetch_products_alike, generate_content_model, business)
         fix_prompt_v1 = f"Our client send this message {user_prompt} and some products available in the section mentioned are these ones {sections_products}"
         
         #, which have some produtcst like this {sections}, which ones do you recommend?"

@@ -16,7 +16,6 @@ from utils.metrics_utils import extract_metric_and_quantity
 
 logger = logging.getLogger(__name__)
 
-# def find_business_sections(conn):
 def find_business_sections(business_id: Optional[int] = None) -> List[str]:
     """
     Return a sorted list of distinct product sections.
@@ -218,7 +217,7 @@ def find_quantity(text: str, business_id: Optional[int] = None) -> Optional[List
     return list(results)
 
 # TODO: Fix this function because the return is not good
-def find_similar_products_using_input_embeddings(input_embed: List[float], threshold: float = 0.5, top_k: int = 20, business_id: Optional[int]= None) -> List[Dict]:
+def find_similar_products_using_input_embeddings(input_embed: List[float], threshold: float = 0.4, top_k: int = 20, business_id: Optional[int]= None) -> List[Dict]:
     """
     Given an input embedding, find the top_k most-similar products (similarity > threshold) and return their details + score.
     """

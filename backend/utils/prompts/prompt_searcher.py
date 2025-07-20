@@ -14,6 +14,8 @@ from chatbot.models import Product
 from utils.brands_utils import find_brands_in_text
 from utils.metrics_utils import extract_metric_and_quantity
 
+import google.generativeai as genai
+
 logger = logging.getLogger(__name__)
 
 def find_business_sections(business_id: Optional[int] = None) -> List[str]:
@@ -217,60 +219,95 @@ def find_quantity(text: str, business_id: Optional[int] = None) -> Optional[List
     return list(results)
 
 # TODO: Fix this function because the return is not good
-def find_similar_products_using_input_embeddings(input_embed: List[float], threshold: float = 0.4, top_k: int = 20, business_id: Optional[int]= None) -> List[Dict]:
+# def find_similar_products_using_input_embeddings(input_embed: List[float], threshold: float = 0.4, top_k: int = 20, business_id: Optional[int]= None) -> List[Dict]:
+def find_similar_products_using_input_embeddings(user_text: str, embed_fn, threshold: float = 0.4, top_k: int = 20, business_id: Optional[int]= None) -> List[Dict]:
     """
     Given an input embedding, find the top_k most-similar products (similarity > threshold) and return their details + score.
     """
     
-    # Pull all IDs + embeddings in one go:
-    qs = Product.objects.values_list("product_id", "embeddings")
+    # Extract the likely product phrase
+    # prod_phrase = extract_product_chunk(user_text)
+    
+    # Hybrid pre-filter
+    pre_qs = Product.objects
     
     if business_id is not None:
         qs = qs.filter(business_id=business_id)
+    
+    pre_qs = pre_qs.filter(name__icontains=user_text)[:200]
+    
+    rows = list(pre_qs.values_list("product_id", "embeddings"))
+    
+    if not rows:
+        return []
+    
+    # Pull all IDs + embeddings in one go:
+    # qs = Product.objects.values_list("product_id", "embeddings")
+    
         
-    rows = list(qs) # list of (id, [float, ...])
+    # rows = list(qs) # list of (id, [float, ...])
     
     product_ids, embeddings = zip(*rows)
     embeddings = [np.array(e, dtype=np.float32) for e in embeddings]
     
     # Compute similarity scores
-    input_vec = np.array(input_embed, dtype=np.float32).reshape(1, -1)
+    input_vec = np.array(embed_fn(find_section, genai, business_id, user_text), dtype=np.float32).reshape(1, -1)
     sims = cosine_similarity(input_vec, embeddings)[0] 
     
     # Pick the ones above your cutoff and sort
-    idxs = np.argsort(sims)[::-1]
-    similar = [
-        (product_ids[i], float(sims[i]))
-        for i in idxs
-        if sims[i] > threshold
-    ][:top_k]
+    # idxs = np.argsort(sims)[::-1]
+    # similar = [
+    #     (product_ids[i], float(sims[i]))
+    #     for i in idxs
+    #     if sims[i] > threshold
+    # ][:top_k]
+    
+    # Pick & fetch details
+    similar = sorted(
+        [(ids[i], float(sims[i])) for i in range(len(ids)) if sims[i] > threshold], key=lambda x: -x[1]
+    )[:top_k]
     
     if not similar:
         return []
     
     # Fetch all those product details in one ORM hit
-    ids = [pid for pid, _ in similar]
-    prods = Product.objects.filter(product_id__in=ids).in_bulk(field_name="product_id")
+    # ids = [pid for pid, _ in similar]
+    # prods = Product.objects.filter(product_id__in=ids).in_bulk(field_name="product_id")
+    
+    products = Product.objects.in_bulk([pid for pid, _ in similar], field_name="product_id")
+    
+    return [
+        {
+             "product_id": pid,
+            "name": prod.name,
+            "section": prod.section,
+            "price": prod.price,
+            "quantity": prod.quantity,
+            "unit": prod.unit,
+            "similarity": round(score,4),
+        }
+        for pid, score in similar if (prod:=products.get(pid))
+    ]
     
     # Build your return list, preserving the similarity order
-    result = []
-    for pid, score in similar:
-        p = prods.get(pid)
-        if not p:
-            continue
+    # result = []
+    # for pid, score in similar:
+    #     p = prods.get(pid)
+    #     if not p:
+    #         continue
         
-    result.append({
-        "product_id": pid,
-        "name": p.name,
-        "section": p.section,
-        "price": Decimal(p.price),
-        "quantity": p.quantity,
-        "unit": p.unit,
-        "similarity": round(score, 4),
-    })
+    # result.append({
+    #     "product_id": pid,
+    #     "name": p.name,
+    #     "section": p.section,
+    #     "price": Decimal(p.price),
+    #     "quantity": p.quantity,
+    #     "unit": p.unit,
+    #     "similarity": round(score, 4),
+    # })
     
     
-    return result
+    # return result
 
 def find_using_synonyms(text, conn):
     cursor = conn.cursor()

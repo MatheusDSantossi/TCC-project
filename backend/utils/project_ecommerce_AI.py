@@ -130,7 +130,7 @@ def normalize(s: str) -> str:
     s = re.sub(r"[^\w\s]", "", s)
     # 5) collapse multiple whitespace into one, then trim
     s = re.sub(r"\s+", " ", s).strip()
-    return s
+    return
 
 # Função para identificar produtos na consulta do usuário
 # TODO: Improve the general returns.

@@ -1,7 +1,7 @@
 embed_model = 'models/text-embedding-004'
-def embed_fn(find_section, genai, conn, title, secao="", preco_venda=0, unidade_medida=""):
+def embed_fn(find_section, genai, business, title, secao="", preco_venda=0, unidade_medida=""):
     
-    section = find_section(title, conn)
+    section = find_section(title, business_id=business)
     
     if section == None:
     

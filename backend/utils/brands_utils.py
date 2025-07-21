@@ -8,7 +8,11 @@ from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
-BRAND_FILE = Path(settings.BASE_DIR) / "utils" / "brands.json"
+HERE = Path(__file__).resolve().parent
+
+BRAND_FILE = HERE / "brands.json"
+
+print("Looking for brands.json at: ", BRAND_FILE, "EXISTS?", BRAND_FILE.exists())
 
 @lru_cache(maxsize=1)
 def load_brand_data():
@@ -45,9 +49,14 @@ def find_brands_in_text(text: str) -> list[str]:
     Returns list of matched brand names.
     """
     data = load_brand_data()
-    brands = data["brands"] - data["excptions"]
+    brands = data["brands"] - data["exceptions"]
+    
+    if not brands:
+        print("No brands find in find_brands)in_text!!!")
+        return []
+    
     # build a regex like r"\b(ANTARCT|ANTARC|LOPES|....)\b"
-    pattern = r"\b(" + "|".join(re.escape(b) for b in sorted(brands, key=len, reverse=True)) + ")\b"
+    pattern = r"\b(" + "|".join(re.escape(b) for b in sorted(brands, key=len, reverse=True)) + r")\b"
     matches = re.findall(pattern, text, flags=re.IGNORECASE)
     
     # dedupe and uppercase

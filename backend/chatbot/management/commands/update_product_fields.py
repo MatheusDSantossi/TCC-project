@@ -16,8 +16,8 @@ from django.core.management.base import BaseCommand
 from django.db import transaction
 
 from chatbot.models import Product
-from backend.utils.brands_utils import find_brands_in_text
-from backend.utils.metrics_utils import extract_metric_and_quantity
+from utils.brands_utils import find_brands_in_text
+from utils.metrics_utils import extract_metric_and_quantity
 
 logger = logging.getLogger(__name__)
 
@@ -58,7 +58,7 @@ class Command(BaseCommand):
             
             # Only update if something changed
             if (
-                parsed["name"] != product.name or parsed["brand"] != product.brand or parsed["quantity"] != product.quantity or parsed["metric"] != product.metric
+                parsed["name"] != product.name or parsed["brand"] != product.brand or parsed["quantity"] != product.quantity
             ):
                 self.update_product(product, parsed)
                 

@@ -178,7 +178,10 @@ def products_find_with_price_fix_prompt(products_find_with_price, products_find_
         
         Retrieve ONLY products priced at {products_find_with_price}.
         Use exact product names, keeping capitalization and punctuation.
-        Ignore {products_find_using_prompt} and {products_alike} unless explicitly instructed.
+        Ignore {products_find_using_prompt}
+        ...unless the name and price clearly match the user input. 
+        and {products_alike}. Only use these if a valid price and name match is evident.
+
         🔹 STRICT Output Examples
         ✅ Valid Outputs (Only two options exist!)
 

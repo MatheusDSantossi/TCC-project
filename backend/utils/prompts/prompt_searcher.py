@@ -16,6 +16,9 @@ from utils.metrics_utils import extract_metric_and_quantity
 
 import google.generativeai as genai
 
+import spacy
+nlp = spacy.load("pt_core_news_sm")
+
 logger = logging.getLogger(__name__)
 
 def find_business_sections(business_id: Optional[int] = None) -> List[str]:
@@ -218,7 +221,20 @@ def find_quantity(text: str, business_id: Optional[int] = None) -> Optional[List
     print(f"Found {len(results)} matching products")
     return list(results)
 
-# TODO: Fix this function because the return is not good
+def extract_product_chunk(text: str) -> str:
+    doc = nlp(text)
+    
+    # Get the largest noun chunk
+    chunks = list(doc.noun_chunks)
+    
+    if not chunks:
+        return text
+    
+    # Choose the chunk containing the largest non-stopword content here we just pick the longest chunk by token count
+    return max(chunks, key=lambda c: len(c)).text
+
+# TODO: My plan is to fix the user_text before sending to the comparation between it and the products. Using these method (spacy) isn't very reliable the return are too different
+
 # def find_similar_products_using_input_embeddings(input_embed: List[float], threshold: float = 0.4, top_k: int = 20, business_id: Optional[int]= None) -> List[Dict]:
 def find_similar_products_using_input_embeddings(user_text: str, embed_fn, threshold: float = 0.4, top_k: int = 20, business_id: Optional[int]= None) -> List[Dict]:
     """
@@ -226,15 +242,17 @@ def find_similar_products_using_input_embeddings(user_text: str, embed_fn, thres
     """
     
     # Extract the likely product phrase
-    # prod_phrase = extract_product_chunk(user_text)
+    prod_phrase = extract_product_chunk(user_text)
+    
+    print("prod_phrase: ", prod_phrase)
     
     # Hybrid pre-filter
     pre_qs = Product.objects
     
     if business_id is not None:
-        qs = qs.filter(business_id=business_id)
+        pre_qs = pre_qs.filter(business_id=business_id)
     
-    pre_qs = pre_qs.filter(name__icontains=user_text)[:200]
+    pre_qs = pre_qs.filter(name__icontains=prod_phrase)[:200]
     
     rows = list(pre_qs.values_list("product_id", "embeddings"))
     
@@ -251,7 +269,7 @@ def find_similar_products_using_input_embeddings(user_text: str, embed_fn, thres
     embeddings = [np.array(e, dtype=np.float32) for e in embeddings]
     
     # Compute similarity scores
-    input_vec = np.array(embed_fn(find_section, genai, business_id, user_text), dtype=np.float32).reshape(1, -1)
+    input_vec = np.array(embed_fn(find_section, genai, business_id, prod_phrase), dtype=np.float32).reshape(1, -1)
     sims = cosine_similarity(input_vec, embeddings)[0] 
     
     # Pick the ones above your cutoff and sort
@@ -264,7 +282,7 @@ def find_similar_products_using_input_embeddings(user_text: str, embed_fn, thres
     
     # Pick & fetch details
     similar = sorted(
-        [(ids[i], float(sims[i])) for i in range(len(ids)) if sims[i] > threshold], key=lambda x: -x[1]
+        [(product_ids[i], float(sims[i])) for i in range(len(product_ids)) if sims[i] > threshold], key=lambda x: -x[1]
     )[:top_k]
     
     if not similar:

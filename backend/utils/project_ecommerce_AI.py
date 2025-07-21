@@ -130,7 +130,7 @@ def normalize(s: str) -> str:
     s = re.sub(r"[^\w\s]", "", s)
     # 5) collapse multiple whitespace into one, then trim
     s = re.sub(r"\s+", " ", s).strip()
-    return
+    return s
 
 # Função para identificar produtos na consulta do usuário
 # TODO: Improve the general returns.
@@ -266,6 +266,7 @@ def chatbot_response(user_prompt, text_related_to="default", business=None):
     print("USER PROMPT: ", user_prompt)
     print("Fixed prompt v1: ", fix_prompt_v1)
     print("Find products: ", find_product)
+    print("Find products size: ", find_product.size)
 
     if is_product:
         
@@ -292,7 +293,7 @@ def chatbot_response(user_prompt, text_related_to="default", business=None):
         
             prompt_intro = "Generate a detailed yet compact description for an e-commerce chatbot using the following product data:\n\n"
                 
-            # print("products_list_after_user_input: ", products_list_after_user_input)
+            print("products_list_after_user_input: ", products_list_after_user_input)
                 
             name_of_product = ""
             matching_products = []

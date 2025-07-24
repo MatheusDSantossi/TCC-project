@@ -9,6 +9,8 @@ from typing import List, Optional, Dict
 
 from django.db import transaction
 from django.db.models import Q
+from django.contrib.postgres.search import TrigramSimilarity
+from django.db.models import F
 
 from chatbot.models import Product
 from utils.brands_utils import find_brands_in_text
@@ -20,6 +22,12 @@ import spacy
 nlp = spacy.load("pt_core_news_sm")
 
 logger = logging.getLogger(__name__)
+
+
+def remove_accents(input_str):
+    """Remove accents/diacritics from a string while preserving the base chracter"""
+    nfkd_form = unicodedata.normalize('NFKD', input_str)
+    return u''.join([c for c in nfkd_form if not unicodedata.combining(c)])
 
 def find_business_sections(business_id: Optional[int] = None) -> List[str]:
     """
@@ -108,11 +116,6 @@ def find_price(text, business_id: Optional[int] = None):
         
     return None
 
-def remove_accents(input_str):
-    """Remove accents/diacritics from a string while preserving the base chracter"""
-    nfkd_form = unicodedata.normalize('NFKD', input_str)
-    return u''.join([c for c in nfkd_form if not unicodedata.combining(c)])
-
 def find_brand(text: str, business_id: Optional[int]= None) -> Optional[List[Dict]]:
     """
     Look for known brand names in `text`. If found, return up to 30 matching products (name and brand). Returns None if no brand match.
@@ -143,7 +146,6 @@ def find_brand(text: str, business_id: Optional[int]= None) -> Optional[List[Dic
     print("List of products (find brand): ", list(qs))
     
     return list(qs) or None
-    
     
 def find_quantity(text: str, business_id: Optional[int] = None) -> Optional[List[Dict]]:
     """
@@ -221,6 +223,38 @@ def find_quantity(text: str, business_id: Optional[int] = None) -> Optional[List
     print(f"Found {len(results)} matching products")
     return list(results)
 
+def extract_only_product_name(text:str, generate_content_model: genai.GenerativeModel) -> str:
+    response = generate_content_model.generate_content(f"""
+                                            **Improved Prompt: Product Extractor**
+
+                                            You are a text corrector and product extractor. Your job is to read the user’s message, correct any minor typos, and return **only** the product names mentioned—nothing else. If no product appears, return **None**.
+                                            
+                                            Text to process:
+                                            {text}
+
+                                            **Processing Rules:**
+
+                                            1. **Normalize** the text: fix spelling/grammar so it’s clear (e.g. “ssabonete” → “sabonete”).
+                                            2. **Extract** all product names (common retail items) in the order they appear.
+                                            3. **Return** a comma‑separated list of products, or the literal **None** if no products are found.
+                                            4. Do **not** return any additional words, punctuation, formatting, or explanations.
+
+                                            **Examples:**
+
+                                            * Input: “Eu quero um biscoito de chocolate” → Output: biscoito de chocolate
+                                            * Input: “Vocês têm desodorante?” → Output: desodorante
+                                            * Input: “Quais produtos vocês têm?” → Output: None
+                                            * Input: “Quanto custa o ssabonete?” → Output: sabonete
+                                            * Input: “Como você está?” → Output: None
+                                            * Input: “Este valor está correto?” → Output: None
+                                            * Input: “Em qual seção fica o café e as bolachas?” → Output: café, bolachas
+
+                                            Always assume the user is Brazilian—product names should stay in Portuguese.
+
+                                            """)
+    
+    return response.text
+
 def extract_product_chunk(text: str) -> str:
     doc = nlp(text)
     
@@ -236,13 +270,14 @@ def extract_product_chunk(text: str) -> str:
 # TODO: My plan is to fix the user_text before sending to the comparation between it and the products. Using these method (spacy) isn't very reliable the return are too different
 
 # def find_similar_products_using_input_embeddings(input_embed: List[float], threshold: float = 0.4, top_k: int = 20, business_id: Optional[int]= None) -> List[Dict]:
-def find_similar_products_using_input_embeddings(user_text: str, embed_fn, threshold: float = 0.4, top_k: int = 20, business_id: Optional[int]= None) -> List[Dict]:
+def find_similar_products_using_input_embeddings(user_text: str, embed_fn, generate_content_model, threshold: float = 0.3, top_k: int = 20, business_id: Optional[int]= None) -> List[Dict]:
     """
     Given an input embedding, find the top_k most-similar products (similarity > threshold) and return their details + score.
     """
     
     # Extract the likely product phrase
-    prod_phrase = extract_product_chunk(user_text)
+    # prod_phrase = extract_product_chunk(user_text)
+    prod_phrase = extract_only_product_name(user_text, generate_content_model)
     
     print("prod_phrase: ", prod_phrase)
     
@@ -252,9 +287,12 @@ def find_similar_products_using_input_embeddings(user_text: str, embed_fn, thres
     if business_id is not None:
         pre_qs = pre_qs.filter(business_id=business_id)
     
-    pre_qs = pre_qs.filter(name__icontains=prod_phrase)[:200]
+    # pre_qs = pre_qs.filter(name__icontains=prod_phrase)[:200]
+    pre_qs = pre_qs.annotate(similarity=TrigramSimilarity("name", prod_phrase)).filter(similarity__gt=threshold).order_by("-similarity")[:30]
     
     rows = list(pre_qs.values_list("product_id", "embeddings"))
+    
+    print("ROws: ", [ids[0] for ids in rows])
     
     if not rows:
         return []
@@ -264,6 +302,8 @@ def find_similar_products_using_input_embeddings(user_text: str, embed_fn, thres
     
         
     # rows = list(qs) # list of (id, [float, ...])
+    
+    # TODO: Enhance now from here down, because the products get are really good but the return or the continuation are losing them. 
     
     product_ids, embeddings = zip(*rows)
     embeddings = [np.array(e, dtype=np.float32) for e in embeddings]
@@ -368,6 +408,9 @@ def find_using_synonyms(text, conn):
     return cursor.fetchall()
 
 # Test cases
+
+# print(find_similar_products_using_input_embeddings("Quero um biscoito", embed_fn))
+
 # print(find_section("I want the product from seção B"))  
 # print(find_section("Where's the seção A?"))            
 # print(find_section("Can I see the seção 2?"))          

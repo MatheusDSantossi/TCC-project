@@ -218,7 +218,7 @@ def pre_process_prompt(prompt, find_section, find_price, find_brand, find_quanti
         "brand": find_brand(prompt, business_id=business),
         "quantity": find_quantity(prompt, business_id=business),
         "synonyms": find_using_synonyms(prompt, connection),
-        "sim_embeddings": find_similar_products_using_input_embeddings(prompt, embed_fn, business_id=business),
+        "sim_embeddings": find_similar_products_using_input_embeddings(prompt, embed_fn, generate_content_model, business_id=business),
         "alike": fetch_products_alike(prompt),
     }
     
@@ -242,8 +242,7 @@ def pre_process_prompt_brand(prompt, brands_find, business_name, generate_conten
 
 def pre_process_prompt_section(prompt, find_section, find_similar_products_using_input_embeddings, embed_fn, fetch_products_alike, generate_content_model, business):
     products_find_in_section = find_section(prompt, business_id=business)
-    input_embed = embed_fn(find_section, genai, business, prompt)
-    products_find_using_prompt = find_similar_products_using_input_embeddings(input_embed=input_embed, business_id=business)
+    products_find_using_prompt = find_similar_products_using_input_embeddings(prompt, embed_fn, generate_content_model, business_id=business)
     products_alike = fetch_products_alike(prompt)
     
     fix_prompt = products_find_in_section_fix_prompt(products_find_in_section, products_find_using_prompt, products_alike, prompt)

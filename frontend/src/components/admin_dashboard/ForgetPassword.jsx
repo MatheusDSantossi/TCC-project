@@ -1,4 +1,4 @@
-import { React, useState } from "react";
+import { useState } from "react";
 import { Box } from "@mui/material";
 import CustomTextField from "../forms/TextField";
 import CustomPasswordField from "../forms/PasswordField";
@@ -20,34 +20,45 @@ const ForgetPassword = () => {
   const { handleSubmit, control } = useForm();
   const [buttonState, setButtonState] = useState("idle");
 
-  const [ShowMessage, setShowMessage] = useState(false);
+  const [showMessage, setShowMessage] = useState(false);
 
   const submission = (data) => {
     setButtonState("loading");
 
     AxiosInstance.post(`api/password_reset/`, {
       email: data.email,
-    }).then((response) => {
-      setShowMessage(true);
-      setTimeout(() => {
-        setButtonState("success");
-      }, 2000);
-    }).catch((error) => {
-      setShowMessage(true);
-      console.log(error);
-      setTimeout(() => {
-        setButtonState("error");
-      }, 2000);
-    });
+    })
+      .then((response) => {
+        setShowMessage(true);
+        setTimeout(() => {
+          setButtonState("success");
+        }, 2000);
+      })
+      .catch((error) => {
+        setShowMessage(true);
+        console.log(error);
+        setTimeout(() => {
+          setButtonState("error");
+        }, 2000);
+      });
   };
+
+  const handleClose = (_, reason) => {
+    if (reason === "clickaway") return;
+    setShowMessage(false);
+  };
+
   return (
     <div className="flex items-center justify-center min-h-screen p-4">
-      {ShowMessage ? (
+      {showMessage ? (
         <CustomMessage
-          text={
+          open={showMessage}
+          onClose={handleClose}
+          severity="error"
+          message={
             "Se esse e-mail existe em nosso banco de dados você recebu um e-mail com as instruções para redefinir sua senha"
           }
-          color={"#69C9AB"}
+          duration={3000}
         />
       ) : null}
       <form
@@ -55,7 +66,10 @@ const ForgetPassword = () => {
         onSubmit={handleSubmit(submission)}
       >
         <Box className={"whiteBox"}>
-            <IoMdReturnLeft className="text-2xl cursor-pointer mr-18 hover:bg-secondary hover:text-primary hover:rounded-full" onClick={() => navigate("/login")} />
+          <IoMdReturnLeft
+            className="text-2xl cursor-pointer mr-18 hover:bg-secondary hover:text-primary hover:rounded-full"
+            onClick={() => navigate("/login")}
+          />
           <div className="flex items-center justify-center mb-5">
             <img className="w-20 mr-4" src={logo} alt="" />
             <h2 className="mb-6 text-2xl font-semibold text-center left-40">

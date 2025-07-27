@@ -19,7 +19,7 @@ import GoogleButton from "./GoogleButton";
 const Login = () => {
   const navigate = useNavigate();
   const { handleSubmit, control } = useForm();
-  const [ShowMessage, setShowMessage] = useState(false);
+  const [showMessage, setShowMessage] = useState(false);
   const [buttonState, setButtonState] = useState("idle");
 
   const submission = (data) => {
@@ -53,12 +53,21 @@ const Login = () => {
     window.location.href = "http://localhost:8000/accounts/google/login";
   }
 
+    const handleClose = (_, reason) => {
+    if (reason === "clickaway") return;
+    setShowMessage(false);
+  };
+
+
   return (
     <div className="flex items-center justify-center min-h-screen p-4 drop-shadow-3xl">
-      {ShowMessage ? (
+      {showMessage ? (
         <CustomMessage
-          text={"Login has failed, please try again, or reset your password"}
-          color={"#EC5A76"}
+        open={showMessage}
+          onClose={handleClose}
+          severity="error"
+          message={"Login falhou, por favor tente novamente, ou resete sua senha."}
+          duration={3000}
         />
       ) : null}
       <form

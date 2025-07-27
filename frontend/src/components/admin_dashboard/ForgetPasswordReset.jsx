@@ -1,4 +1,4 @@
-import { React, useState } from "react";
+import { useState } from "react";
 import { Box } from "@mui/material";
 import CustomTextField from "../forms/TextField";
 import CustomPasswordField from "../forms/PasswordField";
@@ -18,7 +18,7 @@ const ForgetPasswordReset = () => {
   const { token } = useParams();
   console.log(token);
 
-  const [ShowMessage, setShowMessage] = useState(false);
+  const [showMessage, setShowMessage] = useState(false);
   const [buttonState, setButtonState] = useState("idle");
 
   const submission = (data) => {
@@ -36,14 +36,23 @@ const ForgetPasswordReset = () => {
       }, 6000);
     });
   };
+
+  const handleClose = (_, reason) => {
+    if (reason === "clickaway") return;
+    setShowMessage(false);
+  };
+
   return (
     <div className="flex items-center justify-center min-h-screen p-4">
-      {ShowMessage ? (
+      {showMessage ? (
         <CustomMessage
-          text={
+          open={showMessage}
+          onClose={handleClose}
+          severity="error"
+          message={
             "Sua senha foi redefinida com sucesso. Você será redirecionado para a página de login em um segundo."
           }
-          color={"#69C9AB"}
+          duration={3000}
         />
       ) : null}
       <form

@@ -297,13 +297,7 @@ def find_similar_products_using_input_embeddings(user_text: str, embed_fn, gener
     if not rows:
         return []
     
-    # Pull all IDs + embeddings in one go:
-    # qs = Product.objects.values_list("product_id", "embeddings")
-    
-        
-    # rows = list(qs) # list of (id, [float, ...])
-    
-    # TODO: Enhance now from here down, because the products get are really good but the return or the continuation are losing them. 
+    # TODO: Enhance now from here down, because the products get are really good but the return or the continuation are losing them. Actullay see above if we can improve as well
     
     product_ids, embeddings = zip(*rows)
     embeddings = [np.array(e, dtype=np.float32) for e in embeddings]
@@ -311,14 +305,6 @@ def find_similar_products_using_input_embeddings(user_text: str, embed_fn, gener
     # Compute similarity scores
     input_vec = np.array(embed_fn(find_section, genai, business_id, prod_phrase), dtype=np.float32).reshape(1, -1)
     sims = cosine_similarity(input_vec, embeddings)[0] 
-    
-    # Pick the ones above your cutoff and sort
-    # idxs = np.argsort(sims)[::-1]
-    # similar = [
-    #     (product_ids[i], float(sims[i]))
-    #     for i in idxs
-    #     if sims[i] > threshold
-    # ][:top_k]
     
     # Pick & fetch details
     similar = sorted(
@@ -328,13 +314,9 @@ def find_similar_products_using_input_embeddings(user_text: str, embed_fn, gener
     if not similar:
         return []
     
-    # Fetch all those product details in one ORM hit
-    # ids = [pid for pid, _ in similar]
-    # prods = Product.objects.filter(product_id__in=ids).in_bulk(field_name="product_id")
-    
     products = Product.objects.in_bulk([pid for pid, _ in similar], field_name="product_id")
     
-    return [
+    result = [
         {
              "product_id": pid,
             "name": prod.name,
@@ -346,26 +328,10 @@ def find_similar_products_using_input_embeddings(user_text: str, embed_fn, gener
         }
         for pid, score in similar if (prod:=products.get(pid))
     ]
+
+    print("Find similar products using input embedding result: ", result)
     
-    # Build your return list, preserving the similarity order
-    # result = []
-    # for pid, score in similar:
-    #     p = prods.get(pid)
-    #     if not p:
-    #         continue
-        
-    # result.append({
-    #     "product_id": pid,
-    #     "name": p.name,
-    #     "section": p.section,
-    #     "price": Decimal(p.price),
-    #     "quantity": p.quantity,
-    #     "unit": p.unit,
-    #     "similarity": round(score, 4),
-    # })
-    
-    
-    # return result
+    return result
 
 def find_using_synonyms(text, conn):
     cursor = conn.cursor()

@@ -471,6 +471,7 @@ function Chatbot() {
                   value={userInput}
                   onChange={(e) => setUserInput(e.target.value)}
                   onKeyDown={handleKeyPress}
+                  autoFocus
                 />
                 <button
                   className="flex-shrink-0 px-4 py-2 ml-2 font-bold text-black bg-yellow-400 rounded-md cursor-pointer hover:bg-yellow-300 whitespace-nowrap"
@@ -578,6 +579,7 @@ function Chatbot() {
                     onSubmit={handleSubmit}
                     onChange={(e) => setUserInput(e.target.value)}
                     value={userInput}
+                    autoFocus
                   />
 
                   <button

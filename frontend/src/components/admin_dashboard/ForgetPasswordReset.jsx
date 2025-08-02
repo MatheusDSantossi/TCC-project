@@ -1,9 +1,6 @@
 import { useState } from "react";
 import { Box } from "@mui/material";
-import CustomTextField from "../forms/TextField";
 import CustomPasswordField from "../forms/PasswordField";
-import CustomButton from "../forms/Button";
-import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import AxiosInstance from "../AxiosInstance";
 import { useNavigate, useParams } from "react-router-dom";
@@ -11,8 +8,12 @@ import CustomMessage from "./CustomMessage";
 
 import logo from "../../assets/logo.svg";
 import ReactiveButton from "reactive-button";
+import { routes } from "../../routes/routes";
 
 const ForgetPasswordReset = () => {
+  // routes
+  const loginRoute = routes.form.login;
+
   const navigate = useNavigate();
   const { handleSubmit, control } = useForm();
   const { token } = useParams();
@@ -32,7 +33,7 @@ const ForgetPasswordReset = () => {
         setButtonState("success");
       }, 2000);
       setTimeout(() => {
-        navigate("/login");
+        navigate({loginRoute});
       }, 6000);
     });
   };

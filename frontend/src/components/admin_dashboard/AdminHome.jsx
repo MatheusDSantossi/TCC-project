@@ -5,16 +5,21 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 
 import { businessName } from "../../utils/BusinessInfo";
+import { routes } from "../../routes/routes";
 
 const AdminHome = () => {
+  // routes
+  const loginRoute = routes.form.login;
+  const registerRoute = routes.form.register;
+  
   const navigate = useNavigate();
 
   const handleClick = (e, state) => {
     console.log("E.value: ", state);
     if (state === "Login") {
-      navigate("/login");
+      navigate({loginRoute});
     } else {
-      navigate("/register");
+      navigate({registerRoute});
     }
   };
 

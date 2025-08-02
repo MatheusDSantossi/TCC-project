@@ -1,9 +1,6 @@
 import { useState } from "react";
 import { Box } from "@mui/material";
 import CustomTextField from "../forms/TextField";
-import CustomPasswordField from "../forms/PasswordField";
-import CustomButton from "../forms/Button";
-import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import AxiosInstance from "../AxiosInstance";
 import { useNavigate } from "react-router-dom";
@@ -14,8 +11,12 @@ import ReactiveButton from "reactive-button";
 import logo from "../../assets/logo.svg";
 
 import { IoMdReturnLeft } from "react-icons/io";
+import { routes } from "../../routes/routes";
 
 const ForgetPassword = () => {
+  // routes
+  const loginRoute = routes.form.login;
+
   const navigate = useNavigate();
   const { handleSubmit, control } = useForm();
   const [buttonState, setButtonState] = useState("idle");
@@ -68,7 +69,7 @@ const ForgetPassword = () => {
         <Box className={"whiteBox"}>
           <IoMdReturnLeft
             className="text-2xl cursor-pointer mr-18 hover:bg-secondary hover:text-primary hover:rounded-full"
-            onClick={() => navigate("/login")}
+            onClick={() => navigate({ loginRoute })}
           />
           <div className="flex items-center justify-center mb-5">
             <img className="w-20 mr-4" src={logo} alt="" />

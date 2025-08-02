@@ -1,17 +1,15 @@
-import React, { useEffect, useState } from "react";
-import {
-  BsFillArchiveFill,
-  BsFillGrid3X3GapFill,
-  BsPeopleFill,
-  BsFillBellFill,
-} from "react-icons/bs";
+import { useEffect, useState } from "react";
 import BasicPieChart from "./charts/PieChart";
 import SimpleBarChart from "./charts/BarChart";
 import AxiosInstance from "../AxiosInstance";
-import ProductsTable from "./charts/ProductsTable";
 import { useNavigate } from "react-router-dom";
+import { routes } from "../../routes/routes";
 
 function HomeDashboard() {
+  // routes
+  const loginRoute = routes.form.login;
+
+  // States
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -21,10 +19,8 @@ function HomeDashboard() {
     (p) => parseFloat(p.stock) > 0
   ).length;
   const averagePrice =
-    products.reduce(
-      (sum, product) => sum + parseFloat(product.price || 0),
-      0
-    ) / totalProducts || 0;
+    products.reduce((sum, product) => sum + parseFloat(product.price || 0), 0) /
+      totalProducts || 0;
 
   const fetchProductsData = () => {
     AxiosInstance.get(`api/products/`)
@@ -37,9 +33,9 @@ function HomeDashboard() {
         AxiosInstance.post(`logoutall/`, {}).then(() => {
           // Clear user session data and navigate to login pagel
           localStorage.removeItem("Token");
-    
+
           // Navigate to login page
-          navigate("/login");
+          navigate({ loginRoute });
         });
         console.error("Error fetching product data: ", error);
       });

@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import {
-  BsFillBellFill,
   BsPersonCircle,
   BsArrowDownRightSquare,
   BsArrowDownSquare,
@@ -17,6 +16,7 @@ import * as motion from "motion/react-client";
 import { AnimatePresence } from "motion/react";
 
 import "../../App.css";
+import { routes } from "../../routes/routes";
 
 function Header() {
   const [userName, setUsername] = useState("");
@@ -26,12 +26,15 @@ function Header() {
   const businessSlug = localStorage.getItem("BusinessSlug");
 
   const handleLogout = () => {
+    // routes
+    const adminHomeRoute = routes.admin.adminHome
+
     AxiosInstance.post(`logoutall/`, {}).then(() => {
       // Clear user session data and navigate to login pagel
       localStorage.removeItem("Token");
 
       // Navigate to home page
-      navigate("/adminHome");
+      navigate({adminHomeRoute});
     });
   };
 

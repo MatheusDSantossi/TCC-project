@@ -20,11 +20,23 @@ import useFavicon from "./useFavicon";
 import InviteRegister from "./components/InviteRegister";
 
 import InformBusiness from "./components/InformBusiness";
+import { routes } from "./routes/routes";
 
 const LIGHT_ICON = '/logo.svg';
 const DARK_ICON = '/logo_darker.svg';
 
 function App() {
+  // routes
+  const adminHomeRoute = routes.admin.adminHome;
+  const adminMainRoute = routes.admin.adminMain;
+  const registerRoute = routes.form.register;
+  const loginRoute = routes.form.login;
+  const requestPasswordRoute = routes.form.requestPasswordReset;
+  const requestPasswordTokenRoute = routes.form.passwordResetToken;
+  const chatbotMainRoute = routes.chatbot.chatbotMain;
+  const invitationRegisterRoute = routes.form.invitationRegister;
+  const businessSlugRoute = routes.business.businessSlug;
+
   useInactivityLogout();
   useFavicon(DARK_ICON, LIGHT_ICON);
 
@@ -33,31 +45,24 @@ function App() {
   const OpenSidebar = () => {
     setOpenSidebarToggle(!openSidebarToggle);
   };
-
-  // return(
-  //   <div className="p-4 text-black bg-red-500">
-  //     Tailwind Test
-  //   </div>
-  // )
-
+  
   return (
     <div className="w-full">
-      <div className="absolute top-0 left-0 z-10 w-full h-full" >
+      <div className="absolute top-0 left-0 z-10 w-full" >
         {/* <div className="z-1" > */}
         <Routes>
           <Route exact path="/" element={<InformBusiness />} />
-          <Route exact path="/:businessSlug" element={<Home />} />
-          <Route exact path="/register" element={<Register />} />
-          <Route exact path="/login" element={<Login />} />
-          <
-          Route exact path="/request/password_reset" element={<ForgetPassword />} />
-          <Route exact path="/password-reset/:token" element={<ForgetPasswordReset />} />
-          <Route exact path="/adminHome" element={<AdminHome />} />
-          <Route exact path="/chatbot/:businessSlug" element={<Chatbot />} />
-          <Route path="/register/invite/:token" element={<InviteRegister />} />
+          <Route exact path={businessSlugRoute} element={<Home />} />
+          <Route exact path={registerRoute} element={<Register />} />
+          <Route exact path={loginRoute} element={<Login />} />
+          <Route exact path={requestPasswordRoute} element={<ForgetPassword />} />
+          <Route exact path={requestPasswordTokenRoute} element={<ForgetPasswordReset />} />
+          <Route exact path={adminHomeRoute} element={<AdminHome />} />
+          <Route exact path={chatbotMainRoute} element={<Chatbot />} />
+          <Route path={invitationRegisterRoute} element={<InviteRegister />} />
           
           <Route element={<ProtectedRoute />}>
-            <Route exact path="/admin" element={<AdminDashboard openSidebarToggle={openSidebarToggle} OpenSidebar={OpenSidebar} />} />
+            <Route exact path={adminMainRoute} element={<AdminDashboard openSidebarToggle={openSidebarToggle} OpenSidebar={OpenSidebar} />} />
           </Route>
         </Routes>
       </div>

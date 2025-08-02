@@ -15,8 +15,14 @@ import "../../App.css";
 
 import ReactiveButton from "reactive-button";
 import GoogleButton from "./GoogleButton";
+import { routes } from "../../routes/routes";
 
 const Login = () => {
+  // routes
+  const requestPasswordReset = routes.form.requestPasswordReset;
+  const registerRoute = routes.form.register;
+  const adminMainRoute = routes.admin.adminMain;
+  
   const navigate = useNavigate();
   const { handleSubmit, control } = useForm();
   const [showMessage, setShowMessage] = useState(false);
@@ -34,13 +40,12 @@ const Login = () => {
         setButtonState("success");
         const token = response.data.token;
         const biz = response.data.user?.business || response.data.business;
-        console.log("RESPONSE: ", response);
-        console.log("RESPONSE data: ", response.data);
-        // localStorage.setItem("Token", response.data.token);
+
         localStorage.setItem("Email", response.data.email);
         localStorage.setItem("Token", token);
         localStorage.setItem("BusinessSlug", biz);
-        navigate(`/admin`);
+        // navigate(`/admin`);
+        navigate({adminMainRoute});
       })
       .catch((error) => {
         setButtonState("error");
@@ -129,7 +134,7 @@ const Login = () => {
           </div>
 
           <Box className={"itemBox"} sx={{ flexDirection: "column" }}>
-            <Link className="mt-4 text-center text-gray-300" to="/register">
+            <Link className="mt-4 text-center text-gray-300" to={registerRoute}>
               {" "}
               Não possui conta?{" "}
               <span className="font-medium text-yellow-400 hover:underline hover:text-yellow-300">
@@ -139,7 +144,7 @@ const Login = () => {
             <br />
             <Link
               className="mt-4 text-center text-gray-300"
-              to="/request/password_reset"
+              to={requestPasswordReset}
             >
               {" "}
               Esqueceu a senha?{" "}

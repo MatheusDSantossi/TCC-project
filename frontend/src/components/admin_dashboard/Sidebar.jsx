@@ -13,6 +13,7 @@ import "../../App.css";
 import * as motion from "motion/react-client";
 
 function Sidebar({ onSidebarToggle, changeComponent }) {
+  // States
   const [isOpen, setIsOpen] = useState(false);
 
   const containerRef = useRef(null);
@@ -40,7 +41,7 @@ function Sidebar({ onSidebarToggle, changeComponent }) {
   };
   return (
     <div className="bg-primary">
-      <div style={container}>
+      <div className="h-screen" style={container}>
         <motion.nav
           initial={false}
           animate={isOpen ? "open" : "closed"}
@@ -197,6 +198,7 @@ const MenuItem = ({ label, icon, onClick, hasSubitems, isOpen }) => {
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
       onClick={onClick}
+      className={`hover:bg-tertiary ${isOpen ? "bg-tertiary" : ""}`}
     >
       <div style={iconPlaceholder}>{icon}</div>
       <div style={{ ...textPlaceholder, position: "relative" }}>
@@ -222,6 +224,7 @@ const MenuItem = ({ label, icon, onClick, hasSubitems, isOpen }) => {
 };
 
 const SubMenuItem = ({ label, onClick }) => {
+
   return (
     <motion.li
       style={{ ...listItem, marginLeft: "30px", padding: "8px 25px 8px 45px" }}
@@ -230,8 +233,13 @@ const SubMenuItem = ({ label, onClick }) => {
       whileTap={{ scale: 0.99 }}
       onClick={onClick}
     >
-      <div style={textPlaceholder}>
-        <span style={{ color: "white", fontWeight: "normal" }}>{label}</span>
+      <div className="flex items-stretch group" style={textPlaceholder}>
+        <div className="w-2 h-6 mr-2 transition-opacity rounded opacity-0 bg-secondary group-hover:opacity-100" />
+        <span
+          style={{ color: "white", fontWeight: "normal" }}
+        >
+          {label}
+        </span>
       </div>
     </motion.li>
   );
@@ -281,13 +289,14 @@ const MenuToggle = ({ toggle }) => (
 const container = {
   position: "relative",
   display: "flex",
+  height: "screen",
   // justifyContent: "flex-start",
   // alignItems: "stretch",
   flex: 1,
   width: 210,
   maxWidth: "100%",
-  minHeight: "109vh",
-  height: "auto",
+  // minHeight: "109vh",
+  // height: "auto",
   // backgroundColor: "var(--accent)",
   backgroundColor: "#012921",
   overflow: "hidden",

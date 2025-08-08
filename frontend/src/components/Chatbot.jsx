@@ -5,7 +5,7 @@ import test_image from "../assets/test_image.jpg";
 import Typewriter from "./Typewriter";
 import AxiosInstance from "./AxiosInstance";
 import { useNavigate, useParams } from "react-router-dom";
-import { HashLoader } from "react-spinners"
+import { HashLoader } from "react-spinners";
 
 function Capitalize(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
@@ -17,7 +17,7 @@ function Chatbot() {
   const [userInput, setUserInput] = useState("");
   const [userName, setUserName] = useState("");
   const [isNameEntered, setIsNameEntered] = useState(false);
-  
+
   const [menuOptions, setMenuOptions] = useState([]);
   const [hasSelectedOption, setHasSelectedOption] = useState(false);
   const [chatMessages, setChatMessages] = useState([]);
@@ -38,8 +38,7 @@ function Chatbot() {
 
   const finalBusinessSlug = businessSlug || localBusinessSlug;
 
-  const url = `/${finalBusinessSlug}`
-
+  const url = `/${finalBusinessSlug}`;
 
   useEffect(() => {
     if (chatContainerRef.current) {
@@ -53,7 +52,7 @@ function Chatbot() {
     AxiosInstance.get(`menu-options/get/`)
       // .then((response) => setMenuOptions(response.data))
       .then((response) => {
-        console.log("Fetching menu options return: ", response.data)
+        console.log("Fetching menu options return: ", response.data);
         setPendingMenuOptions(response.data);
       })
       .catch((error) => console.error("Error fetching menu options:", error));
@@ -143,7 +142,7 @@ function Chatbot() {
         text_related_to: isTextRelatedTo,
         business_slug: finalBusinessSlug,
       });
-      
+
       setIsHecateAnswering(false);
       const botResponse = {
         sender: "Hecate",
@@ -383,7 +382,9 @@ function Chatbot() {
   };
 
   return (
-    <div className="flex flex-col justify-center items-center w-screen min-h-screen bg-primary p-[72px] relative">
+    <div
+      className="flex flex-col justify-center items-center w-screen min-h-screen bg-primary p-[72px] relative"
+    >
       <div className="absolute top-4 left-4">
         <img className="w-20" src={logo} alt="Logo" />
       </div>
@@ -474,7 +475,7 @@ function Chatbot() {
                   autoFocus
                 />
                 <button
-                  className="flex-shrink-0 px-4 py-2 ml-2 font-bold text-black bg-yellow-400 rounded-md cursor-pointer hover:bg-yellow-300 whitespace-nowrap"
+                  className="flex-shrink-0 px-4 py-2 ml-2 font-semibold text-black bg-yellow-400 rounded cursor-pointer hover:bg-yellow-300 whitespace-nowrap"
                   onClick={handleNameSubmit}
                 >
                   Enviar
@@ -492,7 +493,7 @@ function Chatbot() {
                 {menuOptions.map((option, index) => (
                   <button
                     key={index}
-                    className="px-4 py-2 text-lg font-bold text-black transition duration-200 bg-yellow-400 rounded-lg cursor-pointer hover:bg-yellow-300"
+                    className="px-4 py-2 text-lg font-semibold text-black transition duration-200 bg-yellow-400 rounded-lg cursor-pointer hover:bg-yellow-300"
                     onClick={() => {
                       selectOption(
                         option.menu_extended_id,
@@ -516,12 +517,12 @@ function Chatbot() {
             <span className="flex text-2xl font-bold text-primary">
               Estou processando. Aguarde um instante.
               <div className="mr-8"></div>
-              <HashLoader 
-              color="#012921"
-              size={30}
-              aria-label="Loading Spinner"
+              <HashLoader
+                color="#012921"
+                size={30}
+                aria-label="Loading Spinner"
               />
-              </span>
+            </span>
           )}
 
           {showMenuOptionsAndInputAfterHecateAnswer &&
@@ -531,14 +532,14 @@ function Chatbot() {
             isTypingDone && (
               <div className="flex justify-between">
                 <button
-                  className="h-10 px-6 ml-2 font-bold text-black bg-yellow-400 cursor-pointer hover:bg-yellow-300 rounded-r-md"
+                  className="h-10 px-6 ml-2 font-semibold text-black bg-yellow-400 cursor-pointer hover:bg-yellow-300 rounded-r-md"
                   onClick={showingMenuOptions}
                 >
                   {/* onClick={showingMenuOptions()} */}
                   Voltar para a lista de opções
                 </button>
                 <button
-                  className="h-10 px-6 ml-2 font-bold text-black bg-yellow-400 cursor-pointer hover:bg-yellow-300 rounded-r-md"
+                  className="h-10 px-6 ml-2 font-semibold text-black bg-yellow-400 cursor-pointer hover:bg-yellow-300 rounded-r-md"
                   onClick={handleSessionEnding}
                 >
                   {/* onClick={showingMenuOptions()} */}
@@ -553,7 +554,7 @@ function Chatbot() {
             !isHecateAnswering &&
             menuOptions.length >= 1 && (
               <button
-                className="h-10 px-6 ml-2 font-bold text-black bg-yellow-400 hover:bg-yellow-300 rounded-r-md"
+                className="h-10 px-6 ml-2 font-semibold text-black bg-yellow-400 hover:bg-yellow-300 rounded-r-md"
                 onClick={showingMenuOptions}
               >
                 {/* onClick={handlePreviousMenu()} */}
@@ -584,7 +585,7 @@ function Chatbot() {
 
                   <button
                     type="submit"
-                    className="h-10 px-6 ml-2 font-bold text-black bg-yellow-400 hover:bg-yellow-300 rounded-r-md"
+                    className="h-10 px-6 ml-2 font-semibold text-black bg-yellow-400 hover:bg-yellow-300 rounded"
                   >
                     Enviar
                   </button>

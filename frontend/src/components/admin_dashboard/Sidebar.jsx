@@ -234,7 +234,7 @@ const SubMenuItem = ({ label, onClick }) => {
       onClick={onClick}
     >
       <div className="flex items-stretch group" style={textPlaceholder}>
-        <div className="w-2 h-6 mr-2 transition-opacity rounded opacity-0 bg-secondary group-hover:opacity-100" />
+        <div className="w-1 h-6 mr-2 transition-opacity rounded opacity-0 bg-secondary group-hover:opacity-100" />
         <span
           style={{ color: "white", fontWeight: "normal" }}
         >

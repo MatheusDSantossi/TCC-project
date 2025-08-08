@@ -17,16 +17,16 @@ const AdminHome = () => {
   const handleClick = (e, state) => {
     console.log("E.value: ", state);
     if (state === "Login") {
-      navigate({loginRoute});
+      navigate(loginRoute);
     } else {
-      navigate({registerRoute});
+      navigate(registerRoute);
     }
   };
 
   return (
     <div className="overflow-hidden">
       <div className="p-3 drop-shadow-3xl bg-primary">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mx-4 md:mx-8">
           <img src={logo} alt="logo" className="h-10" />
           <div className="flex">
             <button

@@ -22,7 +22,7 @@ const Login = () => {
   const requestPasswordReset = routes.form.requestPasswordReset;
   const registerRoute = routes.form.register;
   const adminMainRoute = routes.admin.adminMain;
-  
+
   const navigate = useNavigate();
   const { handleSubmit, control } = useForm();
   const [showMessage, setShowMessage] = useState(false);
@@ -45,7 +45,7 @@ const Login = () => {
         localStorage.setItem("Token", token);
         localStorage.setItem("BusinessSlug", biz);
         // navigate(`/admin`);
-        navigate({adminMainRoute});
+        navigate(adminMainRoute);
       })
       .catch((error) => {
         setButtonState("error");
@@ -56,22 +56,23 @@ const Login = () => {
 
   const googleLoginHandle = () => {
     window.location.href = "http://localhost:8000/accounts/google/login";
-  }
+  };
 
-    const handleClose = (_, reason) => {
+  const handleClose = (_, reason) => {
     if (reason === "clickaway") return;
     setShowMessage(false);
   };
-
 
   return (
     <div className="flex items-center justify-center min-h-screen p-4 drop-shadow-3xl">
       {showMessage ? (
         <CustomMessage
-        open={showMessage}
+          open={showMessage}
           onClose={handleClose}
           severity="error"
-          message={"Login falhou, por favor tente novamente, ou resete sua senha."}
+          message={
+            "Login falhou, por favor tente novamente, ou resete sua senha."
+          }
           duration={3000}
         />
       ) : null}
@@ -87,13 +88,19 @@ const Login = () => {
             </h2>
           </div>
           <Box className={"itemBox mb-3"}>
-            <CustomTextField label={"Email"} name={"email"} control={control} />
+            <CustomTextField 
+            label={"Email"} 
+            name={"email"} 
+            control={control} 
+            size={"small"}
+            />
           </Box>
 
           <Box className={"itemBox"}>
             <CustomPasswordField
               label={"Senha"}
               name={"password"}
+              size={"small"}
               control={control}
             />
           </Box>
@@ -114,15 +121,15 @@ const Login = () => {
               idleText={"Login"}
               animation="true"
               rounded="true"
-              width={80}
+              width={200}
               height={40}
               size="large"
             />
-          {/* </div>
+            {/* </div>
 
           <div className="flex items-center justify-center m-3"> */}
-          {/* TODO: I need to fix the problem witht the login using google */}
-          {/* <GoogleButton /> */}
+            {/* TODO: I need to fix the problem witht the login using google */}
+            {/* <GoogleButton /> */}
 
             {/* <button className="flex items-center p-1 rounded rounded-full bg-[#FFC107] bg-white text-black hover:bg-yellow-300" onClick={googleLoginHandle}>
               <img className="h-10" src={googleBrand} alt="Logo do Google" />

@@ -38,6 +38,10 @@
   --breakpoint-xl: "1280px";
 }
 
+button {
+  cursor: pointer;
+}
+
 /* Project CSS  */
 html, body {
   /* height: 100%; */

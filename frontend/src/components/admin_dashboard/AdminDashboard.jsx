@@ -89,7 +89,7 @@ function AdminDashboard() {
       />
 
       <div
-        className={`flex flex-col flex-1 transition-all ${
+        className={`flex flex-col flex-1 transition-all h-screen ${
           isSidebarOpen ? "bg-overlay" : ""
         }`}
       >

@@ -1,9 +1,4 @@
 import { useEffect, useState } from "react";
-import {
-  BsPersonCircle,
-  BsArrowDownRightSquare,
-  BsArrowDownSquare,
-} from "react-icons/bs";
 
 import AxiosInstance from "../AxiosInstance";
 import { MdLogout } from "react-icons/md";
@@ -55,7 +50,7 @@ function Header() {
   return (
     <header className="flex items-center justify-between p-5 drop-shadow-3xl bg-primary">
       {/* <div className="flex items-center justify-around space-x-4"> */}
-      <span className="absolute mr-20 text-lg font-bold transform -translate-x-1/2 left-1/2">Bem-vindo ao {businessName} - {businessSlug}</span>
+      <span className="absolute mr-20 text-lg font-semibold transform -translate-x-1/2 left-1/2">Bem-vindo ao {businessName} ({businessSlug})</span>
       {/* Icons container */}
       <span className="flex items-center ml-auto space-x-4 text-xl cursor-pointer hover:text-secondary">
         <div className="flex">
@@ -66,12 +61,12 @@ function Header() {
 
       <div className="relative ml-4">
         <motion.span
-          className="flex items-center text-xl cursor-pointer hover:text-secondary"
+          className="flex items-center text-xl rounded-full cursor-pointer"
           onClick={toggleDropdown}
           whileTap={{ y: 1 }}
         >
-          <BsPersonCircle className="mr-2" />
-          {isClicked ? <BsArrowDownSquare /> : <BsArrowDownRightSquare />}
+          <p className="p-2 rounded-full text-primary bg-secondary hover:bg-secondary-dark">{userName.slice(0, 2).toUpperCase()}</p>
+          {/* {isClicked ? <BsArrowDownSquare /> : <BsArrowDownRightSquare />} */}
         </motion.span>
 
 

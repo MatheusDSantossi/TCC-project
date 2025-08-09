@@ -39,7 +39,7 @@ class ProductListCreateView(BusinessQuerysetMixin, generics.ListCreateAPIView):
         new_section = "Seção" + str(section)
         incoming = serializer.validated_data.get("synonymous", [])        
         
-        embeddings = generate_embedding(name)
+        embeddings = generate_embedding(name, business_id)
         
         instance = serializer.save(business=business, embeddings=embeddings, section=new_section)
         

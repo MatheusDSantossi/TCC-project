@@ -40,8 +40,8 @@ function Sidebar({ onSidebarToggle, changeComponent }) {
     },
   };
   return (
-    <div className="bg-primary">
-      <div className="h-screen" style={container}>
+    <div className="h-screen bg-primary">
+      <div style={container}>
         <motion.nav
           initial={false}
           animate={isOpen ? "open" : "closed"}
@@ -289,7 +289,7 @@ const MenuToggle = ({ toggle }) => (
 const container = {
   position: "relative",
   display: "flex",
-  height: "screen",
+  height: "100vh",
   // justifyContent: "flex-start",
   // alignItems: "stretch",
   flex: 1,

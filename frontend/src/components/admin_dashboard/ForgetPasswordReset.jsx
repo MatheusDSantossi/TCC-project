@@ -1,9 +1,6 @@
-import { React, useState } from "react";
+import { useState } from "react";
 import { Box } from "@mui/material";
-import CustomTextField from "../forms/TextField";
 import CustomPasswordField from "../forms/PasswordField";
-import CustomButton from "../forms/Button";
-import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import AxiosInstance from "../AxiosInstance";
 import { useNavigate, useParams } from "react-router-dom";
@@ -11,14 +8,18 @@ import CustomMessage from "./CustomMessage";
 
 import logo from "../../assets/logo.svg";
 import ReactiveButton from "reactive-button";
+import { routes } from "../../routes/routes";
 
 const ForgetPasswordReset = () => {
+  // routes
+  const loginRoute = routes.form.login;
+
   const navigate = useNavigate();
   const { handleSubmit, control } = useForm();
   const { token } = useParams();
   console.log(token);
 
-  const [ShowMessage, setShowMessage] = useState(false);
+  const [showMessage, setShowMessage] = useState(false);
   const [buttonState, setButtonState] = useState("idle");
 
   const submission = (data) => {
@@ -32,18 +33,27 @@ const ForgetPasswordReset = () => {
         setButtonState("success");
       }, 2000);
       setTimeout(() => {
-        navigate("/login");
+        navigate({loginRoute});
       }, 6000);
     });
   };
+
+  const handleClose = (_, reason) => {
+    if (reason === "clickaway") return;
+    setShowMessage(false);
+  };
+
   return (
     <div className="flex items-center justify-center min-h-screen p-4">
-      {ShowMessage ? (
+      {showMessage ? (
         <CustomMessage
-          text={
+          open={showMessage}
+          onClose={handleClose}
+          severity="error"
+          message={
             "Sua senha foi redefinida com sucesso. Você será redirecionado para a página de login em um segundo."
           }
-          color={"#69C9AB"}
+          duration={3000}
         />
       ) : null}
       <form

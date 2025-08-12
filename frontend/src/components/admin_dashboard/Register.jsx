@@ -1,7 +1,6 @@
 import { Box } from "@mui/material";
 import CustomTextField from "../forms/TextField";
 import CustomPasswordField from "../forms/PasswordField";
-import CustomButton from "../forms/Button";
 import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import AxiosInstance from "../AxiosInstance";
@@ -13,8 +12,13 @@ import logo from "../../assets/logo.svg";
 
 import ReactiveButton from "reactive-button";
 import { useState } from "react";
+import { routes } from "../../routes/routes";
 
 const Register = () => {
+  // routes
+  const loginRoute = routes.form.login;
+  const adminMainRoute = routes.admin.adminMain;
+
   const navigate = useNavigate();
   const [buttonState, setButtonState] = useState("idle");
 
@@ -52,7 +56,7 @@ const Register = () => {
       setTimeout(() => {
         setButtonState("error");
       }, 2000);
-      navigate(`/admin`);
+      navigate({adminMainRoute});
     });
   };
 
@@ -73,7 +77,7 @@ const Register = () => {
           <Box className={"itemBox mb-3"}>
             <CustomTextField label={"Email"} name={"email"} control={control} />
           </Box>
-          
+
           <Box className={"itemBox  mb-3"}>
             <CustomPasswordField
               label={"Senha"}
@@ -93,7 +97,7 @@ const Register = () => {
           {/* <a href="http://127.0.0.1:8000/accounts/google/login">
             Cadastrar com Google
           </a> */}
-          
+
           <div className="flex items-center justify-center p-3 space-x-32">
             {/* <CustomButton
                             type={"submit"}
@@ -116,7 +120,7 @@ const Register = () => {
           </div>
 
           <Box className={"itemBox"}>
-            <Link className="mt-4 text-center text-gray-300" to="/login">
+            <Link className="mt-4 text-center text-gray-300" to={loginRoute}>
               {" "}
               Já possui cadastro?{" "}
               <span className="font-medium text-yellow-400 hover:underline hover:text-yellow-300">

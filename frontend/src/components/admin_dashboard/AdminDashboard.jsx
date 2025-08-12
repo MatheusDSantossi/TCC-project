@@ -82,14 +82,14 @@ function AdminDashboard() {
 
   return (
     <div className="flex w-full h-screen bg-white-100">
-      {isSidebarOpen && <div className="bg-primary"></div>}
+      {isSidebarOpen && <div className="h-screen bg-primary"></div>}
       <Sidebar
         onSidebarToggle={handleSibedarToggle}
         changeComponent={changeComponent}
       />
 
       <div
-        className={`flex flex-col flex-1 transition-all ${
+        className={`flex flex-col flex-1 transition-all h-screen ${
           isSidebarOpen ? "bg-overlay" : ""
         }`}
       >

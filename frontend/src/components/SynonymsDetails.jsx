@@ -56,6 +56,7 @@ const SynonymDetails = ({
   }, [productLocalSynonyms]);
 
   const handleKeyUp = (e) => {
+    
     if (e.key === "   ") {
       const trimmed = inputValue.trim();
 
@@ -102,10 +103,10 @@ const SynonymDetails = ({
         <InfoDialogScreen
           infoText={
             <h2>
-              Sinônimos do produto, esse campo é <strong>opcional</strong><br></br>
+              Sinônimos do produto, esse campo é <span className="font-semibold">opcional</span><br></br>
               Exemplo: Para cadastrar Refrigerante Cola com sinônimos:<br></br>
-              <strong>Refri</strong> (pressione Tab) → <strong>Cola</strong>{" "}
-              (pressione Tab) → <strong>Bebida gaseificada</strong> (pressione Tab)
+              <span className="font-semibold">Refri</span> (pressione Tab) → <span className="font-semibold">Cola</span>{" "}
+              (pressione Tab) → <span className="font-semibold">Bebida gaseificada</span> (pressione Tab)
             </h2>
           }
         />

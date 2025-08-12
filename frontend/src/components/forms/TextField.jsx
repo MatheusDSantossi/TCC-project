@@ -1,4 +1,3 @@
-import * as React from "react";
 import "../../App.css";
 import TextField from "@mui/material/TextField";
 import { Controller } from "react-hook-form";
@@ -16,7 +15,7 @@ const theme = createTheme({
 });
 
 export default function CustomTextField(props) {
-  const { label, name, control } = props;
+  const { label, name, size, control } = props;
   return (
     <Controller
       name={name}
@@ -31,6 +30,7 @@ export default function CustomTextField(props) {
           onChange={onChange}
           value={value}
           label={label}
+          size={size}
           variant="outlined"
           className={"myForm"}
           error={!!error}

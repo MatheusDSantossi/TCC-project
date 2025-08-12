@@ -49,12 +49,15 @@ function InfoDialogScreen({ infoText }) {
         <MdOutlineClose className="mt-4 ml-4 text-3xl text-white cursor-pointer hover:text-secondary" onClick={handleClose} />
         <DialogTitle
           id="responsive-dialog-title"
-          className="text-2xl font-semibold text-center text-secondary"
+          className="text-base font-semibold text-center text-secondary"
+          sx={{
+            fontSize: "1.3rem"
+          }}
         >
           Informações Importantes:
         </DialogTitle>
-        <DialogContent >
-          <DialogContentText sx={{ fontSize: "1.4rem", color: "#FFFF"}}>
+        <DialogContent>
+          <DialogContentText sx={{ fontSize: "1.2rem", color: "#FFFF", marginRight: "1rem", marginLeft: "1rem" }}>
             {infoText}
           </DialogContentText>
         </DialogContent>

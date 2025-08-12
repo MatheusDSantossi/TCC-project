@@ -10,8 +10,12 @@ import logo from "../assets/logo.svg";
 
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
+import { routes } from "../routes/routes";
 
 const InviteRegister = () => {
+  // route
+  const loginRoute = routes.form.login;
+  
   const schema = yup.object({
     password: yup
       .string()
@@ -63,7 +67,7 @@ const InviteRegister = () => {
         alert("Registration successful!");
         setButtonState("success");
         // Redirect
-        navigate("/login");
+        navigate({loginRoute});
       })
       .catch((error) => {
         console.error("Registration failed:", error);

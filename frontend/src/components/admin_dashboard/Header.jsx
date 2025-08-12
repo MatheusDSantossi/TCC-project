@@ -1,10 +1,4 @@
 import { useEffect, useState } from "react";
-import {
-  BsFillBellFill,
-  BsPersonCircle,
-  BsArrowDownRightSquare,
-  BsArrowDownSquare,
-} from "react-icons/bs";
 
 import AxiosInstance from "../AxiosInstance";
 import { MdLogout } from "react-icons/md";
@@ -17,6 +11,7 @@ import * as motion from "motion/react-client";
 import { AnimatePresence } from "motion/react";
 
 import "../../App.css";
+import { routes } from "../../routes/routes";
 
 function Header() {
   const [userName, setUsername] = useState("");
@@ -26,12 +21,15 @@ function Header() {
   const businessSlug = localStorage.getItem("BusinessSlug");
 
   const handleLogout = () => {
+    // routes
+    const adminHomeRoute = routes.admin.adminHome
+
     AxiosInstance.post(`logoutall/`, {}).then(() => {
       // Clear user session data and navigate to login pagel
       localStorage.removeItem("Token");
 
       // Navigate to home page
-      navigate("/adminHome");
+      navigate({adminHomeRoute});
     });
   };
 
@@ -52,7 +50,7 @@ function Header() {
   return (
     <header className="flex items-center justify-between p-5 drop-shadow-3xl bg-primary">
       {/* <div className="flex items-center justify-around space-x-4"> */}
-      <span className="absolute mr-20 text-lg font-bold transform -translate-x-1/2 left-1/2">Bem-vindo ao {businessName} - {businessSlug}</span>
+      <span className="absolute mr-20 text-lg font-semibold transform -translate-x-1/2 left-1/2">Bem-vindo ao {businessName} ({businessSlug})</span>
       {/* Icons container */}
       <span className="flex items-center ml-auto space-x-4 text-xl cursor-pointer hover:text-secondary">
         <div className="flex">
@@ -63,12 +61,12 @@ function Header() {
 
       <div className="relative ml-4">
         <motion.span
-          className="flex items-center text-xl cursor-pointer hover:text-secondary"
+          className="flex items-center text-xl rounded-full cursor-pointer"
           onClick={toggleDropdown}
           whileTap={{ y: 1 }}
         >
-          <BsPersonCircle className="mr-2" />
-          {isClicked ? <BsArrowDownSquare /> : <BsArrowDownRightSquare />}
+          <p className="p-2 rounded-full text-primary bg-secondary hover:bg-secondary-dark">{userName.slice(0, 2).toUpperCase()}</p>
+          {/* {isClicked ? <BsArrowDownSquare /> : <BsArrowDownRightSquare />} */}
         </motion.span>
 
 
@@ -87,7 +85,7 @@ function Header() {
               }}
             >
               <p className="text-sm font-medium">
-                <span className="font-bold">Logado como:</span> {userName}
+                <span className="font-semibold">Logado como:</span> {userName}
                 <ListItemPrefix
                   className="flex justify-center p-2 mt-4 cursor-pointer hover:bg-red-500 hover:rounded"
                   onClick={handleLogout}

@@ -5,23 +5,28 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 
 import { businessName } from "../../utils/BusinessInfo";
+import { routes } from "../../routes/routes";
 
 const AdminHome = () => {
+  // routes
+  const loginRoute = routes.form.login;
+  const registerRoute = routes.form.register;
+  
   const navigate = useNavigate();
 
   const handleClick = (e, state) => {
     console.log("E.value: ", state);
     if (state === "Login") {
-      navigate("/login");
+      navigate(loginRoute);
     } else {
-      navigate("/register");
+      navigate(registerRoute);
     }
   };
 
   return (
     <div className="overflow-hidden">
       <div className="p-3 drop-shadow-3xl bg-primary">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mx-4 md:mx-8">
           <img src={logo} alt="logo" className="h-10" />
           <div className="flex">
             <button

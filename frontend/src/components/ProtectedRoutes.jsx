@@ -1,29 +1,8 @@
-import { useEffect, useState } from "react";
 import { Outlet, Navigate } from "react-router-dom";
+import { routes } from "../routes/routes";
 
 const ProtectedRoute = () => {
-    // const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-    // useEffect(() => {
-    //     const token = localStorage.getItem('token');
-    //     const checkAuth = () => {
-    //         setIsAuthenticated(!!token);
-    //     }
-
-    //     // Listen for storage changes
-    //     window.addEventListener("storage", checkAuth)
-
-    //     return () => {
-    //         window.removeEventListener("storage", checkAuth)
-    //     }
-
-    // }, []);
-
-    // return isAuthenticated? (
-    //     <Outlet />
-    // ) : (
-    //     <Navigate to="/login" />
-    // );
+    const adminHomeRoute = routes.admin.adminHome
 
     // Check if user is authenticated
     // If not, redirect to login page
@@ -33,7 +12,7 @@ const ProtectedRoute = () => {
         token ? (
             <Outlet />
         ) : (
-            <Navigate to="/adminHome" />
+            <Navigate to={adminHomeRoute} />
         )
     )
 };

@@ -5,8 +5,6 @@ import AxiosInstance from "./AxiosInstance";
 import ReactiveButton from "reactive-button";
 import SynonymDetails from "./SynonymsDetails";
 
-import { BsInfoCircleFill } from "react-icons/bs";
-
 import InfoDialogScreen from "./InfoDialogScreen";
 
 function ProductRegistration() {
@@ -110,7 +108,7 @@ function ProductRegistration() {
 
   return (
     <div className="flex items-center justify-center min-h-screen p-4 bg-tertiary">
-      <div className="w-full max-w-lg p-8 rounded-lg shadow-xl bg-primary">
+      <div className="w-full max-w-4xl p-8 rounded-lg shadow-xl bg-primary">
         <div className="flex items-center justify-center mb-5">
           <img className="w-20 mr-4" src={logo} alt="" />
           <h2 className="mb-6 text-2xl font-semibold text-center left-40">
@@ -136,7 +134,7 @@ function ProductRegistration() {
                   <h2>
                     Coloque quatro letras ou mais para receber exemplos de produtos já
                     cadastrados no sistema. Com produto selecionado aperte a
-                    tecla <strong>tab</strong> para adicionar os dados do
+                    tecla <span className="font-semibold">tab</span> para adicionar os dados do
                     determinado produto.
                   </h2>
                 }
@@ -163,9 +161,9 @@ function ProductRegistration() {
             </datalist>
           </div>
 
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-2 gap-6 md:grid-cols-3">
             {/* Product brand */}
-            <div>
+            <div className="col-span-1">
               <div className="flex items-center mb-5">
                 <label
                   htmlFor="productBrand"
@@ -208,7 +206,7 @@ function ProductRegistration() {
                     <h2>
                       Informe a quantidade de unidades por embalagem e a medida
                       de cada unidade. Exemplo: Se um fardo tem 6 garrafas de
-                      2L, digite <strong>6X2L</strong>
+                      2L, digite <span className="font-semibold">6X2L</span>
                     </h2>
                   }
                 />
@@ -267,8 +265,8 @@ function ProductRegistration() {
                   infoText={
                     <h2>
                       Informe o preço do produto (use ponto como separador
-                      decimal). Exemplos: <strong>2.50</strong> |{" "}
-                      <strong>0.60</strong> | <strong>10.99</strong>
+                      decimal). Exemplos: <span className="font-semibold">2.50</span> |{" "}
+                      <span className="font-semibold">0.60</span> | <span className="font-semibold">10.99</span>
                     </h2>
                   }
                 />
@@ -279,7 +277,7 @@ function ProductRegistration() {
                 name="productPrice"
                 placeholder="10.99"
                 required
-                className="w-full p-2 mt-1 rounded-lg bg-input focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                className="w-full p-2 mt-6 rounded-lg bg-input focus:outline-none focus:ring-2 focus:ring-yellow-400"
                 value={productPrice}
                 onChange={(e) => setProductPrice(e.target.value)}
               />
@@ -299,9 +297,9 @@ function ProductRegistration() {
                       Selecione a unidade de medida correspondente à embalagem:
                       <br></br>
                       Exemplos:<br></br>
-                      <strong>6X2L</strong> → <strong>FD</strong> (Fardo) |
-                      <strong> 12X200G </strong> → <strong>CX</strong> (Caixa) |
-                      <strong> 1X5KG</strong> → <strong>UN</strong> (Unidade)
+                      <span className="font-semibold">6X2L</span> → <span className="font-semibold">FD</span> (Fardo) |
+                      <span className="font-semibold"> 12X200G </span> → <span className="font-semibold">CX</span> (Caixa) |
+                      <span className="font-semibold"> 1X5KG</span> → <span className="font-semibold">UN</span> (Unidade)
                     </h2>
                   }
                 />
@@ -310,7 +308,7 @@ function ProductRegistration() {
                 id="productMetricUnity"
                 name="productMetricUnity"
                 required
-                className="w-full p-2 mt-1 rounded-lg bg-input focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                className="w-full p-[10px] mt-1 rounded-lg bg-input focus:outline-none focus:ring-2 focus:ring-yellow-400"
                 value={productMetricUnity}
                 onChange={(e) => setProductMetricUnity(e.target.value)}
               >
@@ -340,7 +338,7 @@ function ProductRegistration() {
                     <h2>
                       Informe a quantidade de embalagens:<br></br>
                       Digite apenas o número total (ex: para 5 caixas com 12
-                      unidades cada, insira <strong>5</strong>)
+                      unidades cada, insira <span className="font-semibold">5</span>)
                     </h2>
                   }
                 />

@@ -10,8 +10,6 @@ const ProductList = () => {
     AxiosInstance.get(`api/products/`)
       // .then((response) => setMenuOptions(response.data))
       .then((response) => {
-        console.log("Response product: ", response);
-        console.log("Response product data: ", response.data);
         setProducts(response.data);
       })
       .catch((error) => console.error("Error fetching product data: ", error));

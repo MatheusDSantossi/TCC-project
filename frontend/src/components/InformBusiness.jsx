@@ -15,7 +15,7 @@ import AxiosInstance from "./AxiosInstance";
 const InformBusiness = () => {
   const navigate = useNavigate();
   const { handleSubmit, control } = useForm();
-  const [ShowMessage, setShowMessage] = useState(false);
+  const [showMessage, setShowMessage] = useState(false);
   const [businessSlugs, setBusinessSlugs] = useState([]);
   const [buttonState, setButtonState] = useState("idle");
 
@@ -32,28 +32,38 @@ const InformBusiness = () => {
     setShowMessage(false);
 
     let dataSlug = data.establishmentSlug.trim();
-    
-    const userSlug = dataSlug === undefined ? "default" : dataSlug
 
-    console.log(userSlug)
+    const userSlug = dataSlug === undefined ? "default" : dataSlug;
 
-    const match = businessSlugs.find((b) => b.slug === userSlug)
+    console.log(userSlug);
+
+    const match = businessSlugs.find((b) => b.slug === userSlug);
 
     if (match) {
-        setButtonState("success");
-        navigate(`/${userSlug}`);
+      setButtonState("success");
+      navigate(`/${userSlug}`);
     } else {
-        setButtonState("error");
-        setShowMessage(true);
+      setButtonState("error");
+      setShowMessage(true);
     }
+  };
+
+  const handleClose = (_, reason) => {
+    if (reason === "clickaway") return;
+    setShowMessage(false);
   };
 
   return (
     <div className="flex items-center justify-center min-h-screen p-4 drop-shadow-3xl">
-      {ShowMessage ? (
+      {showMessage ? (
         <CustomMessage
-          text={"Estabelecimento não encontrado. Verifique o slug e tente novamente"}
-          color={"#EC5A76"}
+          open={showMessage}
+          onClose={handleClose}
+          severity="error"
+          message={
+            "Estabelecimento não encontrado. Verifique o slug e tente novamente"
+          }
+          duration={3000}
         />
       ) : null}
       <form

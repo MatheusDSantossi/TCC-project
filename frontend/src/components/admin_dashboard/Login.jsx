@@ -15,11 +15,17 @@ import "../../App.css";
 
 import ReactiveButton from "reactive-button";
 import GoogleButton from "./GoogleButton";
+import { routes } from "../../routes/routes";
 
 const Login = () => {
+  // routes
+  const requestPasswordReset = routes.form.requestPasswordReset;
+  const registerRoute = routes.form.register;
+  const adminMainRoute = routes.admin.adminMain;
+
   const navigate = useNavigate();
   const { handleSubmit, control } = useForm();
-  const [ShowMessage, setShowMessage] = useState(false);
+  const [showMessage, setShowMessage] = useState(false);
   const [buttonState, setButtonState] = useState("idle");
 
   const submission = (data) => {
@@ -34,13 +40,12 @@ const Login = () => {
         setButtonState("success");
         const token = response.data.token;
         const biz = response.data.user?.business || response.data.business;
-        console.log("RESPONSE: ", response);
-        console.log("RESPONSE data: ", response.data);
-        // localStorage.setItem("Token", response.data.token);
+
         localStorage.setItem("Email", response.data.email);
         localStorage.setItem("Token", token);
         localStorage.setItem("BusinessSlug", biz);
-        navigate(`/admin`);
+        // navigate(`/admin`);
+        navigate(adminMainRoute);
       })
       .catch((error) => {
         setButtonState("error");
@@ -51,14 +56,24 @@ const Login = () => {
 
   const googleLoginHandle = () => {
     window.location.href = "http://localhost:8000/accounts/google/login";
-  }
+  };
+
+  const handleClose = (_, reason) => {
+    if (reason === "clickaway") return;
+    setShowMessage(false);
+  };
 
   return (
     <div className="flex items-center justify-center min-h-screen p-4 drop-shadow-3xl">
-      {ShowMessage ? (
+      {showMessage ? (
         <CustomMessage
-          text={"Login has failed, please try again, or reset your password"}
-          color={"#EC5A76"}
+          open={showMessage}
+          onClose={handleClose}
+          severity="error"
+          message={
+            "Login falhou, por favor tente novamente, ou resete sua senha."
+          }
+          duration={3000}
         />
       ) : null}
       <form
@@ -73,13 +88,19 @@ const Login = () => {
             </h2>
           </div>
           <Box className={"itemBox mb-3"}>
-            <CustomTextField label={"Email"} name={"email"} control={control} />
+            <CustomTextField 
+            label={"Email"} 
+            name={"email"} 
+            control={control} 
+            size={"small"}
+            />
           </Box>
 
           <Box className={"itemBox"}>
             <CustomPasswordField
               label={"Senha"}
               name={"password"}
+              size={"small"}
               control={control}
             />
           </Box>
@@ -100,15 +121,15 @@ const Login = () => {
               idleText={"Login"}
               animation="true"
               rounded="true"
-              width={80}
+              width={200}
               height={40}
               size="large"
             />
-          {/* </div>
+            {/* </div>
 
           <div className="flex items-center justify-center m-3"> */}
-          {/* TODO: I need to fix the problem witht the login using google */}
-          {/* <GoogleButton /> */}
+            {/* TODO: I need to fix the problem witht the login using google */}
+            {/* <GoogleButton /> */}
 
             {/* <button className="flex items-center p-1 rounded rounded-full bg-[#FFC107] bg-white text-black hover:bg-yellow-300" onClick={googleLoginHandle}>
               <img className="h-10" src={googleBrand} alt="Logo do Google" />
@@ -120,7 +141,7 @@ const Login = () => {
           </div>
 
           <Box className={"itemBox"} sx={{ flexDirection: "column" }}>
-            <Link className="mt-4 text-center text-gray-300" to="/register">
+            <Link className="mt-4 text-center text-gray-300" to={registerRoute}>
               {" "}
               Não possui conta?{" "}
               <span className="font-medium text-yellow-400 hover:underline hover:text-yellow-300">
@@ -130,7 +151,7 @@ const Login = () => {
             <br />
             <Link
               className="mt-4 text-center text-gray-300"
-              to="/request/password_reset"
+              to={requestPasswordReset}
             >
               {" "}
               Esqueceu a senha?{" "}

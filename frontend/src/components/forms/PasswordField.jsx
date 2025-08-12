@@ -11,7 +11,7 @@ import { Controller } from "react-hook-form";
 
 export default function CustomPasswordField(props) {
   const [showPassword, setShowPassword] = React.useState(false);
-  const { label, name, control } = props;
+  const { label, name, size, control } = props;
 
   const handleClickShowPassword = () => setShowPassword((show) => !show);
 
@@ -67,6 +67,7 @@ export default function CustomPasswordField(props) {
           <InputLabel htmlFor="outlined-adornment-password">{label}</InputLabel>
           <OutlinedInput
             id="outlined-adornment-password"
+            size={size}
             onChange={onChange}
             value={value}
             error={!!error}

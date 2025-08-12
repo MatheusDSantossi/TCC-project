@@ -140,7 +140,7 @@ export default function ProductsTable({ products_data, onProductUpdate }) {
           initialState={{
             pagination: {
               paginationModel: {
-                pageSize: 10,
+                pageSize: 15, // HERE I LIMIT THE QUANTITY OF ITEMS
               },
             },
           }}

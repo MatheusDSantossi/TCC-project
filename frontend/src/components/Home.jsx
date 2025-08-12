@@ -1,8 +1,6 @@
 import '../App.css';
-import React, { useEffect } from "react";
 import logo from "../assets/logo.svg";
 import { useNavigate, useParams } from "react-router-dom";
-import AxiosInstance from "./AxiosInstance";
 
 import hugeRobotHand from "../assets/huge_robot_hand.png";
 import hugeRobotHand2 from "../assets/huge_robot_hand_2.png";
@@ -14,22 +12,6 @@ const Home = () => {
   const navigate = useNavigate();
   const { businessSlug } = useParams();
   const url = `/chatbot/${businessSlug}`;
-
-  const TestAPI = () => {
-    AxiosInstance.get("http://127.0.0.1:8000/api/sample/")
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        return response.json();
-      })
-      .then((data) => console.log(data))
-      .catch((error) => console.error("Error fetching data:", error));
-  };
-
-  useEffect(() => {
-    TestAPI;
-  }, []);
 
   const handleClick = () => {
     navigate(url);
@@ -66,7 +48,7 @@ const Home = () => {
           {/* <p className='mb-8'>Selecione a opção que melhor lhe atende</p> */}
           <div className="flex justify-center space-x-4">
             <button
-              className="px-6 py-3 font-bold text-black transition bg-yellow-400 rounded-lg cursor-pointer hover:bg-yellow-300"
+              className="px-6 py-3 font-semibold text-black transition bg-yellow-400 rounded-lg cursor-pointer hover:bg-yellow-300"
               onClick={handleClick}
             >
               Fale com o Hecate

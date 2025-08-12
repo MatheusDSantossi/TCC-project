@@ -36,7 +36,7 @@ const Stars = () => {
 const StarsCanvas = () => {
     return (
         // <div className="w-full h-auto absolute inset-0 z-[-1]">
-        <div className="fixed top-0 left-0 w-full h-full z-0">
+        <div className="fixed top-0 left-0 z-0 w-full h-screen">
             <Canvas
                 camera={{ position: [0, 0, 1] }}
             >

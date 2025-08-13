@@ -15,7 +15,7 @@ const theme = createTheme({
 });
 
 export default function CustomTextField(props) {
-  const { label, name, size, control } = props;
+  const { label, name, size, control, autoFocus = false } = props;
   return (
     <Controller
       name={name}
@@ -35,6 +35,7 @@ export default function CustomTextField(props) {
           className={"myForm"}
           error={!!error}
           helperText={error?.message}
+          autoFocus={autoFocus}
           sx={{
             padding: "0.5rem",
             marginTop: "0.25rem",

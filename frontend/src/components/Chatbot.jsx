@@ -6,6 +6,8 @@ import Typewriter from "./Typewriter";
 import AxiosInstance from "./AxiosInstance";
 import { useNavigate, useParams } from "react-router-dom";
 import { HashLoader } from "react-spinners";
+import ExceptionMainComponent from "../exceptions/ExceptionMainComponent";
+import { ExceptionTypes } from "../exceptions/ExceptionVariantsTypes";
 
 function Capitalize(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
@@ -14,6 +16,7 @@ function Capitalize(str) {
 function Chatbot() {
   const navigate = useNavigate();
 
+  // States
   const [userInput, setUserInput] = useState("");
   const [userName, setUserName] = useState("");
   const [isNameEntered, setIsNameEntered] = useState(false);
@@ -33,6 +36,8 @@ function Chatbot() {
 
   const [showPreviousMenuButton, setShowPreviousMenuButton] = useState(false);
 
+  const [exceptionsData, setExceptionsData] = useState(null);
+
   const { businessSlug } = useParams(); // e.g. "supermarket-santos"
   const localBusinessSlug = localStorage.getItem("BusinessSlug") || null;
 
@@ -40,11 +45,17 @@ function Chatbot() {
 
   const url = `/${finalBusinessSlug}`;
 
+  // useEffect(() => {
+  //   console.log("Chatbot mounted")
+  // }, [chatMessages])
+
   useEffect(() => {
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTop =
         chatContainerRef.current.scrollHeight;
     }
+    setExceptionsData(null)
+
   }, [chatMessages, menuOptions]);
 
   const fetchMenuOptions = () => {
@@ -55,7 +66,15 @@ function Chatbot() {
         console.log("Fetching menu options return: ", response.data);
         setPendingMenuOptions(response.data);
       })
-      .catch((error) => console.error("Error fetching menu options:", error));
+      .catch((error) => {
+        console.error("Error fetching menu options:", error);
+        setExceptionsData({
+          text: "Error fetching menu options",
+          errorMessage: error,
+          variant: ExceptionTypes.ERROR,
+        });
+        // ExceptionMainComponent("Error fetching menu options", error, ExceptionTypes.ERROR);
+      });
   };
 
   // Fetch initial menu options from Django backend
@@ -382,14 +401,19 @@ function Chatbot() {
   };
 
   return (
-    <div
-      className="flex flex-col justify-center items-center w-screen min-h-screen bg-primary p-[72px] relative"
-    >
+    <div className="flex flex-col justify-center items-center w-screen min-h-screen bg-primary p-[72px] relative">
       <div className="absolute top-4 left-4">
         <img className="w-20" src={logo} alt="Logo" />
       </div>
 
       <div className="flex flex-col flex-grow w-full max-w-4xl overflow-hidden bg-white rounded-lg shadow-xl">
+        {exceptionsData && (
+          <ExceptionMainComponent
+            text={exceptionsData.text}
+            errorMessage={exceptionsData.errorMessage}
+            variant={exceptionsData.variant}
+          />
+        )}
         <div
           className="flex flex-col flex-grow h-0 p-4 overflow-auto text-left"
           ref={chatContainerRef}
@@ -585,7 +609,7 @@ function Chatbot() {
 
                   <button
                     type="submit"
-                    className="h-10 px-6 ml-2 font-semibold text-black bg-yellow-400 hover:bg-yellow-300 rounded"
+                    className="h-10 px-6 ml-2 font-semibold text-black bg-yellow-400 rounded hover:bg-yellow-300"
                   >
                     Enviar
                   </button>

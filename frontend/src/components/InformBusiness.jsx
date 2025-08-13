@@ -82,6 +82,7 @@ const InformBusiness = () => {
               label={"Nome do estabelecimento"}
               name={"establishmentSlug"}
               control={control}
+              autoFocus={true}
             />
           </Box>
           <div className="flex items-center justify-center p-3 space-x-16">

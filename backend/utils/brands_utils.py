@@ -12,8 +12,6 @@ HERE = Path(__file__).resolve().parent
 
 BRAND_FILE = HERE / "brands.json"
 
-print("Looking for brands.json at: ", BRAND_FILE, "EXISTS?", BRAND_FILE.exists())
-
 @lru_cache(maxsize=1)
 def load_brand_data():
     """Load brands and exceptions from the JSON file once."""

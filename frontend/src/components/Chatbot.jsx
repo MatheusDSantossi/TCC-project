@@ -60,7 +60,7 @@ function Chatbot() {
 
   const fetchMenuOptions = () => {
     setShowPreviousMenuButton(false);
-    AxiosInstance.get(`menu-options/get/`)
+    AxiosInstance.get(`menu-options/geta/`)
       // .then((response) => setMenuOptions(response.data))
       .then((response) => {
         console.log("Fetching menu options return: ", response.data);
@@ -70,7 +70,7 @@ function Chatbot() {
         console.error("Error fetching menu options:", error);
         setExceptionsData({
           text: "Error fetching menu options",
-          errorMessage: error,
+          error: error,
           variant: ExceptionTypes.ERROR,
         });
         // ExceptionMainComponent("Error fetching menu options", error, ExceptionTypes.ERROR);

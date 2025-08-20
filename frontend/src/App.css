@@ -13,9 +13,11 @@
   --color-white-100: #f3f3f3;
   --color-white-200: #E0FFFF;
   --color-input: #121212;
+  /* Erros colors */
+  --color-error-background: #D50000;
 
-  /* Drop Shadow */
-  --drop-shadow-3xl: 0 35px 120px rgba(1, 61, 49, 1);
+  /* Shadow */
+  --shadow-3xl: 0 35px 120px rgba(1,61,49,0.25);
 
   /* Font Size */
   --text-xs: 0.75rem;

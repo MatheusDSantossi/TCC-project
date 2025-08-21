@@ -13,8 +13,12 @@
   --color-white-100: #f3f3f3;
   --color-white-200: #E0FFFF;
   --color-input: #121212;
+
+  /* Hover colors */
+  --color-button-hover-green: #1b4332;
+
   /* Erros colors */
-  --color-error-background: #D50000;
+  --color-error-background: #c1121f;
 
   /* Shadow */
   --shadow-3xl: 0 35px 120px rgba(1,61,49,0.25);

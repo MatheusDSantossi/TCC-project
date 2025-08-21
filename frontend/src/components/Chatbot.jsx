@@ -54,8 +54,7 @@ function Chatbot() {
       chatContainerRef.current.scrollTop =
         chatContainerRef.current.scrollHeight;
     }
-    setExceptionsData(null)
-
+    setExceptionsData(null);
   }, [chatMessages, menuOptions]);
 
   const fetchMenuOptions = () => {
@@ -402,11 +401,7 @@ function Chatbot() {
 
   return (
     <div className="flex flex-col justify-center items-center w-screen min-h-screen bg-primary p-[72px] relative">
-      <div className="absolute top-4 left-4">
-        <img className="w-20" src={logo} alt="Logo" />
-      </div>
-
-      <div className="flex flex-col flex-grow w-full max-w-4xl overflow-hidden bg-white rounded-lg shadow-xl">
+      <div className="relative">
         {exceptionsData && (
           <ExceptionMainComponent
             text={exceptionsData.text}
@@ -414,6 +409,12 @@ function Chatbot() {
             variant={exceptionsData.variant}
           />
         )}
+      </div>
+      <div className="absolute top-4 left-4">
+        <img className="w-20" src={logo} alt="Logo" />
+      </div>
+
+      <div className="flex flex-col flex-grow w-full max-w-4xl overflow-hidden bg-white rounded-lg shadow-xl">
         <div
           className="flex flex-col flex-grow h-0 p-4 overflow-auto text-left"
           ref={chatContainerRef}

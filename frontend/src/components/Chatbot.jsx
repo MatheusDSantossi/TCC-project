@@ -401,7 +401,7 @@ function Chatbot() {
 
   return (
     <div className="flex flex-col justify-center items-center w-screen min-h-screen bg-primary p-[72px] relative">
-      <div className="relative">
+      <div className="flex justify-center">
         {exceptionsData && (
           <ExceptionMainComponent
             text={exceptionsData.text}

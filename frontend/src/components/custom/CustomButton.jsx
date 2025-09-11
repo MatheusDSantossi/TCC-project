@@ -5,6 +5,7 @@ const CustomButton = ({
   height = "130px",
   paddingTop: padding = "4px",
   rounded = true,
+  onClick
 }) => {
   return (
     <button
@@ -16,6 +17,7 @@ const CustomButton = ({
         height: height,
         padding: padding
       }}
+      onClick={onClick}
     >
       {text}
       {icon && { icon }}

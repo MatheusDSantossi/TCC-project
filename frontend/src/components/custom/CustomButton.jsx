@@ -3,14 +3,19 @@ const CustomButton = ({
   icon,
   width = "100%",
   height = "130px",
-  paddingTop = "4px",
+  paddingTop: padding = "4px",
   rounded = true,
 }) => {
   return (
     <button
-      className={`bg-primary hover:bg-button-hover-green p-[${paddingTop}] w-[${width}] h-[${height}] ${
+      className={`bg-primary hover:bg-transparent hover:border hover:border-primary hover:text-primary ${
         rounded ? "rounded" : ""
       }`}
+      style={{
+        width: width,
+        height: height,
+        padding: padding
+      }}
     >
       {text}
       {icon && { icon }}

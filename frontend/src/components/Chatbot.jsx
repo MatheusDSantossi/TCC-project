@@ -405,7 +405,7 @@ function Chatbot() {
         {exceptionsData && (
           <ExceptionMainComponent
             text={exceptionsData.text}
-            errorMessage={exceptionsData.errorMessage}
+            error={exceptionsData.error}
             variant={exceptionsData.variant}
           />
         )}

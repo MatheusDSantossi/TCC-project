@@ -18,7 +18,7 @@ function Sidebar({ onSidebarToggle, changeComponent }) {
 
   const containerRef = useRef(null);
 
-  const { height } = 100;
+  const height = 100;
 
   const sidebarVariants = {
     open: (height = 1000) => ({

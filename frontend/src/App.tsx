@@ -4,7 +4,7 @@ import { useState } from "react";
 import Home from "./components/Home";
 import Chatbot from "./components/Chatbot";
 
-import { StarsCanvas } from "./components/canvas";
+import { StarsCanvas } from "./components/canvas/index";
 
 import AdminDashboard from "./components/admin_dashboard/AdminDashboard";
 import Login from "./components/admin_dashboard/Login";
@@ -51,18 +51,18 @@ function App() {
       <div className="absolute top-0 left-0 z-10 w-full" >
         {/* <div className="z-1" > */}
         <Routes>
-          <Route exact path="/" element={<InformBusiness />} />
-          <Route exact path={businessSlugRoute} element={<Home />} />
-          <Route exact path={registerRoute} element={<Register />} />
-          <Route exact path={loginRoute} element={<Login />} />
-          <Route exact path={requestPasswordRoute} element={<ForgetPassword />} />
-          <Route exact path={requestPasswordTokenRoute} element={<ForgetPasswordReset />} />
-          <Route exact path={adminHomeRoute} element={<AdminHome />} />
-          <Route exact path={chatbotMainRoute} element={<Chatbot />} />
+          <Route path="/" element={<InformBusiness />} />
+          <Route path={businessSlugRoute} element={<Home />} />
+          <Route path={registerRoute} element={<Register />} />
+          <Route path={loginRoute} element={<Login />} />
+          <Route path={requestPasswordRoute} element={<ForgetPassword />} />
+          <Route path={requestPasswordTokenRoute} element={<ForgetPasswordReset />} />
+          <Route path={adminHomeRoute} element={<AdminHome />} />
+          <Route path={chatbotMainRoute} element={<Chatbot />} />
           <Route path={invitationRegisterRoute} element={<InviteRegister />} />
           
           <Route element={<ProtectedRoute />}>
-            <Route exact path={adminMainRoute} element={<AdminDashboard openSidebarToggle={openSidebarToggle} OpenSidebar={OpenSidebar} />} />
+            <Route path={adminMainRoute} element={<AdminDashboard openSidebarToggle={openSidebarToggle} OpenSidebar={OpenSidebar} />} />
           </Route>
         </Routes>
       </div>

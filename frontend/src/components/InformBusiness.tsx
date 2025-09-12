@@ -10,7 +10,7 @@ import logo from "../assets/logo.svg";
 import "../App.css";
 
 import ReactiveButton from "reactive-button";
-import AxiosInstance from "./AxiosInstance";
+import AxiosInstance from "./AxiosInstance.js";
 
 const InformBusiness = () => {
   const navigate = useNavigate();

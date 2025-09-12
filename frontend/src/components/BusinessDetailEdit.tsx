@@ -6,8 +6,8 @@ import { DialogTitle } from "@mui/material";
 import { DialogContent } from "@mui/material";
 
 import ReactiveButton from "reactive-button";
-import SynonymDetails from "./SynonymsDetails";
-import AxiosInstance from "./AxiosInstance";
+import SynonymDetails from "./SynonymsDetails.jsx";
+import AxiosInstance from "./AxiosInstance.js";
 
 import { MdOutlineClose } from "react-icons/md";
 

@@ -1,6 +1,13 @@
 import React, { useState, useEffect } from "react";
 
-const Typewriter = ({ text, delay, onTypingEnd }) => {
+interface TypewriterProps {
+  className: string;
+  text: string;
+  delay: number;
+  onTypingEnd: () => void;
+}
+
+const Typewriter = ({ className, text, delay, onTypingEnd }: TypewriterProps) => {
   const [currentText, setCurrentText] = useState("");
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -21,7 +28,7 @@ const Typewriter = ({ text, delay, onTypingEnd }) => {
     }
   }, [currentIndex, delay, text, onTypingEnd]);
 
-  return <span className="text-right">{currentText}</span>;
+  return <span className={`text-right ${className}`}>{currentText}</span>;
 };
 
 export default Typewriter;

@@ -59,7 +59,7 @@ function Chatbot() {
 
   const fetchMenuOptions = () => {
     setShowPreviousMenuButton(false);
-    AxiosInstance.get(`menu-options/geta/`)
+    AxiosInstance.get(`menu-options/get/`)
       // .then((response) => setMenuOptions(response.data))
       .then((response) => {
         console.log("Fetching menu options return: ", response.data);
@@ -523,7 +523,6 @@ function Chatbot() {
                       selectOption(
                         option.menu_extended_id,
                         option.description,
-                        1
                       );
                     }}
                   >

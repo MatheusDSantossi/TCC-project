@@ -56,16 +56,16 @@ function BasicPieChart({ products_data }) {
 
   return (
     <div className="w-full h-64">
-      <PieChart 
-      series={[series]} 
-      width={400} 
-      height={200} 
-      sx={{
-        width: '100%',
-        height: '100%',
-        maxWidth: '400px',
-        maxHeight: '200px'
-      }}
+      <PieChart
+        series={[series]}
+        width={400}
+        height={200}
+        sx={{
+          width: "100%",
+          height: "100%",
+          maxWidth: "400px",
+          maxHeight: "200px",
+        }}
       />
     </div>
   );

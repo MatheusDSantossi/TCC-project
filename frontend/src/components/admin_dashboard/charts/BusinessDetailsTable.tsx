@@ -6,7 +6,10 @@ import { useState } from "react";
 import AxiosInstance from "../../AxiosInstance";
 import BusinessDetailEdit from "../../BusinessDetailEdit";
 
-export default function BusinessDetailsTable({ business_detail_data, onBusinessDetailUpdate }) {
+export default function BusinessDetailsTable({
+  business_detail_data,
+  onBusinessDetailUpdate,
+}) {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [selectedBusinessDetail, setSelectedBusinessDetail] = useState(null);
 
@@ -27,7 +30,10 @@ export default function BusinessDetailsTable({ business_detail_data, onBusinessD
           value: updatedBusinessDetail.value,
         }
       );
-      console.log("BusinessDetail updated successfully: ", updatedBusinessDetail);
+      console.log(
+        "BusinessDetail updated successfully: ",
+        updatedBusinessDetail
+      );
 
       if (response.status === 201 || response.status === 200) {
         onBusinessDetailUpdate();
@@ -127,7 +133,7 @@ export default function BusinessDetailsTable({ business_detail_data, onBusinessD
             fontSize: "16px",
             boxShadow: 2,
             border: 2,
-            borderColor: '#5D76D3',
+            borderColor: "#5D76D3",
             backgroundColor: "#FFFFFFFF",
             "& .MuiDataGrid-cell": {
               backgroundColor: "#F4F4F4FF",
@@ -138,8 +144,8 @@ export default function BusinessDetailsTable({ business_detail_data, onBusinessD
             "& .MuiDataGrid-columnHeaderTitle": {
               fontWeight: "bold",
             },
-            '& .MuiDataGrid-cell:hover': {
-              color: '#5D76D3',
+            "& .MuiDataGrid-cell:hover": {
+              color: "#5D76D3",
             },
           }}
         />

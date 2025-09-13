@@ -1,6 +1,6 @@
 import { ExceptionTypes } from "./ExceptionVariantsTypes";
 import { MdContentCopy } from "react-icons/md";
-import CustomButton from "../components/custom/CustomButton.tsx";
+import CustomButton from "../components/custom/CustomButton";
 import { IoMdCloseCircleOutline } from "react-icons/io";
 import { FaClipboardCheck } from "react-icons/fa6";
 import { useState } from "react";

@@ -56,7 +56,7 @@ const Register = () => {
       setTimeout(() => {
         setButtonState("error");
       }, 2000);
-      navigate({adminMainRoute});
+      navigate(adminMainRoute);
     });
   };
 

@@ -13,6 +13,12 @@ function Capitalize(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
+
+type menuOptionsProps = {
+  menu_extended_id: number;
+  description: string;
+}
+
 function Chatbot() {
   const navigate = useNavigate();
 
@@ -21,7 +27,7 @@ function Chatbot() {
   const [userName, setUserName] = useState("");
   const [isNameEntered, setIsNameEntered] = useState(false);
 
-  const [menuOptions, setMenuOptions] = useState([]);
+  const [menuOptions, setMenuOptions] = useState<menuOptionsProps[]>([]);
   const [hasSelectedOption, setHasSelectedOption] = useState(false);
   const [chatMessages, setChatMessages] = useState([]);
   const [isHecateAnswering, setIsHecateAnswering] = useState(false);
@@ -399,6 +405,8 @@ function Chatbot() {
     }
   };
 
+  console.log("menuOptions: ", menuOptions)
+
   return (
     <div className="flex flex-col justify-center items-center w-screen min-h-screen bg-primary p-[72px] relative">
       <div className="flex justify-center">
@@ -552,7 +560,7 @@ function Chatbot() {
           {showMenuOptionsAndInputAfterHecateAnswer &&
             hasSelectedOption &&
             !isHecateAnswering &&
-            menuOptions <= 0 &&
+            menuOptions.length <= 0 &&
             isTypingDone && (
               <div className="flex justify-between">
                 <button
@@ -590,7 +598,7 @@ function Chatbot() {
           {showMenuOptionsAndInputAfterHecateAnswer &&
             hasSelectedOption &&
             !isHecateAnswering &&
-            menuOptions <= 0 &&
+            menuOptions.length <= 0 &&
             isTypingDone && (
               <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 w-full max-w-[600px] px-4">
                 <form

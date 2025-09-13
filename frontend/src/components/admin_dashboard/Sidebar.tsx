@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, type CSSProperties, type ReactNode } from "react";
 import {
   BsChatFill,
   BsTools,
@@ -75,6 +75,11 @@ const navVariants = {
     transition: { staggerChildren: 0.05, staggerDirection: -1 },
   },
 };
+
+type listItemsNavProps = {
+  icon: ReactNode;
+  component: "string"; 
+}
 
 const listItemsNav = {
   // Dashboard: {
@@ -224,7 +229,6 @@ const MenuItem = ({ label, icon, onClick, hasSubitems, isOpen }) => {
 };
 
 const SubMenuItem = ({ label, onClick }) => {
-
   return (
     <motion.li
       style={{ ...listItem, marginLeft: "30px", padding: "8px 25px 8px 45px" }}
@@ -235,11 +239,7 @@ const SubMenuItem = ({ label, onClick }) => {
     >
       <div className="flex items-stretch group" style={textPlaceholder}>
         <div className="w-1 h-6 mr-2 transition-opacity rounded opacity-0 bg-secondary group-hover:opacity-100" />
-        <span
-          style={{ color: "white", fontWeight: "normal" }}
-        >
-          {label}
-        </span>
+        <span style={{ color: "white", fontWeight: "normal" }}>{label}</span>
       </div>
     </motion.li>
   );
@@ -286,7 +286,7 @@ const MenuToggle = ({ toggle }) => (
  * ==============   Styles   ================
  */
 
-const container = {
+const container: CSSProperties = {
   position: "relative",
   display: "flex",
   height: "100vh",
@@ -303,7 +303,7 @@ const container = {
   flexDirection: "column",
 };
 
-const background = {
+const background: CSSProperties = {
   // backgroundColor: "#013D31",
   backgroundColor: "#012921",
   position: "absolute",
@@ -313,7 +313,7 @@ const background = {
   width: 300,
 };
 
-const toggleContainer = {
+const toggleContainer: CSSProperties = {
   outline: "none",
   border: "none",
   WebkitUserSelect: "none",
@@ -329,7 +329,7 @@ const toggleContainer = {
   fill: "yellow",
 };
 
-const list = {
+const list: CSSProperties = {
   listStyle: "none",
   padding: "25px 0",
   margin: 0,
@@ -338,7 +338,7 @@ const list = {
   width: "100%",
 };
 
-const listItem = {
+const listItem: CSSProperties = {
   display: "flex",
   alignItems: "center",
   justifyContent: "flex-start",
@@ -350,7 +350,7 @@ const listItem = {
   width: "100%",
 };
 
-const iconPlaceholder = {
+const iconPlaceholder: CSSProperties = {
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
@@ -362,7 +362,7 @@ const iconPlaceholder = {
   color: "white",
 };
 
-const textPlaceholder = {
+const textPlaceholder: CSSProperties = {
   borderRadius: 5,
   width: 200,
   height: "auto",

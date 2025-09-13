@@ -67,7 +67,7 @@ const InviteRegister = () => {
         alert("Registration successful!");
         setButtonState("success");
         // Redirect
-        navigate({loginRoute});
+        navigate(loginRoute);
       })
       .catch((error) => {
         console.error("Registration failed:", error);

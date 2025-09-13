@@ -33,7 +33,7 @@ const ForgetPasswordReset = () => {
         setButtonState("success");
       }, 2000);
       setTimeout(() => {
-        navigate({loginRoute});
+        navigate(loginRoute);
       }, 6000);
     });
   };

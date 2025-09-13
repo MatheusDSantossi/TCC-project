@@ -11,7 +11,7 @@ function ProductRegistration() {
   const [productName, setProductName] = useState("");
   const [productBrand, setProductBrand] = useState("");
   const [productQuantityFormat, setProductQuantityFormat] = useState("");
-  const [productSection, setProductSection] = useState(0);
+  const [productSection, setProductSection] = useState<string>("");
   const [productPrice, setProductPrice] = useState("");
   const [productMetricUnity, setProductMetricUnity] = useState("");
   const [productAvailability, setProductAvailibility] = useState("");
@@ -93,7 +93,7 @@ function ProductRegistration() {
         setProductName("");
         setProductBrand("");
         setProductQuantityFormat("");
-        setProductSection(0);
+        setProductSection("");
         setProductPrice("");
         setProductMetricUnity("");
         setProductAvailibility("");
@@ -105,6 +105,7 @@ function ProductRegistration() {
         console.error("Error registering the product: ", error);
       });
   };
+
 
   return (
     <div className="flex items-center justify-center min-h-screen p-4 bg-tertiary">

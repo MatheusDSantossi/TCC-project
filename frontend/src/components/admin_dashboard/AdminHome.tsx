@@ -11,7 +11,7 @@ const AdminHome = () => {
   // routes
   const loginRoute = routes.form.login;
   const registerRoute = routes.form.register;
-  
+
   const navigate = useNavigate();
 
   const handleClick = (e, state) => {

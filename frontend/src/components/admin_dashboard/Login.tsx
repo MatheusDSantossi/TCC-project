@@ -88,11 +88,11 @@ const Login = () => {
             </h2>
           </div>
           <Box className={"itemBox mb-3"}>
-            <CustomTextField 
-            label={"Email"} 
-            name={"email"} 
-            control={control} 
-            size={"small"}
+            <CustomTextField
+              label={"Email"}
+              name={"email"}
+              control={control}
+              size={"small"}
             />
           </Box>
 

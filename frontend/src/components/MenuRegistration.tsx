@@ -1,5 +1,3 @@
-import React from 'react'
-
 function MenuRegistration() {
   return (
     <div>
@@ -13,7 +11,7 @@ function MenuRegistration() {
         </form>
       </div>
     </div>
-  )
+  );
 }
 
-export default MenuRegistration
+export default MenuRegistration;

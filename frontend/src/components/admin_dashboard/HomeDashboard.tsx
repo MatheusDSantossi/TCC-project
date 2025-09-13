@@ -35,7 +35,7 @@ function HomeDashboard() {
           localStorage.removeItem("Token");
 
           // Navigate to login page
-          navigate({ loginRoute });
+          navigate(loginRoute);
         });
         console.error("Error fetching product data: ", error);
       });

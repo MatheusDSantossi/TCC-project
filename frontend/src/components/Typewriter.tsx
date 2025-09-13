@@ -7,7 +7,12 @@ interface TypewriterProps {
   onTypingEnd: () => void;
 }
 
-const Typewriter = ({ className, text, delay, onTypingEnd }: TypewriterProps) => {
+const Typewriter = ({
+  className,
+  text,
+  delay,
+  onTypingEnd,
+}: TypewriterProps) => {
   const [currentText, setCurrentText] = useState("");
   const [currentIndex, setCurrentIndex] = useState(0);
 

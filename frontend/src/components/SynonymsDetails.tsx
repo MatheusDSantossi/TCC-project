@@ -5,6 +5,14 @@ import { BsEraserFill, BsInfoCircleFill } from "react-icons/bs";
 import InfoDialogScreen from "./InfoDialogScreen";
 // Component
 
+interface synonymDetailsProps {
+  formData: string
+  setFormData: string
+  setProductSynonyms: () => void;
+  resetKey: string
+  previousProductSynonyms: string
+}
+
 const SynonymDetails = ({
   formData,
   setFormData,

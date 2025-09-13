@@ -4,7 +4,7 @@ import PropTypes from "prop-types";
 
 /**
  * CustomMessage wraps MUI Snackbar + Alert for transient messages.
- * 
+ *
  * Props:
  * - open: boolean, controls visibility
  * - onClose: function, called when message closes
@@ -12,7 +12,13 @@ import PropTypes from "prop-types";
  * - message: string
  * - duration: autoClose time in ms
  */
-const CustomMessage = ({ open, onClose, severity = "success", message, duration = 2000 }) => {
+const CustomMessage = ({
+  open,
+  onClose,
+  severity = "success",
+  message,
+  duration = 2000,
+}) => {
   return (
     <Snackbar
       open={open}
@@ -20,7 +26,13 @@ const CustomMessage = ({ open, onClose, severity = "success", message, duration 
       onClose={onClose}
       anchorOrigin={{ vertical: "top", horizontal: "right" }}
     >
-      <Alert elevation={6} variant="filled" onClose={onClose} severity={severity} sx={{ width: '100%' }}>
+      <Alert
+        elevation={6}
+        variant="filled"
+        onClose={onClose}
+        severity={severity}
+        sx={{ width: "100%" }}
+      >
         {message}
       </Alert>
     </Snackbar>

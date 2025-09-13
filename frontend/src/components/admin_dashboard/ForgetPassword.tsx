@@ -69,7 +69,7 @@ const ForgetPassword = () => {
         <Box className={"whiteBox"}>
           <IoMdReturnLeft
             className="text-2xl cursor-pointer mr-18 hover:bg-secondary hover:text-primary hover:rounded-full"
-            onClick={() => navigate({ loginRoute })}
+            onClick={() => navigate(loginRoute)}
           />
           <div className="flex items-center justify-center mb-5">
             <img className="w-20 mr-4" src={logo} alt="" />

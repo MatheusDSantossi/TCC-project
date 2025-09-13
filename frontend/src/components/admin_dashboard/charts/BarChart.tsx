@@ -16,7 +16,7 @@ function SimpleBarChart({ data }) {
   const dataset = Object.keys(brandCounts).map((brand) => ({
     brand: brand,
     count: brandCounts[brand],
-  }))
+  }));
 
   const topBrands = dataset.sort((a, b) => b.count - a.count).slice(0, 10);
 
@@ -50,21 +50,25 @@ function SimpleBarChart({ data }) {
   }));
 
   const chartSetting = {
-    xAxis: [{
-      scaleType: "band",
-      dataKey: "brand",
-      valueFormatter: (value) => value || 'Unknown Brand'
-    }],
+    xAxis: [
+      {
+        scaleType: "band",
+        dataKey: "brand",
+        valueFormatter: (value) => value || "Unknown Brand",
+      },
+    ],
     yAxis: [
       {
         label: "Quantidade",
       },
     ],
-    series: [{
-      dataKey: "count",
-      label: "Marca",
-      highlightScope
-    }],
+    series: [
+      {
+        dataKey: "count",
+        label: "Marca",
+        highlightScope,
+      },
+    ],
     height: 300,
     sx: {
       [`& .${axisClasses.directionY} .${axisClasses.label}`]: {
@@ -75,14 +79,9 @@ function SimpleBarChart({ data }) {
 
   return (
     <div style={{ width: "100%" }}>
-      <BarChart
-        dataset={topBrands}
-        barLabel="value"
-        {...chartSetting}
-      />
+      <BarChart dataset={topBrands} barLabel="value" {...chartSetting} />
     </div>
   );
-
 }
 
 export default SimpleBarChart;

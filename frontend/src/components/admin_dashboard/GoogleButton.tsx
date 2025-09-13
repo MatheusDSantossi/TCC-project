@@ -34,7 +34,7 @@ const GoogleButton = () => {
     };
     handleCallback();
   }, [navigate]);
-  
+
   return <button onClick={handleGoogleLogin}>Login with Google</button>;
 };
 

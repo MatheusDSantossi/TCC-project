@@ -150,7 +150,7 @@ export default function ProductsTable({ products_data, onProductUpdate }) {
             fontSize: "16px",
             boxShadow: 2,
             border: 2,
-            borderColor: '#5D76D3',
+            borderColor: "#5D76D3",
             backgroundColor: "#FFFFFFFF",
             "& .MuiDataGrid-cell": {
               backgroundColor: "#F4F4F4FF",
@@ -161,8 +161,8 @@ export default function ProductsTable({ products_data, onProductUpdate }) {
             "& .MuiDataGrid-columnHeaderTitle": {
               fontWeight: "bold",
             },
-            '& .MuiDataGrid-cell:hover': {
-              color: '#5D76D3',
+            "& .MuiDataGrid-cell:hover": {
+              color: "#5D76D3",
             },
           }}
         />

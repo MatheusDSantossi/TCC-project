@@ -7,7 +7,7 @@ import AxiosInstance from "./AxiosInstance";
 import { useNavigate, useParams } from "react-router-dom";
 import { HashLoader } from "react-spinners";
 import ExceptionMainComponent from "../exceptions/ExceptionMainComponent";
-import { ExceptionTypes } from "../exceptions/ExceptionVariantsTypes";
+import { ExceptionVariant } from "../exceptions/ExceptionVariantsTypes";
 
 function Capitalize(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
@@ -76,7 +76,7 @@ function Chatbot() {
         setExceptionsData({
           text: "Error fetching menu options",
           error: error,
-          variant: ExceptionTypes.ERROR,
+          variant: ExceptionVariant.ERROR,
         });
         // ExceptionMainComponent("Error fetching menu options", error, ExceptionTypes.ERROR);
       });
@@ -477,7 +477,7 @@ function Chatbot() {
                     <p className="text-lg">{message.text}</p>
                   ) : (
                     <Typewriter
-                      className="text-sm"
+                      className="text-lg"
                       text={`${message.text}`}
                       delay={30}
                       onTypingEnd={
@@ -489,7 +489,7 @@ function Chatbot() {
                   )}
                 </div>
                 {/* Dynamic Time Display */}
-                <span className="font-medium leading-none text-sx text-primary">
+                <span className="font-medium leading-none text-primary">
                   {message.timestamp}
                 </span>
               </div>

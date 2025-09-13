@@ -41,7 +41,7 @@ function Sidebar({ onSidebarToggle, changeComponent }) {
     },
   };
   return (
-    <div className="h-screen bg-primary">
+    <div className="h-screen bg-primary shadow-3xl">
       <div style={container}>
         <motion.nav
           initial={false}

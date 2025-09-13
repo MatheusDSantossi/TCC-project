@@ -17,8 +17,10 @@
   /* Hover colors */
   --color-button-hover-green: #1b4332;
 
-  /* Erros colors */
+  /* Exception colors */
   --color-error: #c1121f;
+  --color-info: #F0E716;
+  --color-confirmation: #38d430;
 
   /* Shadow */
   --shadow-3xl: 0 35px 120px rgba(1,61,49,0.25);

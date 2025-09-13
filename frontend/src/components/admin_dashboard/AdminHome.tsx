@@ -2,10 +2,11 @@ import logo from "../../assets/logo.svg";
 import hugeRobotHand from "../../assets/huge_robot_hand.png";
 import hugeRobotHand2 from "../../assets/huge_robot_hand_2.png";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, type HTMLMotionProps } from "framer-motion";
 
 import { businessName } from "../../utils/BusinessInfo";
 import { routes } from "../../routes/routes";
+
 
 const AdminHome = () => {
   // routes
@@ -15,7 +16,7 @@ const AdminHome = () => {
   const navigate = useNavigate();
 
   const handleClick = (e, state) => {
-    console.log("E.value: ", state);
+    console.log("E.value: ", e);
     if (state === "Login") {
       navigate(loginRoute);
     } else {
@@ -36,7 +37,7 @@ const AdminHome = () => {
               Login
             </button>
             <button
-              onClick={(e) => handleClick(e)}
+              onClick={(e) => handleClick(e, "Signup")}
               className="p-1 mr-3 text-white rounded-lg cursor-pointer text-md bg-quartiary hover:text-secondary-dark hover:bg-quartiary-dark"
             >
               Cadastrar

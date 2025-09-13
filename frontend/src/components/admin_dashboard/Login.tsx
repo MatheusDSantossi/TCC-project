@@ -87,7 +87,7 @@ const Login = () => {
               Login
             </h2>
           </div>
-          <Box className={"itemBox mb-3"}>
+          <Box className={"itemBox"}>
             <CustomTextField
               label={"Email"}
               name={"email"}

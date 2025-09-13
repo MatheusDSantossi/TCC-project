@@ -258,7 +258,7 @@ function ProductRegistration() {
               <div className="flex items-center">
                 <label
                   htmlFor="productPrice"
-                  className="block text-lg font-semibold text-white"
+                  className="block text-lg font-semibold text-white -mb-5"
                 >
                   Preço do Produto (R$)
                 </label>

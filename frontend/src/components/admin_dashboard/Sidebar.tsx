@@ -11,6 +11,7 @@ import logo from "../../assets/logo.svg";
 import "../../App.css";
 
 import * as motion from "motion/react-client";
+import type { NavTree } from "../../types/NavTypes";
 
 function Sidebar({ onSidebarToggle, changeComponent }) {
   // States
@@ -76,12 +77,7 @@ const navVariants = {
   },
 };
 
-type listItemsNavProps = {
-  icon: ReactNode;
-  component: "string"; 
-}
-
-const listItemsNav = {
+const listItemsNav: NavTree = {
   // Dashboard: {
   //   icon: <BsGrid1X2Fill />,
   //   component: "dashboard",

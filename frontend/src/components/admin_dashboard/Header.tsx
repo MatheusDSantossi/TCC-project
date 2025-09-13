@@ -48,7 +48,7 @@ function Header() {
   };
 
   return (
-    <header className="flex items-center justify-between p-5 drop-shadow-3xl bg-primary">
+    <header className="flex items-center justify-between p-5 shadow-3xl bg-primary">
       {/* <div className="flex items-center justify-around space-x-4"> */}
       <span className="absolute mr-20 text-lg font-semibold transform -translate-x-1/2 left-1/2">
         Bem-vindo ao {businessName} ({businessSlug})
@@ -90,7 +90,7 @@ function Header() {
               <p className="text-sm font-medium">
                 <span className="font-semibold">Logado como:</span> {userName}
                 <ListItemPrefix
-                  className="flex justify-center p-2 mt-4 cursor-pointer hover:bg-red-500 hover:rounded"
+                  className="flex justify-center items-center p-2 mt-4 cursor-pointer hover:bg-red-500 hover:rounded mx-auto"
                   onClick={handleLogout}
                 >
                   <MdLogout className="w-5 h-5 mr-3" />

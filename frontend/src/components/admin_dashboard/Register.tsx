@@ -74,15 +74,21 @@ const Register = () => {
             </h2>
           </div>
 
-          <Box className={"itemBox mb-3"}>
-            <CustomTextField label={"Email"} name={"email"} control={control} />
+          <Box className={"itemBox"}>
+            <CustomTextField
+              label={"Email"}
+              name={"email"}
+              control={control}
+              size={"small"}
+            />
           </Box>
 
-          <Box className={"itemBox  mb-3"}>
+          <Box className={"itemBox "}>
             <CustomPasswordField
               label={"Senha"}
               name={"password"}
               control={control}
+              size={"small"}
             />
           </Box>
 
@@ -91,6 +97,7 @@ const Register = () => {
               label={"Confirmar Senha"}
               name={"password2"}
               control={control}
+              size={"small"}
             />
           </Box>
 

@@ -22,8 +22,8 @@ import InviteRegister from "./components/InviteRegister";
 import InformBusiness from "./components/InformBusiness";
 import { routes } from "./routes/routes";
 
-const LIGHT_ICON = '/logo.svg';
-const DARK_ICON = '/logo_darker.svg';
+const LIGHT_ICON = "/logo.svg";
+const DARK_ICON = "/logo_darker.svg";
 
 function App() {
   // routes
@@ -45,10 +45,10 @@ function App() {
   const OpenSidebar = () => {
     setOpenSidebarToggle(!openSidebarToggle);
   };
-  
+
   return (
     <div className="w-full">
-      <div className="absolute top-0 left-0 z-10 w-full" >
+      <div className="absolute top-0 left-0 z-10 w-full">
         {/* <div className="z-1" > */}
         <Routes>
           <Route path="/" element={<InformBusiness />} />
@@ -56,13 +56,24 @@ function App() {
           <Route path={registerRoute} element={<Register />} />
           <Route path={loginRoute} element={<Login />} />
           <Route path={requestPasswordRoute} element={<ForgetPassword />} />
-          <Route path={requestPasswordTokenRoute} element={<ForgetPasswordReset />} />
+          <Route
+            path={requestPasswordTokenRoute}
+            element={<ForgetPasswordReset />}
+          />
           <Route path={adminHomeRoute} element={<AdminHome />} />
           <Route path={chatbotMainRoute} element={<Chatbot />} />
           <Route path={invitationRegisterRoute} element={<InviteRegister />} />
-          
+
           <Route element={<ProtectedRoute />}>
-            <Route path={adminMainRoute} element={<AdminDashboard openSidebarToggle={openSidebarToggle} OpenSidebar={OpenSidebar} />} />
+            <Route
+              path={adminMainRoute}
+              element={
+                <AdminDashboard
+                  // openSidebarToggle={openSidebarToggle}
+                  // OpenSidebar={OpenSidebar}
+                />
+              }
+            />
           </Route>
         </Routes>
       </div>
@@ -73,7 +84,7 @@ function App() {
           <RocketCanvas />
         </div> */}
     </div>
-  )
+  );
 }
 
 export default App;

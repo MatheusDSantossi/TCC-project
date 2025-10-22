@@ -2,10 +2,11 @@ export enum ExceptionVariant {
   ERROR = "error",
   INFO = "info",
   CONFIRMATION = "confirmation",
-};
+}
 
 export interface ExceptionPayload {
-  text: string; 
+  text: string;
   error?: any;
   variant?: string;
+  onClose?: () => void;
 }

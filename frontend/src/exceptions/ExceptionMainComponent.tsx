@@ -1,4 +1,7 @@
-import { ExceptionVariant, type ExceptionPayload } from "./ExceptionVariantsTypes";
+import {
+  ExceptionVariant,
+  type ExceptionPayload,
+} from "./ExceptionVariantsTypes";
 import { MdContentCopy } from "react-icons/md";
 import CustomButton from "../components/custom/CustomButton";
 import { IoMdCloseCircleOutline } from "react-icons/io";
@@ -7,7 +10,16 @@ import { IoInformationCircleSharp } from "react-icons/io5";
 import { BsFillQuestionCircleFill } from "react-icons/bs";
 import { useState } from "react";
 
-const ExceptionMainComponent = ({ text, error, variant }: ExceptionPayload) => {
+const ExceptionMainComponent = ({
+  text,
+  error,
+  variant,
+  onClose,
+}: ExceptionPayload) => {
+  const handleOk = () => {
+    onClose?.();
+  };
+
   // console.log("error: ", error)
   // State
   const extendErrorMessage = error.message + " " + error.code;
@@ -60,7 +72,8 @@ const ExceptionMainComponent = ({ text, error, variant }: ExceptionPayload) => {
             text={"Ok"}
             type="submit"
             onClick={() => {
-              setDisplay("none");
+              // setDisplay("none");
+              handleOk();
             }}
           />
         </div>
@@ -95,7 +108,8 @@ const ExceptionMainComponent = ({ text, error, variant }: ExceptionPayload) => {
             text={"Ok"}
             type="submit"
             onClick={() => {
-              setDisplay("none");
+              // setDisplay("none");
+              handleOk();
             }}
           />
         </div>
@@ -131,6 +145,7 @@ const ExceptionMainComponent = ({ text, error, variant }: ExceptionPayload) => {
             type="submit"
             onClick={() => {
               setDisplay("none");
+              handleOk();
             }}
           />
         </div>

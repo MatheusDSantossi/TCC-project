@@ -56,15 +56,15 @@ const ExceptionMainComponent = ({
           {/* Header */}
           <header className="flex items-center gap-3 mb-4">
             {variant === ExceptionVariant.ERROR && (
-              <IoMdCloseCircleOutline className="text-error" size={36} />
+              <IoMdCloseCircleOutline className="text-error" size={40} />
             )}
             {variant === ExceptionVariant.INFO && (
-              <IoInformationCircleSharp className="text-info" size={36} />
+              <IoInformationCircleSharp className="text-info" size={40} />
             )}
             {variant === ExceptionVariant.CONFIRMATION && (
               <BsFillQuestionCircleFill
                 className="text-confirmation"
-                size={36}
+                size={40}
               />
             )}
             <h2 className="text-lg font-semibold text-primary">
@@ -78,7 +78,7 @@ const ExceptionMainComponent = ({
           </header>
 
           {/* Body: small box with copy button and message */}
-          <div className="relative flex items-start gap-3 bg-white border rounded p-3 mb-4">
+          <div className="relative flex items-start gap-3 bg-white border rounded p-3 mb-4 shadow">
             <div className="flex shrink-0">
               {copied ? (
                 <FaClipboardCheck

@@ -6,6 +6,8 @@ interface customButtonProps {
   width?: string;
   height?: string;
   paddingTop?: string;
+  tooltipContent?: string | ReactNode;
+  tooltipPosition?: "right" | "left" | "top" | "bottom";
   rounded?: boolean;
   onClick?: () => void;
   type?: string;
@@ -18,6 +20,8 @@ const CustomButton = ({
   height = "130px",
   paddingTop: padding = "4px",
   rounded = true,
+  tooltipContent = "Copiar",
+  tooltipPosition = "top",
   onClick,
   type,
 }: customButtonProps) => {
@@ -32,6 +36,9 @@ const CustomButton = ({
         padding: padding,
       }}
       onClick={onClick}
+      data-tooltip-id="custom-button-tooltip"
+      data-tooltip-content={tooltipContent}
+      data-tooltip-place={tooltipPosition}
     >
       {text}
       {icon && <div>{icon}</div>}

@@ -7,7 +7,6 @@ import { motion, type HTMLMotionProps } from "framer-motion";
 import { businessName } from "../../utils/BusinessInfo";
 import { routes } from "../../routes/routes";
 
-
 const AdminHome = () => {
   // routes
   const loginRoute = routes.form.login;
@@ -25,20 +24,20 @@ const AdminHome = () => {
   };
 
   return (
-    <div className="overflow-hidden">
+    <div className="overflow-hidden h-screen">
       <div className="p-3 drop-shadow-3xl bg-primary">
         <div className="flex items-center justify-between mx-4 md:mx-8">
           <img src={logo} alt="logo" className="h-10" />
           <div className="flex">
             <button
               onClick={(e) => handleClick(e, "Login")}
-              className="p-1 mr-3 text-white rounded-lg cursor-pointer text-md bg-quartiary hover:text-secondary-dark hover:bg-quartiary-dark"
+              className="p-1 mr-3 text-white rounded-lg cursor-pointer text-md bg-quaternary hover:text-secondary-dark hover:bg-quaternary-dark"
             >
               Login
             </button>
             <button
               onClick={(e) => handleClick(e, "Signup")}
-              className="p-1 mr-3 text-white rounded-lg cursor-pointer text-md bg-quartiary hover:text-secondary-dark hover:bg-quartiary-dark"
+              className="p-1 mr-3 text-white rounded-lg cursor-pointer text-md bg-quaternary hover:text-secondary-dark hover:bg-quaternary-dark"
             >
               Cadastrar
             </button>

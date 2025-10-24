@@ -87,7 +87,7 @@ const InviteRegister = () => {
             <h2 className="mb-6 text-xl font-semibold text-center left-40">
               Bem-vindo, {email}
               <br />
-              <span className="text-quartiary">Empresa: {business}</span>
+              <span className="text-quaternary">Empresa: {business}</span>
             </h2>
           </div>
 

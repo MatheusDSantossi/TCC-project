@@ -40,116 +40,78 @@ const ExceptionMainComponent = ({
   return (
     <div
       key={display}
-      className="mx-auto absolute text-[14px]"
-      style={{ display: display }}
+      className="fixed inset-0 z-[1000] flex items-center justify-center text-[14px]"
     >
-      {variant === ExceptionVariant.ERROR && (
-        <div className="flex flex-col justify-start w-[500px] h-[150px] px-6 pb-46 pt-4 mx-auto rounded border-2 border-error bg-gray-100 shadow-2xl">
-          <header className="text-base text-start">
-            <IoMdCloseCircleOutline className="text-error" size={40} />
-            <h1 className="text-primary pb-3">Error: {text}</h1>
-            {/* <h3 className="text-primary">{text}</h3> */}
-          </header>
-          <div className="flex flex-col p-3 bg-white border-2 top-1/2 border-primary mb-4">
-            {copied ? (
-              <FaClipboardCheck
-                className="items-end justify-end relative cursor-pointer text-primary hover:text-secondary-dark"
-                size={16}
-              />
-            ) : (
-              <MdContentCopy
-                className="items-end justify-end relative cursor-pointer text-primary hover:text-secondary-dark"
-                onClick={handleCopyClick}
-                size={16}
-              />
-            )}
-            <p className="absolute ml-10 text-[#9E9E9E]">
-              {extendErrorMessage}{" "}
-            </p>
-          </div>
-          <CustomButton
-            width="100px"
-            text={"Ok"}
-            type="submit"
-            onClick={() => {
-              // setDisplay("none");
-              handleOk();
-            }}
-          />
-        </div>
-      )}
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-black/50" onClick={handleOk} />
 
-      {variant === ExceptionVariant.INFO && (
-        <div className="flex flex-col justify-start w-[500px] h-[150px] px-6 pb-46 pt-4 mx-auto rounded border-2 border-info bg-gray-100 shadow-2xl">
-          <header className="text-base text-start">
-            <IoInformationCircleSharp className="text-info" size={40} />
-            <h1 className="text-primary pb-3">Info: {text}</h1>
-            {/* <h3 className="text-primary">{text}</h3> */}
-          </header>
-          <div className="flex flex-col p-3 bg-white border-2 top-1/2 border-primary mb-4">
-            {copied ? (
-              <FaClipboardCheck
-                className="items-end justify-end relative cursor-pointer text-primary hover:text-secondary-dark"
-                size={16}
-              />
-            ) : (
-              <MdContentCopy
-                className="items-end justify-end relative cursor-pointer text-primary hover:text-secondary-dark"
-                onClick={handleCopyClick}
-                size={16}
+      {/* Modal card */}
+      <div
+        // responsive width, limited height, scroll inside if content too tall
+        className="relative z-10 w-full max-w-lg mx-4 bg-gray-100 rounded-l-2xl shadow-2xl border-2 border-primary max-h-[80vh] overflow-y-auto"
+        role="dialog"
+      >
+        {/* Padding and layout inside */}
+        <div className="p-6">
+          {/* Header */}
+          <header className="flex items-center gap-3 mb-4">
+            {variant === ExceptionVariant.ERROR && (
+              <IoMdCloseCircleOutline className="text-error" size={36} />
+            )}
+            {variant === ExceptionVariant.INFO && (
+              <IoInformationCircleSharp className="text-info" size={36} />
+            )}
+            {variant === ExceptionVariant.CONFIRMATION && (
+              <BsFillQuestionCircleFill
+                className="text-confirmation"
+                size={36}
               />
             )}
-            <p className="absolute ml-10 text-[#9E9E9E]">
-              {extendErrorMessage}{" "}
-            </p>
-          </div>
-          <CustomButton
-            width="100px"
-            text={"Ok"}
-            type="submit"
-            onClick={() => {
-              // setDisplay("none");
-              handleOk();
-            }}
-          />
-        </div>
-      )}
+            <h2 className="text-lg font-semibold text-primary">
+              {variant === ExceptionVariant.ERROR
+                ? "Error: "
+                : variant === ExceptionVariant.INFO
+                ? "Info: "
+                : "Confirmation: "}
+              <span className="font-normal ml-1">{text}</span>
+            </h2>
+          </header>
 
-      {variant === ExceptionVariant.CONFIRMATION && (
-        <div className="flex flex-col justify-start w-[500px] h-[150px] px-6 pb-46 pt-4 mx-auto rounded border-2 border-confirmation bg-gray-100 shadow-2xl">
-          <header className="text-base text-start">
-            <IoInformationCircleSharp className="text-confirmation" size={40} />
-            <h1 className="text-primary pb-3">Confirmation: {text}</h1>
-            {/* <h3 className="text-primary">{text}</h3> */}
-          </header>
-          <div className="flex flex-col p-3 bg-white border-2 top-1/2 border-primary mb-4">
-            {copied ? (
-              <FaClipboardCheck
-                className="items-end justify-end relative cursor-pointer text-primary hover:text-secondary-dark"
-                size={16}
-              />
-            ) : (
-              <MdContentCopy
-                className="items-end justify-end relative cursor-pointer text-primary hover:text-secondary-dark"
-                onClick={handleCopyClick}
-                size={16}
-              />
-            )}
-            <p className="absolute ml-10 text-[#9E9E9E]">
-              {extendErrorMessage}{" "}
-            </p>
+          {/* Body: small box with copy button and message */}
+          <div className="relative flex items-start gap-3 bg-white border rounded p-3 mb-4">
+            <div className="flex shrink-0">
+              {copied ? (
+                <FaClipboardCheck
+                  className="text-primary cursor-pointer"
+                  size={18}
+                />
+              ) : (
+                <MdContentCopy
+                  className="text-primary cursor-pointer hover:text-secondary-dark"
+                  size={18}
+                  onClick={handleCopyClick}
+                />
+              )}
+            </div>
+
+            <div className="text-sm text-gray-600 break-words">
+              {/* show extended error message; trimmed if too long */}
+              {extendErrorMessage}
+            </div>
           </div>
-          <CustomButton
-            width="100px"
-            text={"Ok"}
-            type="submit"
-            onClick={() => {
-              setDisplay("none");
-              handleOk();
-            }}
-          />
+
+          {/* Footer: actions */}
+          <div className="flex justify-end gap-3">
+            <CustomButton
+              width="80px"
+              height="35px"
+              text="Ok"
+              type="button"
+              onClick={handleOk}
+            />
+          </div>
         </div>
-      )}
+      </div>
     </div>
   );
 };

@@ -91,7 +91,7 @@ function ProductEdit({ open, onClose, product, onSave, refreshTable }) {
     <Dialog
       open={open}
       onClose={onClose}
-      className="flex items-center justify-center min-h-screen p-4 bg-tertiary"
+      className="flex items-center justify-center min-h-screen p-1 bg-tertiary overflow-y-hidden"
     >
       <div className="w-full max-w-2xl p-8 rounded-lg shadow-xl bg-primary">
         <MdOutlineClose

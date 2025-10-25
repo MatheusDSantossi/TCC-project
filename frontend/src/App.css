@@ -6,16 +6,24 @@
   --color-secondary: #F0FF3D;
   --color-secondary-dark: #CEE009FF;
   --color-tertiary: #013D31;
-  --color-quartiary: #5D76D3;
-  --color-quartiary-dark: #2F4EBEFF;
+  --color-quaternary: #5D76D3;
+  --color-quaternary-dark: #2F4EBEFF;
   --color-black-100: #100d25;
   --color-black-200: #090325;
   --color-white-100: #f3f3f3;
   --color-white-200: #E0FFFF;
   --color-input: #121212;
 
-  /* Drop Shadow */
-  --drop-shadow-3xl: 0 35px 120px rgba(1, 61, 49, 1);
+  /* Hover colors */
+  --color-button-hover-green: #1b4332;
+
+  /* Exception colors */
+  --color-error: #c1121f;
+  --color-info: #F0E716;
+  --color-confirmation: #38d430;
+
+  /* Shadow */
+  --shadow-3xl: 0 35px 120px rgba(1,61,49,0.25);
 
   /* Font Size */
   --text-xs: 0.75rem;

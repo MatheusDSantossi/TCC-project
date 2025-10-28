@@ -48,7 +48,7 @@ const ExceptionMainComponent = ({
       {/* Modal card */}
       <div
         // responsive width, limited height, scroll inside if content too tall
-        className="relative z-10 w-full max-w-lg mx-4 bg-gray-100 rounded-l-2xl shadow-2xl border-2 border-primary max-h-[80vh] overflow-y-auto"
+        className={`relative z-10 w-full max-w-lg mx-4 bg-gray-100 rounded-l-2xl shadow-2xl border-3 max-h-[80vh] overflow-y-auto ${variant === ExceptionVariant.ERROR ? "border-error" : variant === ExceptionVariant.INFO ? "border-info" : "border-confirmation"}`}
         role="dialog"
       >
         {/* Padding and layout inside */}

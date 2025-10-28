@@ -118,7 +118,7 @@ function ProductRegistration() {
           <div className="relative inline-block rounded-md bg-primary px-1 py-1">
             {/* moving pill */}
             <div
-              className="absolute top-1 left-1 bottom-1 rounded-md bg-quaternary shadow transition-all duration-300 ease-in-out"
+              className="absolute left-1 bottom-0 h-1 rounded-md bg-quaternary shadow transition-all duration-300 ease-in-out"
               style={{
                 width: `calc(100% / ${2} - 0.5rem)`, // subtract gap/padding
                 transform: `translateX(${activeTab * 100}%)`,
@@ -142,12 +142,12 @@ function ProductRegistration() {
             </ul>
           </div>
         </div>
-        <div className="w-full md:w-[570px] xl:w-4xl md:h-[660px] xl:h-[630px] max-w-4xl p-8 rounded-lg shadow-xl bg-primary">
+        <div className="w-full md:w-[570px] xl:w-4xl md:h-[660px] xl:h-[630px] max-w-4xl p-8 rounded-lg shadow-xl bg-primary  transition-all duration-300 ease">
           {activeTab === 0 ? (
             <div>
-              <div className="flex items-center justify-center mb-5">
+              <div className="flex items-center mb-7">
                 <img className="w-20 mr-4" src={logo} alt="Hecate's logo" />
-                <h2 className="mb-6 text-2xl font-semibold text-center left-40">
+                <h2 className="mb-6 m-auto text-2xl font-semibold text-center left-40">
                   Cadastro de Produtos
                 </h2>
               </div>

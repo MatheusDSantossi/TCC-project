@@ -4,6 +4,8 @@ import Papa from "papaparse";
 import AxiosInstance from "./AxiosInstance";
 import { useException } from "../context/ExceptionContext";
 import { ExceptionVariant } from "../exceptions/ExceptionVariantsTypes";
+import CustomButton from "./forms/Button";
+import ReactiveButton from "reactive-button";
 
 type Row = {
   name?: string;
@@ -48,8 +50,10 @@ function normalizeRow(row: Row) {
 }
 
 const ProductRegistrationByFile = () => {
+  // States
   const [file, setFile] = useState<File | null>(null);
   const [progress, setProgress] = useState({ done: 0, total: 0 });
+  const [buttonState, setButtonState] = useState("idle");
 
   const { showException } = useException();
 
@@ -65,11 +69,15 @@ const ProductRegistrationByFile = () => {
 
   const handleFile = (f: File | null) => setFile(f);
 
+  // * IMPORTANT: To test out this feature I need first to create a new business, so it won't affect the businesses I have now.
+
   const uploadParsed = async (rows: Row[]) => {
     if (rows.length === 0) return;
 
     const batchSize = 200; // tune based on backend limits
     setProgress({ done: 0, total: rows.length });
+
+    console.log("rows: ", rows);
 
     for (let i = 0; i < rows.length; i += batchSize) {
       const batch = rows.slice(i, i + batchSize).map(normalizeRow);
@@ -124,10 +132,12 @@ const ProductRegistrationByFile = () => {
 
   return (
     <div className="justify-center">
-      <img className="w-20 mr-4" src={logo} alt="Hecate's logo" />
-      <h2 className="mb-6 text-2xl font-semibold text-center left-40">
-        Cadastro usando arquivo do produto
-      </h2>
+      <div className="flex items-center mb-7">
+        <img className="w-20 mr-4" src={logo} alt="Hecate's logo" />
+        <h2 className="mb-6 m-auto text-2xl font-semibold text-center left-40">
+          Cadastro usando arquivo do produto
+        </h2>
+      </div>
       <input
         className="block shadow-2xl! w-full text-sm
               file:mr-4 file:py-2 file:px-3
@@ -145,9 +155,27 @@ const ProductRegistrationByFile = () => {
         id="file_select"
         onChange={(e) => handleFile(e.target.files?.[0] ?? null)}
       />
-      <button onClick={handleUpload} disabled={!file}>
+      <div className="mt-5">
+        <ReactiveButton
+          className="text-primary hover:bg-yellow-300"
+          disabled={!file}
+          buttonState={buttonState}
+          color="yellow"
+          type={"submit"}
+          loadingText="Carregando..."
+          successText={"Upload feito com sucesso"}
+          idleText={"Upload"}
+          animation="true"
+          rounded="true"
+          width={120}
+          height={40}
+          size="large"
+          onClick={handleUpload}
+        />
+      </div>
+      {/* <button onClick={handleUpload} disabled={!file}>
         Upload
-      </button>
+      </button> */}
       <div>
         Uploaded {progress.done} / {progress.total}
       </div>

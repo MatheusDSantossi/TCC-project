@@ -118,7 +118,7 @@ function ProductRegistration() {
           <div className="relative inline-block rounded-md bg-primary px-1 py-1">
             {/* moving pill */}
             <div
-              className="absolute left-1 bottom-0 h-1 rounded-md bg-quaternary shadow transition-all duration-300 ease-in-out"
+              className="absolute left-1 bottom-0 h-1 rounded-md bg-quaternary shadow transition-all duration-300 ease-in-out "
               style={{
                 width: `calc(100% / ${2} - 0.5rem)`, // subtract gap/padding
                 transform: `translateX(${activeTab * 100}%)`,
@@ -126,7 +126,7 @@ function ProductRegistration() {
             />
             <ul className="relative flex">
               {tabs.map((label, i) => (
-                <li key={label} className="flex-1">
+                <li key={label} className="flex-1 hover:bg-button-hover-green">
                   <button
                     className={
                       "relative z-10 w-full px-6 py-2 text-sm font-medium rounded-md focus:outline-none"

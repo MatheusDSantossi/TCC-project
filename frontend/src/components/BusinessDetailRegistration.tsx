@@ -127,10 +127,10 @@ function BusinessDetailRegistration() {
             loadingText="Carregando..."
             successText={"Cadastrado com sucesso"}
             idleText={"Cadastrar"}
-            animation="true"
-            rounded="true"
-            width={120}
-            height={40}
+            animation={true}
+            rounded={true}
+            width={"120"}
+            height={"40"}
             size="large"
             // onClick={registerProduct}
           />

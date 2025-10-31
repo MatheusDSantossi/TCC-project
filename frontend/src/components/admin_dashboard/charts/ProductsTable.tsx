@@ -4,7 +4,7 @@ import { IconButton } from "@mui/material";
 import { MdEdit } from "react-icons/md";
 import { useState } from "react";
 import AxiosInstance from "../../AxiosInstance";
-import ProductEdit from "../../ProductEdit";
+import ProductEdit from "../../productsRegistration/ProductEdit";
 
 export default function ProductsTable({ products_data, onProductUpdate }) {
   const [editModalOpen, setEditModalOpen] = useState(false);

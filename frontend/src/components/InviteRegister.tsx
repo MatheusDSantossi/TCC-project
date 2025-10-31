@@ -127,10 +127,10 @@ const InviteRegister = () => {
               loadingText="Loading..."
               successText={"Cadastrador com sucesso"}
               idleText={"Cadastrar"}
-              animation="true"
-              rounded="true"
+              animation={true}
+              rounded={true}
               width={80}
-              height={40}
+              height={"40"}
               size="large"
             />
           </div>

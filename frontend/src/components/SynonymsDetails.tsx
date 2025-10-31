@@ -5,12 +5,12 @@ import { BsEraserFill, BsInfoCircleFill } from "react-icons/bs";
 import InfoDialogScreen from "./InfoDialogScreen";
 // Component
 
-interface synonymDetailsProps {
-  formData: string
-  setFormData: string
-  setProductSynonyms: () => void;
-  resetKey: string
-  previousProductSynonyms: string
+interface SynonymDetailsProps {
+  formData?: string;
+  setFormData?: any;
+  setProductSynonyms: any;
+  resetKey: string | number;
+  previousProductSynonyms: any[];
 }
 
 const SynonymDetails = ({
@@ -19,7 +19,7 @@ const SynonymDetails = ({
   setProductSynonyms,
   resetKey,
   previousProductSynonyms,
-}) => {
+}: SynonymDetailsProps) => {
   const [productLocalSynonyms, setProductsLocalSynonyms] = useState([]);
   const [inputValue, setInputValue] = useState("");
   const inputRef = useRef(null);
@@ -56,7 +56,7 @@ const SynonymDetails = ({
       initialLoadRef.current = false;
     }
   }, [previousProductSynonyms]);
-  
+
   useEffect(() => {
     if (inputRef.current) {
       inputRef.current.focus();
@@ -64,7 +64,6 @@ const SynonymDetails = ({
   }, [productLocalSynonyms]);
 
   const handleKeyUp = (e) => {
-    
     if (e.key === "   ") {
       const trimmed = inputValue.trim();
 
@@ -111,10 +110,14 @@ const SynonymDetails = ({
         <InfoDialogScreen
           infoText={
             <h2>
-              Sinônimos do produto, esse campo é <span className="font-semibold">opcional</span><br></br>
+              Sinônimos do produto, esse campo é{" "}
+              <span className="font-semibold">opcional</span>
+              <br></br>
               Exemplo: Para cadastrar Refrigerante Cola com sinônimos:<br></br>
-              <span className="font-semibold">Refri</span> (pressione Tab) → <span className="font-semibold">Cola</span>{" "}
-              (pressione Tab) → <span className="font-semibold">Bebida gaseificada</span> (pressione Tab)
+              <span className="font-semibold">Refri</span> (pressione Tab) →{" "}
+              <span className="font-semibold">Cola</span> (pressione Tab) →{" "}
+              <span className="font-semibold">Bebida gaseificada</span>{" "}
+              (pressione Tab)
             </h2>
           }
         />

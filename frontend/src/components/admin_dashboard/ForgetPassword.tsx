@@ -93,10 +93,10 @@ const ForgetPassword = () => {
             loadingText="Carregando..."
             successText={"Sucesso!"}
             idleText={"Solicitar redefinição de senha"}
-            animation="true"
-            rounded="true"
+            animation={true}
+            rounded={true}
             width={250}
-            height={40}
+            height={"40"}
             size="large"
           />
 

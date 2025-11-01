@@ -130,6 +130,16 @@ const ProductRegistrationByFile = () => {
     }
   };
 
+  const uploadFile = async (file: File) => {
+    const form = new FormData();
+    form.append("file", file);
+
+    const res = await AxiosInstance.post("/api/products/import/", form, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return res.data;
+  };
+
   return (
     <div className="w-full md:w-[570px] xl:w-4xl md:h-[660px] xl:h-[630px] max-w-4xl p-8 rounded-lg shadow-xl bg-primary  transition-all duration-300 ease">
       <div className="justify-center">
@@ -171,15 +181,15 @@ const ProductRegistrationByFile = () => {
             width={"120"}
             height={"40"}
             size="large"
-            onClick={handleUpload}
+            // onClick={handleUpload}
+            onClick={() => {
+              uploadFile(file);
+            }}
           />
         </div>
-        {/* <button onClick={handleUpload} disabled={!file}>
-        Upload
-      </button> */}
-        <div>
+        {/* <div>
           Uploaded {progress.done} / {progress.total}
-        </div>
+        </div> */}
       </div>
     </div>
   );

@@ -13,12 +13,12 @@ type TabsType = {
 const tabs: TabsType = [
   {
     label: "Cadastro Manual",
-    index: 1,
+    index: 0,
     Component: TabManual,
   },
   {
     label: "Cadastro Automático",
-    index: 2,
+    index: 1,
     Component: ProductRegistrationByFile,
   },
 ];

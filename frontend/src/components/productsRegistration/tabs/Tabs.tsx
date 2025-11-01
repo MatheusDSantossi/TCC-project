@@ -1,17 +1,23 @@
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import styles from "./Tabs.module.css";
 
-type TabsProps = {
-  tabs: {
-    label: String;
-    index: number;
-    Component: React.FC<{ index: number }>;
-  }[];
-  selectedTab: number;
+export type TabItem = {
+  label: string;
+  index: number | string;
+  Component?: React.ComponentType<{ index: number }>;
+};
+
+export type TabsProps = {
+  tabs: TabItem[];
+  selectedTab?: number | string;
+  defaultTab?: number | string;
   onClick: (index: number) => void;
   orientation?: "horizontal" | "vertical";
   className?: string;
 };
+
+const toNumber = (v?: number | string | null) =>
+  typeof v === "number" ? v : v ? Number(v) : NaN;
 
 /**
  * Available Props
@@ -27,33 +33,80 @@ const Tabs: React.FC<TabsProps> = ({
   className = `${styles.tabsComponent}`,
   tabs = [],
   selectedTab = 0,
+  defaultTab,
   onClick,
   orientation = "horizontal",
 }) => {
-  const Panel = tabs && tabs.find((tab) => tab.index === selectedTab);
+  // Coerce tabs to internal representation with numeric indexes
+  const normalizedTabs = useMemo(
+    () =>
+      tabs.map((t) => ({
+        ...t,
+        _index: toNumber(t.index),
+      })),
+    [tabs]
+  );
 
-  console.log("selected tab (tabs): ", selectedTab);
-  console.log("tab index (tabs): ", tabs[0].index);
+  // Internal state only used if `selectedTab` prop is not provided (uncontrolled)
+  const [internal, setInternal] = useState<number>(() => {
+    if (defaultTab !== undefined) return toNumber(defaultTab);
 
+    // fallback to first tab index (or 0)
+    return normalizedTabs.length ? normalizedTabs[0]._index : 0;
+  });
+
+  // Active index: prefer controlled prop if present
+  const activeIndex = Number(
+    selectedTab !== undefined ? toNumber(selectedTab) : internal
+  );
+
+  // Ensure we have a sensible default (if parent passed an invalid index)
+  useEffect(() => {
+    if (Number.isNaN(activeIndex) && normalizedTabs.length) {
+      const fallback = normalizedTabs[0]._index;
+      if (selectedTab === undefined) setInternal(fallback);
+      if (typeof onClick === "function") onClick(fallback);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  });
+
+  const handleClick = (idx: number) => {
+    if (selectedTab === undefined) setInternal(idx); // uncontrolled: update internal state
+    if (onClick) onClick(idx);
+  };
+
+  // Keyboard navigation: left/right arrows (pass)
+
+  const ActivePanel = normalizedTabs.find((t) => t._index === activeIndex);
   return (
     <div
       className={
-        orientation === "vertical" ? className + " vertical" : className
+        orientation === "vertical" ? `${className} vertical` : className
       }
     >
-      <div role="tablist" aria-orientation={orientation}>
-        {tabs.map((tab) => {
+      <div
+        role="tablist"
+        aria-orientation={orientation}
+        className={styles.tabsList}
+      >
+        {normalizedTabs.map((tab) => {
+          const isActive = tab._index === activeIndex;
+
           return (
             <button
-              className={selectedTab === tab.index ? "active" : ""}
-              onClick={() => onClick(tab.index)}
               key={tab.index}
               type="button"
               role="tab"
-              aria-selected={selectedTab === tab.index}
-              aria-controls={`tabpanel-${tab.index}`}
-              tabIndex={selectedTab === tab.index ? 0 : -1}
-              id={`btn-${tab.index}`}
+              aria-selected={isActive}
+              aria-controls={`tabpanel-${tab._index}`}
+              id={`btn-${tab._index}`}
+              tabIndex={isActive ? 0 : -1}
+              className={`${
+                isActive
+                  ? `${styles.tabButton} ${styles.active}`
+                  : `${styles.tabButton}`
+              }`}
+              onClick={() => handleClick(tab._index)}
             >
               {tab.label}
             </button>
@@ -62,10 +115,13 @@ const Tabs: React.FC<TabsProps> = ({
       </div>
       <div
         role="tabpanel"
-        aria-labelledby={`btn-${selectedTab}`}
-        id={`tabpanel-${selectedTab}`}
+        id={`tabpanel-${activeIndex}`}
+        aria-labelledby={`btn-${activeIndex}`}
+        className={styles.tabPanel}
       >
-        {Panel && <Panel.Component index={selectedTab} />}
+        {ActivePanel?.Component ? (
+          <ActivePanel.Component index={activeIndex} />
+        ) : null}
       </div>
     </div>
   );

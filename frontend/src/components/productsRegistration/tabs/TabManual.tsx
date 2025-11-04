@@ -1,23 +1,183 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useReducer, useState } from "react";
 import logo from "../../../assets/logo.svg";
 import AxiosInstance from "../../AxiosInstance";
 import ReactiveButton from "reactive-button";
 import SynonymDetails from "../../SynonymsDetails";
 import InfoDialogScreen from "../../InfoDialogScreen";
 
+type Suggestion = { name: string; [k: string]: any };
+
+type ButtonState = "idle" | "loading" | "success" | "error";
+
+export type ProductState = {
+  productName: string;
+  productBrand: string;
+  productQuantityFormat: string;
+  productSection: string;
+  productPrice: string;
+  productMetricUnity: string;
+  productAvailability: string;
+  productSynonyms: string[]; // array of synonyms
+  resetKey: number; // used to force child resets
+  suggestions: Suggestion[];
+  buttonState: ButtonState;
+};
+
+export const initialProductState: ProductState = {
+  productName: "",
+  productBrand: "",
+  productQuantityFormat: "",
+  productSection: "",
+  productPrice: "",
+  productMetricUnity: "",
+  productAvailability: "",
+  productSynonyms: [],
+  resetKey: 0,
+  suggestions: [],
+  buttonState: "idle",
+};
+
+export type ProductAction =
+  | { type: "SET_PRODUCT_NAME"; payload: string }
+  | { type: "SET_PRODUCT_BRAND"; payload: string }
+  | { type: "SET_PRODUCT_QUANTITY_FORMAT"; payload: string }
+  | { type: "SET_PRODUCT_SECTION"; payload: string }
+  | { type: "SET_PRODUCT_PRICE"; payload: string }
+  | { type: "SET_PRODUCT_METRIC_UNITY"; payload: string }
+  | { type: "SET_PRODUCT_AVAILABILITY"; payload: string }
+  | { type: "SET_PRODUCT_SYNONYMS"; payload: string[] }
+  | { type: "ADD_PRODUCT_SYNONYM"; payload: string } // push single
+  | { type: "REMOVE_PRODUCT_SYNONYM"; payload: string } // remove by value
+  | { type: "SET_SUGGESTIONS"; payload: Suggestion[] }
+  | { type: "SET_BUTTON_STATE"; payload: ButtonState }
+  | { type: "INCREMENT_RESET_KEY" }
+  | { type: "RESET_FORM" };
+
+// Reducer
+export function productReducer(
+  state: ProductState,
+  action: ProductAction
+): ProductState {
+  switch (action.type) {
+    case "SET_PRODUCT_NAME":
+      return { ...state, productName: action.payload };
+    case "SET_PRODUCT_BRAND":
+      return { ...state, productBrand: action.payload };
+    case "SET_PRODUCT_QUANTITY_FORMAT":
+      return { ...state, productQuantityFormat: action.payload };
+    case "SET_PRODUCT_SECTION":
+      return { ...state, productSection: action.payload };
+    case "SET_PRODUCT_PRICE":
+      return { ...state, productPrice: action.payload };
+    case "SET_PRODUCT_METRIC_UNITY":
+      return { ...state, productMetricUnity: action.payload };
+    case "SET_PRODUCT_AVAILABILITY":
+      return { ...state, productAvailability: action.payload };
+    case "SET_PRODUCT_SYNONYMS":
+      return { ...state, productSynonyms: action.payload };
+    case "ADD_PRODUCT_SYNONYM":
+      return {
+        ...state,
+        productSynonyms: [...state.productSynonyms, action.payload],
+      };
+    case "REMOVE_PRODUCT_SYNONYM":
+      return {
+        ...state,
+        productSynonyms: state.productSynonyms.filter(
+          (s) => s !== action.payload
+        ),
+      };
+    case "SET_SUGGESTIONS":
+      return { ...state, suggestions: action.payload };
+    case "SET_BUTTON_STATE":
+      return { ...state, buttonState: action.payload };
+    case "INCREMENT_RESET_KEY":
+      return { ...state, resetKey: state.resetKey + 1 };
+    case "RESET_FORM":
+      // keep incremented resetKey so consumers depending on it will remount
+      return { ...initialProductState, resetKey: state.resetKey + 1 };
+    default:
+      return state;
+  }
+}
+
 const TabManual = () => {
   // States
-  const [productName, setProductName] = useState("");
-  const [productBrand, setProductBrand] = useState("");
-  const [productQuantityFormat, setProductQuantityFormat] = useState("");
-  const [productSection, setProductSection] = useState<string>("");
-  const [productPrice, setProductPrice] = useState("");
-  const [productMetricUnity, setProductMetricUnity] = useState("");
-  const [productAvailability, setProductAvailability] = useState("");
-  const [productSynonyms, setProductSynonyms] = useState([]);
-  const [resetKey, setResetKey] = useState(0);
-  const [suggestions, setSuggestions] = useState([]);
-  const [buttonState, setButtonState] = useState("idle");
+  // const [productName, setProductName] = useState("");
+  // const [productBrand, setProductBrand] = useState("");
+  // const [productQuantityFormat, setProductQuantityFormat] = useState("");
+  // const [productSection, setProductSection] = useState<string>("");
+  // const [productPrice, setProductPrice] = useState("");
+  // const [productMetricUnity, setProductMetricUnity] = useState("");
+  // const [productAvailability, setProductAvailability] = useState("");
+  // const [productSynonyms, setProductSynonyms] = useState([]);
+  // const [resetKey, setResetKey] = useState(0);
+  // const [suggestions, setSuggestions] = useState([]);
+  // const [buttonState, setButtonState] = useState("idle");
+
+  const [state, dispatch] = useReducer(productReducer, initialProductState);
+
+  // Destructure for easy usage
+  const {
+    productName,
+    productBrand,
+    productQuantityFormat,
+    productSection,
+    productPrice,
+    productMetricUnity,
+    productAvailability,
+    productSynonyms,
+    suggestions,
+    buttonState,
+    resetKey,
+  } = state;
+
+  const onNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    dispatch({ type: "SET_PRODUCT_NAME", payload: e.target.value });
+  }, []);
+  const onBrandChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      dispatch({ type: "SET_PRODUCT_BRAND", payload: e.target.value });
+    },
+    []
+  );
+  const onProductAvailabilityChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      dispatch({ type: "SET_PRODUCT_AVAILABILITY", payload: e.target.value });
+    },
+    []
+  );
+  const onMetricUnityChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      dispatch({ type: "SET_PRODUCT_METRIC_UNITY", payload: e.target.value });
+    },
+    []
+  );
+  const onPriceChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      dispatch({ type: "SET_PRODUCT_PRICE", payload: e.target.value });
+    },
+    []
+  );
+  const onQuantityFormatChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      dispatch({
+        type: "SET_PRODUCT_QUANTITY_FORMAT",
+        payload: e.target.value,
+      });
+    },
+    []
+  );
+  const onSectionChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      dispatch({ type: "SET_PRODUCT_SECTION", payload: e.target.value });
+    },
+    []
+  );
+
+  const onAddSynonym = useCallback((syn: string) => {
+    dispatch({ type: "ADD_PRODUCT_SYNONYM", payload: syn });
+  }, []);
 
   // TODO: The process of getting the list of possible products is taking a way too long time.
 
@@ -26,14 +186,15 @@ const TabManual = () => {
       AxiosInstance.get(`api/products/?search=${productName}`)
         .then((response) => {
           console.log(response.data);
-          setSuggestions(response.data);
+          dispatch({ type: "SET_SUGGESTIONS", payload: response.data });
+          // setSuggestions(response.data);
         })
         .catch((err) => {
           console.error("Error fetching product suggestions: ", err);
-          setSuggestions([]);
+          dispatch({ type: "SET_SUGGESTIONS", payload: [] });
         });
     } else {
-      setSuggestions([]);
+      dispatch({ type: "SET_SUGGESTIONS", payload: [] });
     }
   };
 
@@ -50,20 +211,39 @@ const TabManual = () => {
       const numberOfSection = selectedProduct.section.slice(-1);
       console.log("Selected product in PREGISTER: ", selectedProduct);
       console.log("Number of section: " + numberOfSection);
-      setProductBrand(selectedProduct.brand);
-      setProductQuantityFormat(selectedProduct.quantity);
-      setProductSection(numberOfSection);
-      setProductPrice(selectedProduct.price);
-      setProductMetricUnity(selectedProduct.unit);
-      setProductAvailability(selectedProduct.stock);
-      setProductSynonyms(selectedProduct.synonymous);
+      dispatch({ type: "SET_PRODUCT_BRAND", payload: selectedProduct.brand });
+      dispatch({
+        type: "SET_PRODUCT_QUANTITY_FORMAT",
+        payload: selectedProduct.quantity,
+      });
+      dispatch({ type: "SET_PRODUCT_SECTION", payload: numberOfSection });
+      dispatch({ type: "SET_PRODUCT_PRICE", payload: selectedProduct.price });
+      dispatch({
+        type: "SET_PRODUCT_METRIC_UNITY",
+        payload: selectedProduct.unit,
+      });
+      dispatch({
+        type: "SET_PRODUCT_AVAILABILITY",
+        payload: selectedProduct.stock,
+      });
+      dispatch({
+        type: "SET_PRODUCT_SYNONYMS",
+        payload: selectedProduct.synonymous,
+      });
+      // setProductBrand(selectedProduct.brand);
+      // setProductQuantityFormat(selectedProduct.quantity);
+      // setProductSection(numberOfSection);
+      // setProductPrice(selectedProduct.price);
+      // setProductMetricUnity(selectedProduct.unit);
+      // setProductAvailability(selectedProduct.stock);
+      // setProductSynonyms(selectedProduct.synonymous);
     }
   };
 
   const registerProduct = (e) => {
     e.preventDefault();
 
-    setButtonState("loading");
+    dispatch({ type: "SET_BUTTON_STATE", payload: "loading" });
 
     console.log("Product synonyms: ", productSynonyms);
 
@@ -83,22 +263,26 @@ const TabManual = () => {
         }
 
         setTimeout(() => {
-          setButtonState("success");
+          // setButtonState("success");
+          dispatch({ type: "SET_BUTTON_STATE", payload: "success" });
         }, 2000);
 
         console.log("Response: ", response);
-        setProductName("");
-        setProductBrand("");
-        setProductQuantityFormat("");
-        setProductSection("");
-        setProductPrice("");
-        setProductMetricUnity("");
-        setProductAvailability("");
-        setProductSynonyms([]);
-        setResetKey((prev) => prev + 1);
+
+        dispatch({ type: "RESET_FORM" });
+
+        // setProductName("");
+        // setProductBrand("");
+        // setProductQuantityFormat("");
+        // setProductSection("");
+        // setProductPrice("");
+        // setProductMetricUnity("");
+        // setProductAvailability("");
+        // setProductSynonyms([]);
+        // setResetKey((prev) => prev + 1);
       })
       .catch((error) => {
-        setButtonState("error");
+        dispatch({ type: "SET_BUTTON_STATE", payload: "error" });
         console.error("Error registering the product: ", error);
       });
   };
@@ -144,7 +328,8 @@ const TabManual = () => {
             className="w-full p-2 mt-1 rounded-lg bg-input focus:outline-none focus:ring-2 focus:ring-yellow-400"
             value={productName}
             list="productsSuggestions"
-            onChange={(e) => setProductName(e.target.value)}
+            onChange={onNameChange}
+            // onChange={(e) => setProductName(e.target.value)}
             onBlur={(e) => handleProductSelection(e.target.value)} // Triggered when a product is selected
           />
           <datalist id="productsSuggestions">
@@ -182,7 +367,7 @@ const TabManual = () => {
               required
               className="w-full p-2 mt-1 rounded-lg bg-input focus:outline-none focus:ring-2 focus:ring-yellow-400"
               value={productBrand}
-              onChange={(e) => setProductBrand(e.target.value)}
+              onChange={onBrandChange}
               placeholder="NESTLE"
             />
           </div>
@@ -213,7 +398,7 @@ const TabManual = () => {
               required
               className="w-full p-2 mt-1 rounded-lg bg-input focus:outline-none focus:ring-2 focus:ring-yellow-400"
               value={productQuantityFormat}
-              onChange={(e) => setProductQuantityFormat(e.target.value)}
+              onChange={onQuantityFormatChange}
               placeholder="24X200G"
             />
           </div>
@@ -242,7 +427,7 @@ const TabManual = () => {
               required
               className="w-full p-2 mt-1 rounded-lg bg-input focus:outline-none focus:ring-2 focus:ring-yellow-400"
               value={productSection}
-              onChange={(e) => setProductSection(e.target.value)}
+              onChange={onSectionChange}
               placeholder="Seção 1"
             />
           </div>
@@ -276,7 +461,7 @@ const TabManual = () => {
               required
               className="w-full p-2 mt-6 rounded-lg bg-input focus:outline-none focus:ring-2 focus:ring-yellow-400"
               value={productPrice}
-              onChange={(e) => setProductPrice(e.target.value)}
+              onChange={onPriceChange}
             />
           </div>
           {/* Product Metric Unity */}
@@ -310,7 +495,7 @@ const TabManual = () => {
               required
               className="w-full p-[10px] mt-1 rounded-lg bg-input focus:outline-none focus:ring-2 focus:ring-yellow-400"
               value={productMetricUnity}
-              onChange={(e) => setProductMetricUnity(e.target.value)}
+              onChange={onMetricUnityChange}
             >
               <option value="">Selecione uma opção</option>
               <option value="CX">CX</option>
@@ -351,14 +536,14 @@ const TabManual = () => {
               required
               className="w-full p-2 mt-1 mb-5 rounded-lg bg-input focus:outline-none focus:ring-2 focus:ring-yellow-400"
               value={productAvailability}
-              onChange={(e) => setProductAvailability(e.target.value)}
+              onChange={onProductAvailabilityChange}
               placeholder="100"
             />
           </div>
         </div>
         <div>
           <SynonymDetails
-            setProductSynonyms={setProductSynonyms}
+            setProductSynonyms={onAddSynonym}
             resetKey={resetKey}
             previousProductSynonyms={productSynonyms}
             // formData={formData}

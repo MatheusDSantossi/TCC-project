@@ -14,7 +14,8 @@ from django.db import transaction
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, permissions, parsers
-from chatbot.models import Product, Business
+from chatbot.models import Product
+from core.models import Business
 from django.contrib.postgres.fields import ArrayField
 import pandas as pd
 import regex as re

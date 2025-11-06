@@ -49,7 +49,7 @@ class Command(BaseCommand):
             # for row in reader:
         for _, row in df.iterrows():
             # Compute embedding only once
-            emb = embed_fn(find_section, genai, business, row['nome'])
+            emb = embed_fn(find_section, genai, biz, row['nome'])
             
             # batch.append(BigSuperProduct(
             batch.append(Product(
@@ -64,7 +64,7 @@ class Command(BaseCommand):
                 # margem_venda  = row['margem_venda'],
                 # markup_venda  = row['markup_venda'],
                 section = row['secao_produto'],
-                preco_venda   = row['preco_venda'],
+                price   = row['preco_venda'],
                 # ncm           = row.get('NCM',''),
                 # cest          = row.get('CEST',''),
                 # preco_custo   = row['preco_custo'],

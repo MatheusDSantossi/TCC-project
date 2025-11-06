@@ -65,7 +65,7 @@ def find_section(text: str, business_id: Optional[int] = None):
     # Search for the pattern in the input text (case-insensitive)
     match = re.search(pattern, text, re.IGNORECASE)
     
-    print("section Text (find section): ", text)
+    # print("section Text (find section): ", text)
     
     # if a match is found, return the matched section
     if match:
@@ -122,7 +122,7 @@ def find_brand(text: str, business_id: Optional[int]= None) -> Optional[List[Dic
     Look for known brand names in `text`. If found, return up to 30 matching products (name and brand). Returns None if no brand match.
     """
     
-    print("Text (find_brand): ", text)
+    # print("Text (find_brand): ", text)
     
     normalize_text = remove_accents(text).upper()
     
@@ -205,7 +205,7 @@ def find_quantity(text: str, business_id: Optional[int] = None) -> Optional[List
     if business_id:
         qs = qs.filter(business_id=business_id)
     
-    print(f"Found before name filter {len(qs)} matching products")
+    # print(f"Found before name filter {len(qs)} matching products")
     
     # TODO: Think about a efficient way to narrow by product name. Considering that the text contains more than the product name.
     name_filter = normalized_text.replace(quantity_str, "").strip()
@@ -217,11 +217,11 @@ def find_quantity(text: str, business_id: Optional[int] = None) -> Optional[List
     
     if not results:
         logger.debug("No matching products found")
-        print("No matching products found")
+        # print("No matching products found")
         return None
     
     logger.debug(f"Found {len(results)} matching products")
-    print(f"Found {len(results)} matching products")
+    # print(f"Found {len(results)} matching products")
     return list(results)
 
 def extract_only_product_name(text:str, generate_content_model: genai.GenerativeModel) -> str:
@@ -344,7 +344,7 @@ def find_similar_products_using_input_embeddings(user_text: str, embed_fn, gener
     # prod_phrase = extract_product_chunk(user_text)
     prod_phrase = extract_only_product_name(user_text, generate_content_model)
     
-    print("prod_phrase: ", prod_phrase)
+    # print("prod_phrase: ", prod_phrase)
     
     
     # Hybrid pre-filter
@@ -364,8 +364,8 @@ def find_similar_products_using_input_embeddings(user_text: str, embed_fn, gener
     # rows = list(pre_qs.values_list("product_id", "embeddings"))
     rows = pre_qs
     
-    print("ROws: ", [ids[0] for ids in rows])
-    # print("ROws: ", rows)
+    # print("ROws: ", [ids[0] for ids in rows])
+    print("ROws: ", rows)
     
     if not rows:
         return []
@@ -373,8 +373,8 @@ def find_similar_products_using_input_embeddings(user_text: str, embed_fn, gener
     # TODO: Enhance now from here down, because the products get are really good but the return or the continuation are losing them. Actullay see above if we can improve as well
     
     product_ids, embeddings = zip(*rows)
-    print("products ids: ", product_ids)
-    print("embeddings: ", embeddings)
+    # print("products ids: ", product_ids)
+    # print("embeddings: ", embeddings)
     embeddings = [np.array(e, dtype=np.float32) for e in embeddings]
     
     # Compute similarity scores
@@ -404,7 +404,7 @@ def find_similar_products_using_input_embeddings(user_text: str, embed_fn, gener
         for pid, score in similar if (prod:=products.get(pid))
     ]
 
-    print("Find similar products using input embedding result: ", result)
+    # print("Find similar products using input embedding result: ", result)
     
     return result
 

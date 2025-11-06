@@ -5,6 +5,15 @@
 OBS: This command is to fill the table with the products based on the xlsx file and during this process it creates the embeddings.
 python manage.py import_big_super path/to/file.xlsx --business big-super
 
+- This one is responsible for creating a new business
+
+python manage.py shell
+
+from django.contrib.auth import get_user_model
+User = get_user_model()
+u = User.objects.get(username="yourusername")
+Business.objects.create(name="My Store", slug="my-store", owner=u)
+
 ## Docker
 
 docker-compose down -v --remove-orphans

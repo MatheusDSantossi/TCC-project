@@ -73,6 +73,9 @@ class ProductImportView(APIView):
         """
         uploaded = request.FILES.get("file")
 
+        print("Incoming import request, content-type:", request.content_type)
+        print("FILES keys:", request.FILES.keys())
+
         if not uploaded:
             return Response({"detail", "No file"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -121,8 +124,8 @@ class ProductImportView(APIView):
                     return row[k]
             return ""
 
-        for idx, row in df.to_dict(orient="records"):
-            pass
+        # for idx, row in df.to_dict(orient="records"):
+        #     pass
 
         # simpler loop
         for i, raw in enumerate(df.to_dict(orient="records")):
@@ -167,6 +170,8 @@ class ProductImportView(APIView):
                     synonymous=synonyms,  # if field is jsonb or ArrayField adapt accordingly
                 )
                 products_to_create.append(product)
+
+                print("product: ", product)
 
             except Exception as e:
                 errors.append({"row": i + 1, "error": str(e)})

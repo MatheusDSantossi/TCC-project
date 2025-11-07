@@ -28,6 +28,8 @@ const SynonymDetails = ({
   // Ref to check if initial load is done
   const initialLoadRef = useRef(true);
 
+  console.log("previousProductSynonyms: ", previousProductSynonyms);
+
   useEffect(() => {
     // console.log("Form Data before: ", formData)
     if (formData) {

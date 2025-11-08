@@ -24,7 +24,6 @@ const ExceptionMainComponent = ({
   // State
   const extendErrorMessage = error.message + " " + error.code;
   const [copied, setCopied] = useState(false);
-  const [display, setDisplay] = useState("flex");
 
   const handleCopyClick = async () => {
     try {
@@ -39,11 +38,11 @@ const ExceptionMainComponent = ({
 
   return (
     <div
-      key={display}
       className="fixed inset-0 z-[1000] flex items-center justify-center text-[14px]"
     >
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/50" onClick={handleOk} />
+      {/* <div className="absolute inset-0 bg-black/50" onClick={handleOk} /> */}
+      <div className="absolute inset-0 bg-black/50" />
 
       {/* Modal card */}
       <div

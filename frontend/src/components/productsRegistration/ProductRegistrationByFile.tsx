@@ -132,21 +132,26 @@ const ProductRegistrationByFile = () => {
 
   const uploadFile = async (file: File) => {
     const form = new FormData();
+    setButtonState("loading");
 
     console.log("file: ", file);
     form.append("file", file);
 
-    const res = await AxiosInstance.post("/api/products/import/", form).then((response) => {
-      if (!response) {
-        showException({
-          text: "Falha ao importar os produtos",
-          error: null,
-          variant: ExceptionVariant.ERROR,
-        });
-      }
+    const res = await AxiosInstance.post("/api/products/import/", form).then(
+      (response) => {
+        if (!response) {
+          setButtonState("error");
+          showException({
+            text: "Falha ao importar os produtos",
+            error: null,
+            variant: ExceptionVariant.ERROR,
+          });
+        }
 
-      console.log("response: ", response);
-    });
+        console.log("response: ", response);
+      }
+    );
+    setButtonState("success");
     return res;
   };
 

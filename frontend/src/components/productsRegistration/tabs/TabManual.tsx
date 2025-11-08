@@ -74,18 +74,38 @@ export function productReducer(
     case "SET_PRODUCT_AVAILABILITY":
       return { ...state, productAvailability: action.payload };
     case "SET_PRODUCT_SYNONYMS":
-      return { ...state, productSynonyms: action.payload };
+      console.log("Reducer SET_PRODUCT_SYNONYMS payload:", action.payload);
+      const arr = Array.isArray(action.payload)
+        ? action.payload
+        : [action.payload];
+      const cleaned = arr
+        .flat()
+        .map((s: any) => (s == null ? "" : String(s).trim()))
+        .filter((s: string) => s.length > 0);
+      return { ...state, productSynonyms: cleaned };
     case "ADD_PRODUCT_SYNONYM":
-      return {
-        ...state,
-        productSynonyms: [...state.productSynonyms, action.payload],
-      };
+      // accept both single string or array to be robust
+      const incoming = Array.isArray(action.payload)
+        ? action.payload.flat()
+        : [action.payload];
+      const cleanedIncoming = incoming
+        .map((s: any) => (s == null ? "" : String(s).trim()))
+        .filter((s: string) => s.length > 0);
+
+      if (cleanedIncoming.length === 0) return state;
+
+      // merge avoiding exact duplicates
+      const next = Array.from(
+        new Set([...state.productSynonyms, ...cleanedIncoming])
+      );
+      return { ...state, productSynonyms: next };
+
     case "REMOVE_PRODUCT_SYNONYM":
+      const toRemove = String(action.payload ?? "").trim();
+      if (!toRemove) return state;
       return {
         ...state,
-        productSynonyms: state.productSynonyms.filter(
-          (s) => s !== action.payload
-        ),
+        productSynonyms: state.productSynonyms.filter((s) => s !== toRemove),
       };
     case "SET_SUGGESTIONS":
       return { ...state, suggestions: action.payload };
@@ -102,19 +122,6 @@ export function productReducer(
 }
 
 const TabManual = () => {
-  // States
-  // const [productName, setProductName] = useState("");
-  // const [productBrand, setProductBrand] = useState("");
-  // const [productQuantityFormat, setProductQuantityFormat] = useState("");
-  // const [productSection, setProductSection] = useState<string>("");
-  // const [productPrice, setProductPrice] = useState("");
-  // const [productMetricUnity, setProductMetricUnity] = useState("");
-  // const [productAvailability, setProductAvailability] = useState("");
-  // const [productSynonyms, setProductSynonyms] = useState([]);
-  // const [resetKey, setResetKey] = useState(0);
-  // const [suggestions, setSuggestions] = useState([]);
-  // const [buttonState, setButtonState] = useState("idle");
-
   const [state, dispatch] = useReducer(productReducer, initialProductState);
 
   // Destructure for easy usage
@@ -148,7 +155,7 @@ const TabManual = () => {
     []
   );
   const onMetricUnityChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
+    (e: React.ChangeEvent<HTMLSelectElement>) => {
       dispatch({ type: "SET_PRODUCT_METRIC_UNITY", payload: e.target.value });
     },
     []
@@ -207,37 +214,53 @@ const TabManual = () => {
       (product) => product.name === selectedProductName
     );
 
-    if (selectedProduct) {
-      const numberOfSection = selectedProduct.section.slice(-1);
-      console.log("Selected product in PREGISTER: ", selectedProduct);
-      console.log("Number of section: " + numberOfSection);
-      dispatch({ type: "SET_PRODUCT_BRAND", payload: selectedProduct.brand });
-      dispatch({
-        type: "SET_PRODUCT_QUANTITY_FORMAT",
-        payload: selectedProduct.quantity,
-      });
-      dispatch({ type: "SET_PRODUCT_SECTION", payload: numberOfSection });
-      dispatch({ type: "SET_PRODUCT_PRICE", payload: selectedProduct.price });
-      dispatch({
-        type: "SET_PRODUCT_METRIC_UNITY",
-        payload: selectedProduct.unit,
-      });
-      dispatch({
-        type: "SET_PRODUCT_AVAILABILITY",
-        payload: selectedProduct.stock,
-      });
-      dispatch({
-        type: "SET_PRODUCT_SYNONYMS",
-        payload: selectedProduct.synonymous,
-      });
-      // setProductBrand(selectedProduct.brand);
-      // setProductQuantityFormat(selectedProduct.quantity);
-      // setProductSection(numberOfSection);
-      // setProductPrice(selectedProduct.price);
-      // setProductMetricUnity(selectedProduct.unit);
-      // setProductAvailability(selectedProduct.stock);
-      // setProductSynonyms(selectedProduct.synonymous);
+    if (!selectedProduct) return;
+
+    const numberOfSection = selectedProduct.section.slice(-1);
+    console.log("Selected product in PREGISTER: ", selectedProduct);
+    console.log("Number of section: " + numberOfSection);
+    dispatch({
+      type: "SET_PRODUCT_BRAND",
+      payload: selectedProduct.brand ?? "",
+    });
+    dispatch({
+      type: "SET_PRODUCT_QUANTITY_FORMAT",
+      payload: selectedProduct.quantity ?? "",
+    });
+    dispatch({ type: "SET_PRODUCT_SECTION", payload: numberOfSection ?? "" });
+    dispatch({
+      type: "SET_PRODUCT_PRICE",
+      payload: String(selectedProduct.price ?? ""),
+    });
+    dispatch({
+      type: "SET_PRODUCT_METRIC_UNITY",
+      payload: selectedProduct.unit ?? "",
+    });
+    dispatch({
+      type: "SET_PRODUCT_AVAILABILITY",
+      payload: selectedProduct.stock ?? "",
+    });
+
+    // === Sanitizing synonyms before dispatching ===
+    const rawSyn = selectedProduct.synonymous ?? selectedProduct.synonyms ?? [];
+    const normalizedSynonyms: string[] = Array.isArray(rawSyn)
+      ? rawSyn
+          .flat() // flatten nested arrays just in case
+          .map((s) => (s == null ? "" : String(s).trim()))
+          .filter((s) => s.length > 0)
+      : String(rawSyn).trim().length
+      ? [String(rawSyn).trim()]
+      : [];
+
+    // We only dispatch if we actually have at least one non-empty synonym
+    if (normalizedSynonyms.length > 0) {
+      dispatch({ type: "SET_PRODUCT_SYNONYMS", payload: normalizedSynonyms });
+    } else {
+      // clear synonyms when product has none
+      dispatch({ type: "SET_PRODUCT_SYNONYMS", payload: [] });
     }
+
+    console.log("normalizedSynonyms:", normalizedSynonyms);
   };
 
   const registerProduct = (e) => {
@@ -270,16 +293,6 @@ const TabManual = () => {
         console.log("Response: ", response);
 
         dispatch({ type: "RESET_FORM" });
-
-        // setProductName("");
-        // setProductBrand("");
-        // setProductQuantityFormat("");
-        // setProductSection("");
-        // setProductPrice("");
-        // setProductMetricUnity("");
-        // setProductAvailability("");
-        // setProductSynonyms([]);
-        // setResetKey((prev) => prev + 1);
       })
       .catch((error) => {
         dispatch({ type: "SET_BUTTON_STATE", payload: "error" });
@@ -328,9 +341,13 @@ const TabManual = () => {
             className="w-full p-2 mt-1 rounded-lg bg-input focus:outline-none focus:ring-2 focus:ring-yellow-400"
             value={productName}
             list="productsSuggestions"
-            onChange={onNameChange}
+            onChange={(e) => {
+              onNameChange(e);
+
+              handleProductSelection(e.target.value);
+            }}
             // onChange={(e) => setProductName(e.target.value)}
-            onBlur={(e) => handleProductSelection(e.target.value)} // Triggered when a product is selected
+            // onBlur={(e) => handleProductSelection(e.target.value)} // Triggered when a product is selected
           />
           <datalist id="productsSuggestions">
             {suggestions.map((product, index) => (

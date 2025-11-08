@@ -151,6 +151,7 @@ const ProductRegistrationByFile = () => {
         console.log("response: ", response);
       }
     );
+    setFile(null);
     setButtonState("success");
     return res;
   };

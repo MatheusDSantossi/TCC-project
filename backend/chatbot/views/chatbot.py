@@ -19,6 +19,7 @@ from core.models import Business
 from django.contrib.postgres.fields import ArrayField
 import pandas as pd
 import regex as re
+import traceback
 
 
 class ChatbotResponse(viewsets.GenericViewSet):
@@ -73,8 +74,10 @@ class ProductImportView(APIView):
         """
         uploaded = request.FILES.get("file")
 
-        print("Incoming import request, content-type:", request.content_type)
-        print("FILES keys:", request.FILES.keys())
+        print("=== ProductImportView called ===")
+        print("Incoming content-type:", request.content_type)
+        print("FILES keys:", list(request.FILES.keys()))
+        print("META CONTENT_LENGTH:", request.META.get("CONTENT_LENGTH"))
 
         if not uploaded:
             return Response({"detail", "No file"}, status=status.HTTP_400_BAD_REQUEST)
@@ -94,24 +97,88 @@ class ProductImportView(APIView):
             business = None
             print(f"Error retrieving business: {str(e)}")
 
-        # Accept business id in form
-        business_id = Business.objects.get_id_by_name(business)
-        business = business_id
+        business_obj = None
 
-        # if business_id:
-        #     try:
-        #         business = Business.objects.get(pk=int(business_id))
-
-        #     except:
-        #         business = None
+        # If `business` is already a Business instance (best case), we use it
+        if isinstance(business, Business):
+            business_obj = business
+        else:
+            # if business is a name string, try to get by name
+            try:
+                if isinstance(business, str) and business:
+                    business_obj = Business.objects.get(name=business)
+                else:
+                    # fallback: if id was earlier computed we use it
+                    business_id = Business.objects.get_id_by_name(business) if isinstance(business, str) else None
+                    
+                    if business_id:
+                        business_obj = Business.objects.get(pk=business_id)
+            except Business.DoesNotExist:
+                business_obj = None
 
         # Read into pandas for convenience (handles csv/xlsx)
         try:
+
+            print("Uploaded file name:", uploaded.name)
+            print("Uploaded file size (bytes):", getattr(uploaded, "size", "unknown"))
+
             if uploaded.name.endswith(".csv"):
-                df = pd.read_csv(uploaded, dtype=str).fillna("")
+                tried = []
+                df = None
+                # default read
+                try:
+                    df = pd.read_csv(uploaded, dtype=str).fillna("")
+                    tried.append("default")
+                except Exception as e1:
+                    print("Default CSV read failed:", str(e1))
+                    tried.append("default failed: " + str(e1))
+
+                    # rewind file pointer for next attemp
+                    try:
+                        uploaded.seek(0)
+                    except Exception:
+                        pass
+
+                # try latin-1 encoding (common with Excel/Windows exports)
+                try:
+                    df = pd.read_csv(uploaded, dtype=str, encoding="latin-1").fillna("")
+                    tried.append("latin-1")
+                except Exception as e2:
+                    print("Latin-1 CSV read failed:", str(e2))
+                    tried.append("latin-1 failed: " + str(e2))
+
+                    try:
+                        uploaded.seek(0)
+                    except Exception:
+                        pass
+
+                    # try semicolon separator
+                    try:
+                        df = pd.read_csv(uploaded, dtype=str, sep="|").fillna("")
+                        tried.append("sep='|'")
+
+                    except Exception as e3:
+                        print("Separator '|' CSV read failed:", str(e3))
+                        tried.append("sep='|' failed: " + str(e3))
+                if df is None:
+                    raise ValueError(
+                        "unable to parse CSV. Attempts: " + "; ".join(tried)
+                    )
             else:
-                df = pd.read_excel(uploaded, dtype=str).fillna("")
+                try:
+                    df = pd.read_excel(uploaded, dtype=str, engine="openpyxl").fillna(
+                        ""
+                    )
+                except Exception as ex:
+                    print("read_excel failed:", str(ex))
+                    # try without engine fallback
+                    df = pd.read_excel(uploaded, dtype=str).fillna("")
+
+            print("DataFrame loaded. shape:", getattr(df, "shape", None))
+            print("DataFrame head:\n", df.head(5).to_dict(orient="records"))
+
         except Exception as e:
+            print("Exception while reading/parsing file:")
             return Response({"detail": f"Failed to read file: {str(e)}"}, status=400)
 
         products_to_create = []
@@ -133,14 +200,14 @@ class ProductImportView(APIView):
                 name = getcell(raw, ["name", "nome", "productName"]).strip()
                 brand = getcell(raw, ["brand", "marca"]).strip()
                 quantity = getcell(raw, ["quantity", "quantidade"]).strip()
-                section_raw = getcell(raw, ["section", "secao", "seção"])
-                section = int(section_raw) if section_raw else 0
-                price_raw = getcell(raw, ["price", "preco", "preço"])
+                section = getcell(raw, ["section", "secao", "seção", "secao_produto"])
+                price_raw = getcell(raw, ["price", "preco", "preço", "preco_venda"])
                 price = float(price_raw.replace(",", ".").strip()) if price_raw else 0.0
-                unit = getcell(raw, ["unit", "unidade"]).strip()
-                stock_raw = getcell(raw, ["stock", "estoque"])
+                unit = getcell(raw, ["unit", "unidade", "unidade_medida"]).strip()
+                stock_raw = getcell(raw, ["stock", "estoque", "disponivel"])
                 stock = float(stock_raw) if stock_raw else 0.0
                 syn_cell = getcell(raw, ["synonymous", "sinonimos", "synonyms"]) or ""
+                embeddings = getcell(raw, ["embeddings", "embedding"]) or ""
                 # parse synonyms: try JSON then fallback to separators
                 synonyms = []
                 if syn_cell:
@@ -157,17 +224,21 @@ class ProductImportView(APIView):
                 if not name:
                     errors.append({"row": i + 1, "error": "Missing name"})
                     continue
+                
+                if not business_obj:
+                    return Response({" detail": "Business not found for this user"}, status=status.HTTP_400_BAD_REQUEST)
 
                 product = Product(
-                    business=business,
+                    business=business_obj,
                     name=name,
                     brand=brand,
                     quantity=quantity,
-                    secao_produto=section,
-                    preco_venda=price,
-                    unidade_medida=unit,
-                    disponivel=stock,
+                    section=section,
+                    price=price,
+                    unit=unit,
+                    stock=stock,
                     synonymous=synonyms,  # if field is jsonb or ArrayField adapt accordingly
+                    embeddings=embeddings,
                 )
                 products_to_create.append(product)
 
@@ -175,6 +246,11 @@ class ProductImportView(APIView):
 
             except Exception as e:
                 errors.append({"row": i + 1, "error": str(e)})
+                print(f"Error processing row {i+1}: {e}")
+                traceback.print_exc()
+
+        print("Prepared products count:", len(products_to_create))
+        print("Row-level errors:", errors[:10])
         # Bulk create in chunks
         created = 0
 
@@ -186,6 +262,8 @@ class ProductImportView(APIView):
                     Product.objects.bulk_create(batch, batch_size=BATCH)
                     created += len(batch)
         except Exception as e:
+            print("Exception during bulk_create:")
             return Response({"detail": "DB error: " + str(e)}, status=500)
 
+        print("Import finished. created:", created)
         return Response({"created": created, "errors": errors})

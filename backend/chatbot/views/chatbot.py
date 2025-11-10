@@ -197,14 +197,14 @@ class ProductImportView(APIView):
         # simpler loop
         for i, raw in enumerate(df.to_dict(orient="records")):
             try:
-                name = getcell(raw, ["name", "nome", "productName"]).strip()
-                brand = getcell(raw, ["brand", "marca"]).strip()
+                name = getcell(raw, ["name", "nome", "productName", "Produto"]).strip()
+                brand = getcell(raw, ["brand", "marca", "Marca"]).strip()
                 quantity = getcell(raw, ["quantity", "quantidade"]).strip()
                 section = getcell(raw, ["section", "secao", "seção", "secao_produto"])
-                price_raw = getcell(raw, ["price", "preco", "preço", "preco_venda"])
+                price_raw = getcell(raw, ["price", "preco", "preço", "preco_venda", "Preço de venda"])
                 price = float(price_raw.replace(",", ".").strip()) if price_raw else 0.0
-                unit = getcell(raw, ["unit", "unidade", "unidade_medida"]).strip()
-                stock_raw = getcell(raw, ["stock", "estoque", "disponivel"])
+                unit = getcell(raw, ["unit", "unidade", "unidade_medida", "Unidade"]).strip()
+                stock_raw = getcell(raw, ["stock", "estoque", "disponivel", "Estoque"])
                 stock = float(stock_raw) if stock_raw else 0.0
                 syn_cell = getcell(raw, ["synonymous", "sinonimos", "synonyms"]) or ""
                 embeddings = getcell(raw, ["embeddings", "embedding"]) or ""

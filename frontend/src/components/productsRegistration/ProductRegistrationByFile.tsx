@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import logo from "../../assets/logo.svg";
 import Papa from "papaparse";
 import AxiosInstance from "../AxiosInstance";
@@ -54,6 +54,7 @@ const ProductRegistrationByFile = () => {
   const [file, setFile] = useState<File | null>(null);
   const [progress, setProgress] = useState({ done: 0, total: 0 });
   const [buttonState, setButtonState] = useState("idle");
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const { showException } = useException();
 
@@ -130,30 +131,59 @@ const ProductRegistrationByFile = () => {
     }
   };
 
+  const clearFileSelection = () => {
+    // Clear React state
+    setFile(null);
+
+    // Clear the native file input so filename disappears
+    if (fileInputRef.current) {
+      try {
+        fileInputRef.current.value = "";
+      } catch (e) {
+        // some browsers may be picky; we ignore errors here
+        console.warn("Could not clear file input programmatically", e);
+      }
+    }
+  };
+
   const uploadFile = async (file: File) => {
+    if (!file) return;
+
     const form = new FormData();
+    form.append("file", file, file.name);
     setButtonState("loading");
 
     console.log("file: ", file);
     form.append("file", file);
 
-    const res = await AxiosInstance.post("/api/products/import/", form).then(
-      (response) => {
-        if (!response) {
-          setButtonState("error");
-          showException({
-            text: "Falha ao importar os produtos",
-            error: null,
-            variant: ExceptionVariant.ERROR,
-          });
-        }
-
-        console.log("response: ", response);
+    try {
+      const res = await AxiosInstance.post("/api/products/import/", form);
+      // check status or response data to decide success
+      if (res && (res.status === 200 || res.status === 201)) {
+        setButtonState("success");
+      } else {
+        setButtonState("error");
+        showException({
+          text: "Falha ao importar os produtos",
+          error: res?.data ?? null,
+          variant: ExceptionVariant.ERROR,
+        });
       }
-    );
-    setFile(null);
-    setButtonState("success");
-    return res;
+
+      console.log("response: ", res?.data);
+    } catch (err) {
+      setButtonState("error");
+      console.error("Error uploading file:", err);
+      showException({
+        text: "Falha ao importar os produtos",
+        error: err?.response?.data ?? err,
+        variant: ExceptionVariant.ERROR,
+      });
+    } finally {
+      // Always clear file selection (so UI is safe for next upload)
+      clearFileSelection();
+      setTimeout(() => setButtonState("idle"), 1500);
+    }
   };
 
   return (
@@ -166,6 +196,7 @@ const ProductRegistrationByFile = () => {
           </h2>
         </div>
         <input
+          ref={fileInputRef}
           className="block shadow-2xl! w-full text-sm
               file:mr-4 file:py-2 file:px-3
               file:border-0
@@ -178,10 +209,22 @@ const ProductRegistrationByFile = () => {
               focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent
               file:transition file:duration-300 file:ease-in-out"
           type="file"
-          accept=".xlsx, .csv"
+          accept=".xlsx, .csv, .xls"
           id="file_select"
           onChange={(e) => handleFile(e.target.files?.[0] ?? null)}
         />
+        {file && (
+          <div className="mt-2 text-sm text-white">
+            Arquivo selecionado: "{file.name}"
+            <button
+              type="button"
+              onClick={clearFileSelection}
+              className="ml-3 text-xs text-red-600"
+            >
+              Remover
+            </button>
+          </div>
+        )}
         <div className="mt-5">
           <ReactiveButton
             className="text-primary hover:bg-yellow-300"

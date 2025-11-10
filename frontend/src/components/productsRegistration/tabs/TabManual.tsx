@@ -341,6 +341,7 @@ const TabManual = () => {
             className="w-full p-2 mt-1 rounded-lg bg-input focus:outline-none focus:ring-2 focus:ring-yellow-400"
             value={productName}
             list="productsSuggestions"
+            autoFocus
             onChange={(e) => {
               onNameChange(e);
 

@@ -2,7 +2,7 @@ import Box from "@mui/material/Box";
 import { DataGrid } from "@mui/x-data-grid";
 import { IconButton } from "@mui/material";
 import { MdEdit } from "react-icons/md";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import AxiosInstance from "../../AxiosInstance";
 import ProductEdit from "../../productsRegistration/ProductEdit";
 
@@ -52,60 +52,63 @@ export default function ProductsTable({ products_data, onProductUpdate }) {
     setEditModalOpen(false);
   };
 
-  const columns = [
-    {
-      field: "product_id",
-      headerName: <strong className="text-base">ID</strong>,
-      width: 90,
-      minWidth: 80,
-    },
-    {
-      field: "name",
-      headerName: <strong className="text-base">Produto</strong>,
-      minWidth: 200,
-      flex: 2,
-    },
-    {
-      field: "brand",
-      headerName: <strong className="text-base">Marca</strong>,
-      minWidth: 150,
-      flex: 1,
-    },
-    {
-      field: "quantity",
-      headerName: <strong className="text-base">Formato Qt.</strong>,
-      minWidth: 180,
-      flex: 1,
-    },
-    {
-      field: "section",
-      headerName: <strong className="text-base">Seção</strong>,
-      minWidth: 100,
-      flex: 0.5,
-    },
-    {
-      field: "price",
-      headerName: <strong className="text-base">Preço</strong>,
-      minWidth: 120,
-      flex: 1,
-    },
-    {
-      field: "actions",
-      headerName: <strong className="text-base">Ações</strong>,
-      minWidth: 100,
-      flex: 0.5,
-      sortable: false,
-      renderCell: (params) => (
-        <IconButton
-          onClick={() => handleEditClick(params.row)}
-          size="small"
-          color="primary"
-        >
-          <MdEdit color="#5D76D3" />
-        </IconButton>
-      ),
-    },
-  ];
+  const columns = useMemo(
+    () => [
+      {
+        field: "product_id",
+        headerName: <strong className="text-base">ID</strong>,
+        width: 90,
+        minWidth: 80,
+      },
+      {
+        field: "name",
+        headerName: <strong className="text-base">Produto</strong>,
+        minWidth: 200,
+        flex: 2,
+      },
+      {
+        field: "brand",
+        headerName: <strong className="text-base">Marca</strong>,
+        minWidth: 150,
+        flex: 1,
+      },
+      {
+        field: "quantity",
+        headerName: <strong className="text-base">Formato Qt.</strong>,
+        minWidth: 180,
+        flex: 1,
+      },
+      {
+        field: "section",
+        headerName: <strong className="text-base">Seção</strong>,
+        minWidth: 100,
+        flex: 0.5,
+      },
+      {
+        field: "price",
+        headerName: <strong className="text-base">Preço</strong>,
+        minWidth: 120,
+        flex: 1,
+      },
+      {
+        field: "actions",
+        headerName: <strong className="text-base">Ações</strong>,
+        minWidth: 100,
+        flex: 0.5,
+        sortable: false,
+        renderCell: (params) => (
+          <IconButton
+            onClick={() => handleEditClick(params.row)}
+            size="small"
+            color="primary"
+          >
+            <MdEdit color="#5D76D3" />
+          </IconButton>
+        ),
+      },
+    ],
+    []
+  );
 
   // const rows = products_data;
 
@@ -122,19 +125,32 @@ export default function ProductsTable({ products_data, onProductUpdate }) {
   console.log("Product dict: ", products_dict()[0]);
 
   return (
-    <div className="flex items-center justify-center w-full overflow-x-auto">
+    <div className="flex w-full h-[730px]">
       <Box
         sx={{
-          width: "100%",
-          height: "calc(100 - 100px)",
-          padding: 2,
+          position: "sticky",
+          zIndex: 1,
+          // height: "50%",
+          // minHeight: 340,
+          display: "flex",
+          flexDirection: "column",
+          pl: 1.5,
+          pr: 1,
+          py: 1,
+          bottom: 0,
+          border: "1px solid",
+          borderColor: "divider",
+          // boxShadow: "none",
+          borderRadius: 1,
+          // backgroundColor: "background.paper",
           "& .MuiDataGrid-root": {
-            minWidth: 800, // Minimum width before scrolling
+            minWidth: 100, // Minimum width before scrolling
           },
         }}
       >
         <DataGrid
           rows={products_data}
+          disableVirtualization
           columns={columns}
           getRowId={(row) => row.product_id}
           initialState={{
@@ -146,8 +162,9 @@ export default function ProductsTable({ products_data, onProductUpdate }) {
           }}
           pageSizeOptions={[10]}
           disableRowSelectionOnClick
+          density="comfortable"
           sx={{
-            fontSize: "16px",
+            fontSize: "14px",
             boxShadow: 2,
             border: 2,
             borderColor: "#5D76D3",

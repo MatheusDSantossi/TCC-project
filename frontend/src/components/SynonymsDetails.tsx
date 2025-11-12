@@ -1,9 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-
-import "../App.css";
 import { BsEraserFill, BsInfoCircleFill } from "react-icons/bs";
 import InfoDialogScreen from "./InfoDialogScreen";
-// Component
 
 interface SynonymDetailsProps {
   formData?: string;

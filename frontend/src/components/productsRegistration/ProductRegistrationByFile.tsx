@@ -6,6 +6,9 @@ import { useException } from "../../context/ExceptionContext";
 import { ExceptionVariant } from "../../exceptions/ExceptionVariantsTypes";
 import CustomButton from "../forms/Button";
 import ReactiveButton from "reactive-button";
+import { progress } from "framer-motion";
+import type { AxiosProgressEvent } from "axios";
+import { LinearProgress } from "@mui/material";
 
 type Row = {
   name?: string;
@@ -52,7 +55,11 @@ function normalizeRow(row: Row) {
 const ProductRegistrationByFile = () => {
   // States
   const [file, setFile] = useState<File | null>(null);
-  const [progress, setProgress] = useState({ done: 0, total: 0 });
+  const [uploadPercent, setUploadPercent] = useState<number | null>(null);
+  const [processingPercent, setProcessingPercent] = useState<number | null>(
+    null
+  );
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [buttonState, setButtonState] = useState("idle");
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -156,13 +163,27 @@ const ProductRegistrationByFile = () => {
     console.log("file: ", file);
     form.append("file", file);
 
+    setUploadPercent(0);
+    setProcessingPercent(null);
+    setStatusMessage("Iniciando upload...");
+
     try {
-      const res = await AxiosInstance.post("/api/products/import/", form);
-      // check status or response data to decide success
-      if (res && (res.status === 200 || res.status === 201)) {
+      const res = await AxiosInstance.post("/api/products/import/", form, {
+        onUploadProgress: (progressEvent: AxiosProgressEvent) => {
+          const percent = Math.round(
+            (progressEvent.loaded * 100) / progressEvent.total
+          );
+        },
+      });
+      // Server could respond:
+      // { job_id: "abcd-1234" }  -> you should poll job status endpoint
+      // or { created: 100, errors: [...] } -> synchronous result
+      if (res.data?.job_id) {
         setButtonState("success");
+        setStatusMessage("Upload completo! Processando dados...");
       } else {
         setButtonState("error");
+        setStatusMessage("Falha ao importar os produtos");
         showException({
           text: "Falha ao importar os produtos",
           error: res?.data ?? null,
@@ -174,6 +195,7 @@ const ProductRegistrationByFile = () => {
     } catch (err) {
       setButtonState("error");
       console.error("Error uploading file:", err);
+      setStatusMessage("Erro ao importar os produtos");
       showException({
         text: "Falha ao importar os produtos",
         error: err?.response?.data ?? err,
@@ -182,9 +204,45 @@ const ProductRegistrationByFile = () => {
     } finally {
       // Always clear file selection (so UI is safe for next upload)
       clearFileSelection();
+      setUploadPercent(null);
       setTimeout(() => setButtonState("idle"), 1500);
     }
   };
+
+  // Polling helper for background job status
+  async function pollJobStatus(jobId: string) {
+    const intervalMs = 1500;
+    setProcessingPercent(0);
+
+    // polling loop
+    return new Promise<void>((resolve) => {
+      const timer = setInterval(async () => {
+        try {
+          const r = await AxiosInstance.get(
+            `/api/products/import/status/${jobId}/`
+          );
+          // Example server response: { status: 'PENDING'|'PROGRESS'|'SUCCESS'|'FAILURE', progress: 45, message: 'parsing' }
+          const data = r.data;
+
+          if (data.progress != null) setProcessingPercent(data.progress);
+          if (data.message) setStatusMessage(data.message);
+
+          if (data.status === "SUCCESS" || data.status === "FAILURE") {
+            clearInterval(timer);
+
+            setStatusMessage(
+              data.status === "SUCCESS"
+                ? "Importação completa!"
+                : `Falha na importação dos produtos. ${data.error ?? ""}`
+            );
+            resolve();
+          }
+        } catch (err) {
+          console.warn("Status poll error ", err);
+        }
+      }, intervalMs);
+    });
+  }
 
   return (
     <div className="w-full md:w-[570px] xl:w-4xl md:h-[660px] xl:h-[630px] max-w-4xl p-8 rounded-lg shadow-xl bg-primary  transition-all duration-300 ease">
@@ -246,6 +304,22 @@ const ProductRegistrationByFile = () => {
             }}
           />
         </div>
+
+        {uploadPercent != null && (
+          <div>
+            <div>Uploading: {uploadPercent}%</div>
+            <LinearProgress variant="determinate" value={uploadPercent} />
+          </div>
+        )}
+
+        {processingPercent != null && (
+          <div>
+            <div>Processing: {processingPercent}%</div>
+            <LinearProgress variant="determinate" value={processingPercent} />
+          </div>
+        )}
+
+        {statusMessage && <div>{statusMessage}</div>}
         {/* <div>
           Uploaded {progress.done} / {progress.total}
         </div> */}

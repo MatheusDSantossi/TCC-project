@@ -11,6 +11,7 @@ import csv
 import json
 from typing import List
 from django.db import transaction
+from django.core.files.temp import NamedTemporaryFile
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, permissions, parsers
@@ -115,6 +116,16 @@ class ProductImportView(APIView):
                         business_obj = Business.objects.get(pk=business_id)
             except Business.DoesNotExist:
                 business_obj = None
+
+        # tmp = NamedTemporaryFile(delete=False, suffix=uploaded.name)
+        # for chunk in uploaded.chunks():
+        #     tmp.write(chunk)
+        
+        # tmp.flush()
+        # tmp.close()
+        
+        # # Enqueue processing task (Celery)
+        # task = import_products_task.delay(tmp.name, request.user.id, business_id=business.pk)
 
         # Read into pandas for convenience (handles csv/xlsx)
         try:

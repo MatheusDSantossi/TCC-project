@@ -6,6 +6,8 @@ backend/media/
 **/__pycache__/
 *.py[cod]
 
+importants_commands.md
+
 # Random
 melhorias.md
 synonimus_test.py

@@ -49,7 +49,6 @@ function App() {
   return (
     <div className="w-full">
       <div className="absolute top-0 left-0 z-10 w-full">
-        {/* <div className="z-1" > */}
         <Routes>
           <Route path="/" element={<InformBusiness />} />
           <Route path={businessSlugRoute} element={<Home />} />

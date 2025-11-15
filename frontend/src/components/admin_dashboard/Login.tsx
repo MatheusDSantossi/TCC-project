@@ -119,10 +119,10 @@ const Login = () => {
               loadingText="Carregando..."
               successText={"Logado com sucesso"}
               idleText={"Login"}
-              animation="true"
-              rounded="true"
+              animation={true}
+              rounded={true}
               width={200}
-              height={40}
+              height={"40"}
               size="large"
             />
             {/* </div>

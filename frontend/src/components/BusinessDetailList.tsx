@@ -11,7 +11,7 @@ const BusinessDetailList = () => {
   const { showException } = useException();
 
   const fetchBusinessDetailData = () => {
-    AxiosInstance.get(`api/business-detaila/`)
+    AxiosInstance.get(`api/business-detail/`)
       // .then((response) => setMenuOptions(response.data))
       .then((response) => {
         console.log("Response: ", response);

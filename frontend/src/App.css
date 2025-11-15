@@ -3,8 +3,8 @@
 @theme {
   /* Colors */
   --color-primary: #012921;
-  --color-secondary: #F0FF3D;
-  --color-secondary-dark: #CEE009FF;
+  --color-secondary: #FFF629;
+  --color-secondary-dark: #F0E716;
   --color-tertiary: #013D31;
   --color-quaternary: #5D76D3;
   --color-quaternary-dark: #2F4EBEFF;
@@ -19,7 +19,7 @@
 
   /* Exception colors */
   --color-error: #c1121f;
-  --color-info: #F0E716;
+  --color-info: #00B0FF;
   --color-confirmation: #38d430;
 
   /* Shadow */

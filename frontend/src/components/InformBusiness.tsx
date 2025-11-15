@@ -94,10 +94,10 @@ const InformBusiness = () => {
               loadingText="Carregando..."
               successText={"Estabelecimento encontrado"}
               idleText={"Acessar"}
-              animation="true"
-              rounded="true"
+              animation={true}
+              rounded={true}
               width={80}
-              height={40}
+              height={"40"}
               size="large"
             />
           </div>

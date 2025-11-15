@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import Header from "./Header";
 import Sidebar from "./Sidebar";
 import HomeDashboard from "./HomeDashboard";
-import ProductRegistration from "../ProductRegistration";
+import ProductRegistration from "../productsRegistration/ProductRegistration";
 import Chatbot from "../Chatbot";
 import BusinessDetailRegistration from "../BusinessDetailRegistration";
 

@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
-import logo from "../assets/logo.svg";
+import logo from "../../assets/logo.svg";
 
 import { Dialog } from "@mui/material";
 import { DialogTitle } from "@mui/material";
 import { DialogContent } from "@mui/material";
 
 import ReactiveButton from "reactive-button";
-import SynonymDetails from "./SynonymsDetails";
-import AxiosInstance from "./AxiosInstance";
+import SynonymDetails from "../SynonymsDetails";
+import AxiosInstance from "../AxiosInstance";
 
 import { MdOutlineClose } from "react-icons/md";
 
@@ -91,7 +91,7 @@ function ProductEdit({ open, onClose, product, onSave, refreshTable }) {
     <Dialog
       open={open}
       onClose={onClose}
-      className="flex items-center justify-center min-h-screen p-4 bg-tertiary"
+      className="flex items-center justify-center min-h-screen p-1 bg-tertiary overflow-y-hidden"
     >
       <div className="w-full max-w-2xl p-8 rounded-lg shadow-xl bg-primary">
         <MdOutlineClose
@@ -226,7 +226,7 @@ function ProductEdit({ open, onClose, product, onSave, refreshTable }) {
                   Unidade de Medida do Produto
                 </label>
                 <select
-                  type="text"
+                  // type="text"
                   id="productMetricUnity"
                   name="productMetricUnity"
                   className="w-full p-3 text-white border-gray-300 rounded-lg bg-input focus:outline-none focus:ring-2 focus:ring-yellow-400"

@@ -24,7 +24,6 @@ const ExceptionMainComponent = ({
   // State
   const extendErrorMessage = error.message + " " + error.code;
   const [copied, setCopied] = useState(false);
-  const [display, setDisplay] = useState("flex");
 
   const handleCopyClick = async () => {
     try {
@@ -39,16 +38,16 @@ const ExceptionMainComponent = ({
 
   return (
     <div
-      key={display}
       className="fixed inset-0 z-[1000] flex items-center justify-center text-[14px]"
     >
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/50" onClick={handleOk} />
+      {/* <div className="absolute inset-0 bg-black/50" onClick={handleOk} /> */}
+      <div className="absolute inset-0 bg-black/50" />
 
       {/* Modal card */}
       <div
         // responsive width, limited height, scroll inside if content too tall
-        className="relative z-10 w-full max-w-lg mx-4 bg-gray-100 rounded-l-2xl shadow-2xl border-2 border-primary max-h-[80vh] overflow-y-auto"
+        className={`relative z-10 w-full max-w-lg mx-4 bg-gray-100 rounded-l-2xl shadow-2xl border-3 max-h-[80vh] overflow-y-auto ${variant === ExceptionVariant.ERROR ? "border-error" : variant === ExceptionVariant.INFO ? "border-info" : "border-confirmation"}`}
         role="dialog"
       >
         {/* Padding and layout inside */}

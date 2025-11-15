@@ -9,6 +9,7 @@ import ReactiveButton from "reactive-button";
 import { progress } from "framer-motion";
 import type { AxiosProgressEvent } from "axios";
 import { LinearProgress } from "@mui/material";
+import Spinner from "../../ui/Spinner";
 
 type Row = {
   name?: string;
@@ -62,6 +63,8 @@ const ProductRegistrationByFile = () => {
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [buttonState, setButtonState] = useState("idle");
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const { showException } = useException();
 
@@ -159,6 +162,7 @@ const ProductRegistrationByFile = () => {
     const form = new FormData();
     form.append("file", file, file.name);
     setButtonState("loading");
+    setIsProcessing(true);
 
     console.log("file: ", file);
     form.append("file", file);
@@ -178,18 +182,18 @@ const ProductRegistrationByFile = () => {
       // Server could respond:
       // { job_id: "abcd-1234" }  -> you should poll job status endpoint
       // or { created: 100, errors: [...] } -> synchronous result
-      if (res.data?.job_id) {
-        setButtonState("success");
-        setStatusMessage("Upload completo! Processando dados...");
-      } else {
-        setButtonState("error");
-        setStatusMessage("Falha ao importar os produtos");
-        showException({
-          text: "Falha ao importar os produtos",
-          error: res?.data ?? null,
-          variant: ExceptionVariant.ERROR,
-        });
-      }
+      // if (res.data?.job_id) {
+      setButtonState("success");
+      setStatusMessage("Upload completo! Processando dados...");
+      // } else {
+      //   setButtonState("error");
+      //   setStatusMessage("Falha ao importar os produtos");
+      //   showException({
+      //     text: "Falha ao importar os produtos",
+      //     error: res?.data ?? null,
+      //     variant: ExceptionVariant.ERROR,
+      //   });
+      // }
 
       console.log("response: ", res?.data);
     } catch (err) {
@@ -205,6 +209,7 @@ const ProductRegistrationByFile = () => {
       // Always clear file selection (so UI is safe for next upload)
       clearFileSelection();
       setUploadPercent(null);
+      setIsProcessing(false);
       setTimeout(() => setButtonState("idle"), 1500);
     }
   };
@@ -246,6 +251,7 @@ const ProductRegistrationByFile = () => {
 
   return (
     <div className="w-full md:w-[570px] xl:w-4xl md:h-[660px] xl:h-[630px] max-w-4xl p-8 rounded-lg shadow-xl bg-primary  transition-all duration-300 ease">
+      <Spinner open={isProcessing} text="Importando produtos - aguarde..." />
       <div className="justify-center">
         <div className="flex items-center mb-7">
           <img className="w-20 mr-4" src={logo} alt="Hecate's logo" />

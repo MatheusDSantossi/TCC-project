@@ -11,7 +11,7 @@ export default function ProductsTable({ products_data, onProductUpdate }) {
   const [selectedProduct, setSelectedProduct] = useState(null);
 
   const handleEditClick = (product) => {
-    console.log("Product: ", product);
+    // console.log("Product: ", product);
     setSelectedProduct(product);
     setEditModalOpen(true);
   };
@@ -122,7 +122,7 @@ export default function ProductsTable({ products_data, onProductUpdate }) {
     return rows;
   };
 
-  console.log("Product dict: ", products_dict()[0]);
+  // console.log("Product dict: ", products_dict()[0]);
 
   return (
     <div className="flex w-full h-[730px]">
@@ -134,6 +134,7 @@ export default function ProductsTable({ products_data, onProductUpdate }) {
           // minHeight: 340,
           display: "flex",
           flexDirection: "column",
+          width: "100%",
           pl: 1.5,
           pr: 1,
           py: 1,

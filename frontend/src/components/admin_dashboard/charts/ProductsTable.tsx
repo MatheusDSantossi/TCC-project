@@ -1,12 +1,17 @@
 import Box from "@mui/material/Box";
-import { DataGrid } from "@mui/x-data-grid";
+import { DataGrid, type GridColDef } from "@mui/x-data-grid";
 import { IconButton } from "@mui/material";
 import { MdEdit } from "react-icons/md";
 import { useMemo, useState } from "react";
 import AxiosInstance from "../../AxiosInstance";
 import ProductEdit from "../../productsRegistration/ProductEdit";
+import CustomLoadingOverlay, { CustomNoRowsOverlay } from "./components/CustomLoadingOverlay";
 
-export default function ProductsTable({ products_data, onProductUpdate }) {
+export default function ProductsTable({
+  products_data,
+  onProductUpdate,
+  isLoading,
+}) {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
 
@@ -150,10 +155,21 @@ export default function ProductsTable({ products_data, onProductUpdate }) {
         }}
       >
         <DataGrid
-          rows={products_data}
+          rows={products_data ?? []}
           disableVirtualization
           columns={columns}
           getRowId={(row) => row.product_id}
+          loading={!!isLoading}
+          components={{
+            LoadingOverlay: CustomLoadingOverlay,
+            NoRowsOverlay: CustomNoRowsOverlay,
+          }}
+          componentsProps={{
+            noRowsOverlay: {
+              // pass a dynamic message based on your app state
+              message: isLoading ? "Carregando..." : "Nenhum produto cadastrado.",
+            },
+          }}
           initialState={{
             pagination: {
               paginationModel: {

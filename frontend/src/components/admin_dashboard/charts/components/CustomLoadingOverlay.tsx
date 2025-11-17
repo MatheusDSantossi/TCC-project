@@ -43,7 +43,7 @@ export function CustomNoRowsOverlay(props: NoRowsOverlayProps) {
           gap: 1,
           p: 2,
         }}
-      >
+    >
         <div className="text-lg font-medium text-primary">{message}</div>
         <div className="text-sm text-gray-300">
           Se quiser, adicione produtos manualmente ou importe um arquivo.

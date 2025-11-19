@@ -5,10 +5,14 @@ import { MdEdit } from "react-icons/md";
 import { useState } from "react";
 import AxiosInstance from "../../AxiosInstance";
 import BusinessDetailEdit from "../../BusinessDetailEdit";
+import CustomLoadingOverlay, {
+  CustomNoRowsOverlay,
+} from "./components/CustomLoadingOverlay";
 
 export default function BusinessDetailsTable({
   business_detail_data,
   onBusinessDetailUpdate,
+  isLoading,
 }) {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [selectedBusinessDetail, setSelectedBusinessDetail] = useState(null);
@@ -105,14 +109,27 @@ export default function BusinessDetailsTable({
   console.log("BusinessDetail dict: ", BusinessDetails_dict()[0]);
 
   return (
-    <div className="flex items-center justify-center w-full overflow-x-auto">
+    <div className="flex w-full h-[730px]">
       <Box
         sx={{
+          position: "sticky",
+          zIndex: 1,
+          // height: "50%",
+          // minHeight: 340,
+          display: "flex",
+          flexDirection: "column",
           width: "100%",
-          height: "calc(100 - 100px)",
-          padding: 2,
+          pl: 1.5,
+          pr: 1,
+          py: 1,
+          bottom: 0,
+          border: "1px solid",
+          borderColor: "divider",
+          // boxShadow: "none",
+          borderRadius: 1,
+          // backgroundColor: "background.paper",
           "& .MuiDataGrid-root": {
-            minWidth: 800, // Minimum width before scrolling
+            minWidth: 100, // Minimum width before scrolling
           },
         }}
       >
@@ -120,6 +137,30 @@ export default function BusinessDetailsTable({
           rows={business_detail_data}
           columns={columns}
           getRowId={(row) => row.id}
+          loading={!!isLoading}
+          components={{
+            LoadingOverlay: CustomLoadingOverlay,
+            NoRowsOverlay: CustomNoRowsOverlay,
+          }}
+          slots={{
+            noRowsOverlay: CustomNoRowsOverlay,
+          }}
+          slotProps={{
+            noRowsOverlay: {
+              // pass a dynamic message based on your app state
+              content: isLoading
+                ? "Carregando..."
+                : "Nenhum produto cadastrado.",
+            },
+          }}
+          componentsProps={{
+            noRowsOverlay: {
+              // pass a dynamic message based on your app state
+              message: isLoading
+                ? "Carregando..."
+                : "Nenhum produto cadastrado.",
+            },
+          }}
           initialState={{
             pagination: {
               paginationModel: {

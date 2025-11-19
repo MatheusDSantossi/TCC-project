@@ -3,15 +3,13 @@ import {
   BsChatFill,
   BsTools,
   BsFillArchiveFill,
-  BsArrowRightCircleFill,
 } from "react-icons/bs";
 
 import logo from "../../assets/logo.svg";
 
-import "../../App.css";
-
 import * as motion from "motion/react-client";
 import type { NavTree } from "../../types/NavTypes";
+import { IoIosArrowForward } from "react-icons/io";
 
 function Sidebar({ onSidebarToggle, changeComponent }) {
   // States
@@ -203,9 +201,10 @@ const MenuItem = ({ label, icon, onClick, hasSubitems, isOpen }) => {
     >
       <div style={iconPlaceholder}>{icon}</div>
       <div style={{ ...textPlaceholder, position: "relative" }}>
-        <span style={{ color: "white", fontWeight: "bold" }}>{label}</span>
+        <span className="mr-2" style={{ color: "white", fontWeight: "bold" }}>{label}</span>
         {hasSubitems && (
           <motion.span
+          className="ml-2 mt-[2px]"
             style={{
               position: "absolute",
               top: 3,
@@ -216,7 +215,7 @@ const MenuItem = ({ label, icon, onClick, hasSubitems, isOpen }) => {
             initial={{ rotate: 0 }}
             animate={{ rotate: isOpen ? 90 : 0 }}
           >
-            <BsArrowRightCircleFill />
+            <IoIosArrowForward />
           </motion.span>
         )}
       </div>

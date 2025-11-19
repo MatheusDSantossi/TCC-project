@@ -5,7 +5,9 @@ import { MdEdit } from "react-icons/md";
 import { useMemo, useState } from "react";
 import AxiosInstance from "../../AxiosInstance";
 import ProductEdit from "../../productsRegistration/ProductEdit";
-import CustomLoadingOverlay, { CustomNoRowsOverlay } from "./components/CustomLoadingOverlay";
+import CustomLoadingOverlay, {
+  CustomNoRowsOverlay,
+} from "./components/CustomLoadingOverlay";
 
 export default function ProductsTable({
   products_data,
@@ -164,10 +166,23 @@ export default function ProductsTable({
             LoadingOverlay: CustomLoadingOverlay,
             NoRowsOverlay: CustomNoRowsOverlay,
           }}
+          slots={{
+            noRowsOverlay: CustomNoRowsOverlay,
+          }}
+          slotProps={{
+            noRowsOverlay: {
+              // pass a dynamic message based on your app state
+              content: isLoading
+                ? "Carregando..."
+                : "Nenhum produto cadastrado.",
+            },
+          }}
           componentsProps={{
             noRowsOverlay: {
               // pass a dynamic message based on your app state
-              message: isLoading ? "Carregando..." : "Nenhum produto cadastrado.",
+              message: isLoading
+                ? "Carregando..."
+                : "Nenhum produto cadastrado.",
             },
           }}
           initialState={{

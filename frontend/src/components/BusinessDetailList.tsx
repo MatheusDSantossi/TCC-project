@@ -7,10 +7,12 @@ import { ExceptionVariant } from "../exceptions/ExceptionVariantsTypes";
 const BusinessDetailList = () => {
   const [businessDetail, setBusinessDetail] = useState([]);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [loading, setLoading] = useState(false);
 
   const { showException } = useException();
 
   const fetchBusinessDetailData = () => {
+    setLoading(true);
     AxiosInstance.get(`api/business-detail/`)
       // .then((response) => setMenuOptions(response.data))
       .then((response) => {
@@ -26,7 +28,8 @@ const BusinessDetailList = () => {
           error: error,
           variant: ExceptionVariant.ERROR,
         });
-      });
+      })
+      .finally(() => setLoading(false));
   };
 
   // Adding a refresh function
@@ -45,6 +48,7 @@ const BusinessDetailList = () => {
       <BusinessDetailsTable
         business_detail_data={businessDetail}
         onBusinessDetailUpdate={refreshBusinessDetail}
+        isLoading={loading}
       />
     </div>
   );

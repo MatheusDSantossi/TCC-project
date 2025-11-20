@@ -27,8 +27,8 @@ function ProductRegistration() {
   const [selectedTab, setSelectedTab] = useState<number>(tabs[0].index);
 
   return (
-    <div className="flex justify-center items-center bg-tertiary">
-      <div className="flex flex-col items-start justify-start min-h-screen p-4 bg-tertiary">
+    <div className="flex justify-center items-center bg-tertiary h-screen">
+      <div className="flex flex-col items-start justify-start bg-tertiary">
         <div className="w-full flex justify-start items-start">
           <Tabs
             selectedTab={selectedTab}

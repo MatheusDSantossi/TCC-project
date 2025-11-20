@@ -8,7 +8,6 @@ import BusinessDetailRegistration from "../BusinessDetailRegistration";
 
 import UserList from "./UsersList";
 
-import "../../App.css";
 import ProductList from "../ProductList";
 import BusinessDetailList from "../BusinessDetailList";
 
@@ -89,7 +88,7 @@ function AdminDashboard() {
       />
 
       <div
-        className={`flex flex-col flex-1 transition-all h-screen ${
+        className={`flex flex-col flex-1 transition-all h-screen bg-tertiary ${
           isSidebarOpen ? "bg-overlay" : ""
         }`}
       >

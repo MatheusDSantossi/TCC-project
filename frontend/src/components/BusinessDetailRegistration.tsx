@@ -42,7 +42,7 @@ function BusinessDetailRegistration() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen p-4 bg-tertiary">
+    <div className="flex items-center justify-center h-screen p-4 bg-tertiary">
       <div className="w-full max-w-lg p-8 rounded-lg shadow-xl bg-primary">
         <div className="flex items-center justify-center mb-5">
           <img className="w-20 mr-4" src={logo} alt="" />

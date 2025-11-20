@@ -2,7 +2,7 @@ import Box from "@mui/material/Box";
 import { DataGrid } from "@mui/x-data-grid";
 import { IconButton } from "@mui/material";
 import { MdEdit } from "react-icons/md";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import AxiosInstance from "../../AxiosInstance";
 import BusinessDetailEdit from "../../BusinessDetailEdit";
 import CustomLoadingOverlay, {
@@ -57,65 +57,54 @@ export default function BusinessDetailsTable({
     setEditModalOpen(false);
   };
 
-  const columns = [
-    {
-      field: "id",
-      headerName: <strong className="text-base">ID</strong>,
-      width: 90,
-      minWidth: 80,
-    },
-    {
-      field: "key",
-      headerName: <strong className="text-base">Título</strong>,
-      minWidth: 200,
-      flex: 2,
-    },
-    {
-      field: "value",
-      headerName: <strong className="text-base">Descrição</strong>,
-      minWidth: 150,
-      flex: 1,
-    },
-    {
-      field: "actions",
-      headerName: <strong className="text-base">Ações</strong>,
-      minWidth: 100,
-      flex: 0.5,
-      sortable: false,
-      renderCell: (params) => (
-        <IconButton
-          onClick={() => handleEditClick(params.row)}
-          size="small"
-          color="primary"
-        >
-          <MdEdit color="#5D76D3" />
-        </IconButton>
-      ),
-    },
-  ];
+  const columns = useMemo(
+    () => [
+      {
+        field: "id",
+        headerName: <strong className="text-base">ID</strong>,
+        width: 90,
+        minWidth: 80,
+      },
+      {
+        field: "key",
+        headerName: <strong className="text-base">Título</strong>,
+        minWidth: 200,
+        flex: 2,
+      },
+      {
+        field: "value",
+        headerName: <strong className="text-base">Descrição</strong>,
+        minWidth: 150,
+        flex: 1,
+      },
+      {
+        field: "actions",
+        headerName: <strong className="text-base">Ações</strong>,
+        minWidth: 100,
+        flex: 0.5,
+        sortable: false,
+        renderCell: (params) => (
+          <IconButton
+            onClick={() => handleEditClick(params.row)}
+            size="small"
+            color="primary"
+          >
+            <MdEdit color="#5D76D3" />
+          </IconButton>
+        ),
+      },
+    ],
+    []
+  );
 
-  // const rows = BusinessDetails_data;
-
-  let rows = [];
-
-  const BusinessDetails_dict = () => {
-    for (const BusinessDetail of business_detail_data) {
-      rows.push(BusinessDetail);
-    }
-
-    return rows;
-  };
-
-  console.log("BusinessDetail dict: ", BusinessDetails_dict()[0]);
+  // Memoize rows so they don't change identity every render
+  const rows = useMemo(() => business_detail_data, [business_detail_data]);
 
   return (
-    <div className="flex w-full h-[730px]">
+    <div className="flex w-full h-[689px]">
       <Box
         sx={{
-          position: "sticky",
-          zIndex: 1,
-          // height: "50%",
-          // minHeight: 340,
+          position: "relative",
           display: "flex",
           flexDirection: "column",
           width: "100%",
@@ -125,19 +114,16 @@ export default function BusinessDetailsTable({
           bottom: 0,
           border: "1px solid",
           borderColor: "divider",
-          // boxShadow: "none",
           borderRadius: 1,
-          // backgroundColor: "background.paper",
           "& .MuiDataGrid-root": {
             minWidth: 100, // Minimum width before scrolling
           },
         }}
       >
         <DataGrid
-          rows={business_detail_data}
+          rows={rows}
           columns={columns}
           getRowId={(row) => row.id}
-          loading={!!isLoading}
           components={{
             LoadingOverlay: CustomLoadingOverlay,
             NoRowsOverlay: CustomNoRowsOverlay,
@@ -150,7 +136,7 @@ export default function BusinessDetailsTable({
               // pass a dynamic message based on your app state
               content: isLoading
                 ? "Carregando..."
-                : "Nenhum produto cadastrado.",
+                : "Nenhum serviço cadastrado.",
             },
           }}
           componentsProps={{
@@ -158,27 +144,29 @@ export default function BusinessDetailsTable({
               // pass a dynamic message based on your app state
               message: isLoading
                 ? "Carregando..."
-                : "Nenhum produto cadastrado.",
+                : "Nenhum Serviço cadastrado.",
             },
           }}
-          initialState={{
-            pagination: {
-              paginationModel: {
-                pageSize: 10,
-              },
-            },
-          }}
-          pageSizeOptions={[10]}
-          disableRowSelectionOnClick
+          loading={!!isLoading}
+          // re-enable virtualization (remove disableVirtualization)
+          disableSelectionOnClick
+          // pageSizeOptions={[10, 15, 30]}
+          initialState={{ pagination: { paginationModel: { pageSize: 15 } } }}
+          density="comfortable"
+          // important: set fixed row/header heights that match your styling
+          rowHeight={28} // tune to match your desired visual height
+          headerHeight={30}
           sx={{
-            fontSize: "16px",
+            fontSize: "14px",
             boxShadow: 2,
             border: 2,
-            borderColor: "#5D76D3",
+            borderColor: "var(--color-quaternary)",
             backgroundColor: "#FFFFFFFF",
             "& .MuiDataGrid-cell": {
               backgroundColor: "#F4F4F4FF",
-              whiteSpace: "normal",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
               lineHeight: "1.2",
               padding: "8px",
             },
@@ -186,7 +174,7 @@ export default function BusinessDetailsTable({
               fontWeight: "bold",
             },
             "& .MuiDataGrid-cell:hover": {
-              color: "#5D76D3",
+              color: "var(--color-quaternary)",
             },
           }}
         />

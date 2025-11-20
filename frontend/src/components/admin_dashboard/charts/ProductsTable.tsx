@@ -72,12 +72,34 @@ export default function ProductsTable({
         headerName: <strong className="text-base">Produto</strong>,
         minWidth: 200,
         flex: 2,
+        renderCell: (params) => (
+          <div
+            style={{
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }}
+          >
+            {params.value}
+          </div>
+        ),
       },
       {
         field: "brand",
         headerName: <strong className="text-base">Marca</strong>,
         minWidth: 150,
         flex: 1,
+        renderCell: (p) => (
+          <div
+            style={{
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }}
+          >
+            {p.value}
+          </div>
+        ),
       },
       {
         field: "quantity",
@@ -94,7 +116,7 @@ export default function ProductsTable({
       {
         field: "price",
         headerName: <strong className="text-base">Preço</strong>,
-        minWidth: 120,
+        width: 80,
         flex: 1,
       },
       {
@@ -109,7 +131,7 @@ export default function ProductsTable({
             size="small"
             color="primary"
           >
-            <MdEdit color="#5D76D3" />
+            <MdEdit style={{ color: "var(--color-quaternary)" }} />
           </IconButton>
         ),
       },
@@ -117,28 +139,16 @@ export default function ProductsTable({
     []
   );
 
-  // const rows = products_data;
-
-  let rows = [];
-
-  const products_dict = () => {
-    for (const product of products_data) {
-      rows.push(product);
-    }
-
-    return rows;
-  };
+  // Memoize rows so they don't change identity every render
+  const rows = useMemo(() => products_data, [products_data]);
 
   // console.log("Product dict: ", products_dict()[0]);
 
   return (
-    <div className="flex w-full h-[730px]">
+    <div className="flex w-full h-[689px]">
       <Box
         sx={{
-          position: "sticky",
-          zIndex: 1,
-          // height: "50%",
-          // minHeight: 340,
+          position: "relative",
           display: "flex",
           flexDirection: "column",
           width: "100%",
@@ -148,20 +158,16 @@ export default function ProductsTable({
           bottom: 0,
           border: "1px solid",
           borderColor: "divider",
-          // boxShadow: "none",
           borderRadius: 1,
-          // backgroundColor: "background.paper",
           "& .MuiDataGrid-root": {
             minWidth: 100, // Minimum width before scrolling
           },
         }}
       >
         <DataGrid
-          rows={products_data ?? []}
-          disableVirtualization
+          rows={rows}
           columns={columns}
           getRowId={(row) => row.product_id}
-          loading={!!isLoading}
           components={{
             LoadingOverlay: CustomLoadingOverlay,
             NoRowsOverlay: CustomNoRowsOverlay,
@@ -185,25 +191,26 @@ export default function ProductsTable({
                 : "Nenhum produto cadastrado.",
             },
           }}
-          initialState={{
-            pagination: {
-              paginationModel: {
-                pageSize: 15, // HERE I LIMIT THE QUANTITY OF ITEMS
-              },
-            },
-          }}
-          pageSizeOptions={[10]}
-          disableRowSelectionOnClick
+          loading={!!isLoading}
+          // re-enable virtualization (remove disableVirtualization)
+          disableSelectionOnClick
+          // pageSizeOptions={[10, 15, 30]}
+          initialState={{ pagination: { paginationModel: { pageSize: 15 } } }}
           density="comfortable"
+          // important: set fixed row/header heights that match your styling
+          rowHeight={28} // tune to match your desired visual height
+          headerHeight={30}
           sx={{
             fontSize: "14px",
             boxShadow: 2,
             border: 2,
-            borderColor: "#5D76D3",
+            borderColor: "var(--color-quaternary)",
             backgroundColor: "#FFFFFFFF",
             "& .MuiDataGrid-cell": {
               backgroundColor: "#F4F4F4FF",
-              whiteSpace: "normal",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
               lineHeight: "1.2",
               padding: "8px",
             },
@@ -211,7 +218,7 @@ export default function ProductsTable({
               fontWeight: "bold",
             },
             "& .MuiDataGrid-cell:hover": {
-              color: "#5D76D3",
+              color: "var(--color-quaternary)",
             },
           }}
         />

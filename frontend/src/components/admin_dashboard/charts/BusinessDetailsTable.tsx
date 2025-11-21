@@ -80,7 +80,7 @@ export default function BusinessDetailsTable({
       {
         field: "actions",
         headerName: <strong className="text-base">Ações</strong>,
-        minWidth: 100,
+        width: 50,
         flex: 0.5,
         sortable: false,
         renderCell: (params) => (

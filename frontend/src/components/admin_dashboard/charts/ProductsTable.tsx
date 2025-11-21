@@ -122,16 +122,17 @@ export default function ProductsTable({
       {
         field: "actions",
         headerName: <strong className="text-base">Ações</strong>,
-        minWidth: 100,
+        width: 50,
         flex: 0.5,
         sortable: false,
         renderCell: (params) => (
           <IconButton
+            className="items-center"
             onClick={() => handleEditClick(params.row)}
             size="small"
             color="primary"
           >
-            <MdEdit style={{ color: "var(--color-quaternary)" }} />
+            <MdEdit style={{ color: "var(--color-quaternary)", alignItems: "center" }} />
           </IconButton>
         ),
       },

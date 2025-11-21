@@ -1,7 +1,7 @@
 import re
 
 KNOWN_METRICS = [
-    "UN", "CX", "PT", "PCT", "PR", "CXT", "CT", "CXA" , "KG", "G", "M"
+    "UN", "CX", "PT", "PCT", "PR", "CXT", "CT", "CXA" , "KG", "G", "M", "L", "LT", "ML"
 ]
 
 QUANTITY_RE = re.compile(r"""

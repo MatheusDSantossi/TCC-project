@@ -187,6 +187,11 @@ def generate_and_search(prompt, business):
     # print("Business gen and ser: ", business)
     products_df = get_cached_products_df(business, conn)
     # print("Products df generate and serach: ", products_df)
+    # print("prompt: ", prompt)
+    # print("products_df: ", products_df)
+    # print("products_df[embeddings]: ", products_df["embeddings"])
+    # print("np.stack(products_df[embeddings]): ", np.stack(products_df["embeddings"]))
+    
     similarities = find_similarity_products(prompt, products_df, np.stack(products_df["embeddings"]), business)
 
     if isinstance(similarities, list):  

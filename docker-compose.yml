@@ -27,9 +27,9 @@ services:
       - backend
 
   db:
-    image: postgres:13
+    image: postgres:18
     volumes:
-      - postgres_data:/var/lib/postgresql/data/
+      - postgres_data_v18:/var/lib/postgresql/
     env_file:
       - .env
     environment:
@@ -40,5 +40,6 @@ services:
       - POSTGRES_PORT=${DATABASE_PORT}
 volumes:
   postgres_data:
+  postgres_data_v18:
   static_volume:
   media_volume:

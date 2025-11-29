@@ -1,6 +1,6 @@
-from prompts.prompt_preprocessing import pre_process_prompt
+from .prompt_preprocessing import pre_process_prompt
 from typing import Optional
-from embeddings import embed_fn
+from ..embeddings import embed_fn
 
 def preprocess_with_ai(
     prompt: str,

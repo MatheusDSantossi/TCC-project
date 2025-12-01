@@ -9,6 +9,13 @@ from chatbot.services.product_ai import generate_synonyms_for, generate_embeddin
 
 from core.mixins import BusinessQuerysetMixin
 
+# TODO: I'm getting this error when trying to create a product:
+# IntegrityError at /api/products/
+# null value in column "product_id" of relation "products_with_embeddings" violates not-null constraint
+# DETAIL:  Failing row contains (null, BISCOITO RECHEADO  COCO, Seção3, 1.99, PT, TRELOSO, 30X120G, 3, 100.00, [-0.02286109, 0.022939662, 0.018616376, 0.011887718, -0.00251269..., ["BISCOITINHO", "COQUINHO"]).
+
+
+
 class ProductListCreateView(BusinessQuerysetMixin, generics.ListCreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer

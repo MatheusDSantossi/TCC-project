@@ -73,13 +73,14 @@ function ProductEdit({ open, onClose, product, onSave, refreshTable }) {
     onClose();
     try {
       const response = await AxiosInstance.delete(
-        `delete-product/${formData.productId}/`
+        `api/products/${formData.productId}/`
+        // `delete-product/${formData.productId}/`
       );
 
       refreshTable();
 
       console.log(
-        `Product ${formData.productName} deleted succesfuly`,
+        `Product ${formData.productName} deleted successfully`,
         response.data
       );
     } catch (error) {

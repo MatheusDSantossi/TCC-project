@@ -18,7 +18,7 @@
     "@mui/icons-material": "^6.4.2",
     "@mui/material": "^6.4.2",
     "@mui/x-charts": "^7.25.0",
-    "@mui/x-data-grid": "^7.28.3",
+    "@mui/x-data-grid": "latest",
     "@react-three/drei": "^9.122.0",
     "@react-three/fiber": "^8.18.0",
     "@tailwindcss/container-queries": "^0.1.1",

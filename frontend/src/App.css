@@ -24,6 +24,8 @@
 
   /* Shadow */
   --shadow-3xl: 0 35px 120px rgba(1,61,49,0.25);
+  --shadow-box:
+    rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.08) 0px 0px 0px 1px;
 
   /* Font Size */
   --text-xs: 0.75rem;

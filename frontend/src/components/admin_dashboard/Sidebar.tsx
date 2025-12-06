@@ -1,17 +1,13 @@
 import React, { useState, useRef, type CSSProperties, type ReactNode } from "react";
-import {
-  BsChatFill,
-  BsTools,
-  BsFillArchiveFill,
-  BsArrowRightCircleFill,
-} from "react-icons/bs";
+import { TbMessageChatbot } from "react-icons/tb";
+import { FaBoxes } from "react-icons/fa";
 
 import logo from "../../assets/logo.svg";
 
-import "../../App.css";
-
 import * as motion from "motion/react-client";
 import type { NavTree } from "../../types/NavTypes";
+import { IoIosArrowForward } from "react-icons/io";
+import { MdBusinessCenter } from "react-icons/md";
 
 function Sidebar({ onSidebarToggle, changeComponent }) {
   // States
@@ -41,7 +37,7 @@ function Sidebar({ onSidebarToggle, changeComponent }) {
     },
   };
   return (
-    <div className="h-screen bg-primary shadow-3xl">
+    <div className="h-screen bg-primary shadow-box rounded">
       <div style={container}>
         <motion.nav
           initial={false}
@@ -83,7 +79,7 @@ const listItemsNav: NavTree = {
   //   component: "dashboard",
   // },
   Produtos: {
-    icon: <BsFillArchiveFill />,
+    icon: <FaBoxes />,
     subitems: {
       Cadastro: {
         component: "productRegistration",
@@ -94,7 +90,7 @@ const listItemsNav: NavTree = {
     },
   },
   Serviços: {
-    icon: <BsTools />,
+    icon: <MdBusinessCenter />,
     subitems: {
       Cadastro: {
         component: "companyInfoRegistration",
@@ -105,7 +101,7 @@ const listItemsNav: NavTree = {
     },
   },
   Chatbot: {
-    icon: <BsChatFill />,
+    icon: <TbMessageChatbot />,
     component: "chatbot",
   },
   // Settings: {
@@ -203,9 +199,10 @@ const MenuItem = ({ label, icon, onClick, hasSubitems, isOpen }) => {
     >
       <div style={iconPlaceholder}>{icon}</div>
       <div style={{ ...textPlaceholder, position: "relative" }}>
-        <span style={{ color: "white", fontWeight: "bold" }}>{label}</span>
+        <span className="mr-2" style={{ color: "white", fontWeight: "bold" }}>{label}</span>
         {hasSubitems && (
           <motion.span
+          className="ml-2 mt-[2px]"
             style={{
               position: "absolute",
               top: 3,
@@ -216,7 +213,7 @@ const MenuItem = ({ label, icon, onClick, hasSubitems, isOpen }) => {
             initial={{ rotate: 0 }}
             animate={{ rotate: isOpen ? 90 : 0 }}
           >
-            <BsArrowRightCircleFill />
+            <IoIosArrowForward />
           </motion.span>
         )}
       </div>

@@ -1,17 +1,24 @@
 import Box from "@mui/material/Box";
-import { DataGrid } from "@mui/x-data-grid";
+import { DataGrid, type GridColDef } from "@mui/x-data-grid";
 import { IconButton } from "@mui/material";
 import { MdEdit } from "react-icons/md";
 import { useMemo, useState } from "react";
 import AxiosInstance from "../../AxiosInstance";
 import ProductEdit from "../../productsRegistration/ProductEdit";
+import CustomLoadingOverlay, {
+  CustomNoRowsOverlay,
+} from "./components/CustomLoadingOverlay";
 
-export default function ProductsTable({ products_data, onProductUpdate }) {
+export default function ProductsTable({
+  products_data,
+  onProductUpdate,
+  isLoading,
+}) {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
 
   const handleEditClick = (product) => {
-    console.log("Product: ", product);
+    // console.log("Product: ", product);
     setSelectedProduct(product);
     setEditModalOpen(true);
   };
@@ -65,12 +72,34 @@ export default function ProductsTable({ products_data, onProductUpdate }) {
         headerName: <strong className="text-base">Produto</strong>,
         minWidth: 200,
         flex: 2,
+        renderCell: (params) => (
+          <div
+            style={{
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }}
+          >
+            {params.value}
+          </div>
+        ),
       },
       {
         field: "brand",
         headerName: <strong className="text-base">Marca</strong>,
         minWidth: 150,
         flex: 1,
+        renderCell: (p) => (
+          <div
+            style={{
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }}
+          >
+            {p.value}
+          </div>
+        ),
       },
       {
         field: "quantity",
@@ -87,22 +116,23 @@ export default function ProductsTable({ products_data, onProductUpdate }) {
       {
         field: "price",
         headerName: <strong className="text-base">Preço</strong>,
-        minWidth: 120,
+        width: 80,
         flex: 1,
       },
       {
         field: "actions",
         headerName: <strong className="text-base">Ações</strong>,
-        minWidth: 100,
+        width: 50,
         flex: 0.5,
         sortable: false,
         renderCell: (params) => (
           <IconButton
+            className="items-center"
             onClick={() => handleEditClick(params.row)}
             size="small"
             color="primary"
           >
-            <MdEdit color="#5D76D3" />
+            <MdEdit style={{ color: "var(--color-quaternary)", alignItems: "center" }} />
           </IconButton>
         ),
       },
@@ -110,68 +140,78 @@ export default function ProductsTable({ products_data, onProductUpdate }) {
     []
   );
 
-  // const rows = products_data;
+  // Memoize rows so they don't change identity every render
+  const rows = useMemo(() => products_data, [products_data]);
 
-  let rows = [];
-
-  const products_dict = () => {
-    for (const product of products_data) {
-      rows.push(product);
-    }
-
-    return rows;
-  };
-
-  console.log("Product dict: ", products_dict()[0]);
+  // console.log("Product dict: ", products_dict()[0]);
 
   return (
-    <div className="flex w-full h-[730px]">
+    <div className="flex w-full h-[689px]">
       <Box
         sx={{
-          position: "sticky",
-          zIndex: 1,
-          // height: "50%",
-          // minHeight: 340,
+          position: "relative",
           display: "flex",
           flexDirection: "column",
+          width: "100%",
           pl: 1.5,
           pr: 1,
           py: 1,
           bottom: 0,
           border: "1px solid",
           borderColor: "divider",
-          // boxShadow: "none",
           borderRadius: 1,
-          // backgroundColor: "background.paper",
           "& .MuiDataGrid-root": {
             minWidth: 100, // Minimum width before scrolling
           },
         }}
       >
         <DataGrid
-          rows={products_data}
-          disableVirtualization
+          rows={rows}
           columns={columns}
           getRowId={(row) => row.product_id}
-          initialState={{
-            pagination: {
-              paginationModel: {
-                pageSize: 15, // HERE I LIMIT THE QUANTITY OF ITEMS
-              },
+          components={{
+            LoadingOverlay: CustomLoadingOverlay,
+            NoRowsOverlay: CustomNoRowsOverlay,
+          }}
+          slots={{
+            noRowsOverlay: CustomNoRowsOverlay,
+          }}
+          slotProps={{
+            noRowsOverlay: {
+              // pass a dynamic message based on your app state
+              content: isLoading
+                ? "Carregando..."
+                : "Nenhum produto cadastrado.",
             },
           }}
-          pageSizeOptions={[10]}
-          disableRowSelectionOnClick
+          componentsProps={{
+            noRowsOverlay: {
+              // pass a dynamic message based on your app state
+              message: isLoading
+                ? "Carregando..."
+                : "Nenhum produto cadastrado.",
+            },
+          }}
+          loading={!!isLoading}
+          // re-enable virtualization (remove disableVirtualization)
+          disableSelectionOnClick
+          // pageSizeOptions={[10, 15, 30]}
+          initialState={{ pagination: { paginationModel: { pageSize: 15 } } }}
           density="comfortable"
+          // important: set fixed row/header heights that match your styling
+          rowHeight={28} // tune to match your desired visual height
+          headerHeight={30}
           sx={{
             fontSize: "14px",
             boxShadow: 2,
             border: 2,
-            borderColor: "#5D76D3",
+            borderColor: "var(--color-quaternary)",
             backgroundColor: "#FFFFFFFF",
             "& .MuiDataGrid-cell": {
               backgroundColor: "#F4F4F4FF",
-              whiteSpace: "normal",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
               lineHeight: "1.2",
               padding: "8px",
             },
@@ -179,7 +219,7 @@ export default function ProductsTable({ products_data, onProductUpdate }) {
               fontWeight: "bold",
             },
             "& .MuiDataGrid-cell:hover": {
-              color: "#5D76D3",
+              color: "var(--color-quaternary)",
             },
           }}
         />

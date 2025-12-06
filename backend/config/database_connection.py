@@ -17,4 +17,4 @@ def get_db_connection():
     
     return conn
 
-conn = get_db_connection()
+# conn = get_db_connection()

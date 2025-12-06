@@ -10,8 +10,8 @@ from sklearn.metrics.pairwise import cosine_similarity
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 
-from prompts.prompt_preprocessing import pre_process_prompt, pre_process_prompt_brand, pre_process_prompt_section, pre_process_prompt_grammatical
-from prompts.prompt_searcher import find_business_sections, find_section, find_brand, find_price, find_quantity, find_using_synonyms, find_similar_products_using_input_embeddings
+from .prompts.prompt_preprocessing import pre_process_prompt, pre_process_prompt_brand, pre_process_prompt_section, pre_process_prompt_grammatical
+from .prompts.prompt_searcher import find_business_sections, find_section, find_brand, find_price, find_quantity, find_using_synonyms, find_similar_products_using_input_embeddings
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,7 +25,7 @@ from fuzzywuzzy import fuzz
 
 from config.config import SECRET_KEY
 
-from config.database_connection import conn
+from config.database_connection import get_db_connection
 
 import re
 
@@ -36,13 +36,13 @@ import json
 import time
 
 from .embeddings import embed_fn
-from loaders import load_business_details, get_cached_products_df
+from .loaders import load_business_details, get_cached_products_df
 
-from search.trigram import fetch_brands_alike, fetch_products_alike
+from .search.trigram import fetch_brands_alike, fetch_products_alike
 
-from prompts.prompt_preprocessor import preprocess_with_ai
-from regex_extractor import extract_product_list
-from tfidf_matcher import tfidf_match
+from .prompts.prompt_preprocessor import preprocess_with_ai
+from .regex_extractor import extract_product_list
+from .tfidf_matcher import tfidf_match
 
 # Você: quero um refrige
 
@@ -111,6 +111,9 @@ products_list_after_user_input = []
 text_has_section = False
 text_has_brand = False
 sections_find_in_db = find_business_sections() 
+
+conn = get_db_connection()
+
 
 # print("Sections found in db: ", sections_find_in_db)
 
@@ -187,6 +190,11 @@ def generate_and_search(prompt, business):
     # print("Business gen and ser: ", business)
     products_df = get_cached_products_df(business, conn)
     # print("Products df generate and serach: ", products_df)
+    # print("prompt: ", prompt)
+    # print("products_df: ", products_df)
+    # print("products_df[embeddings]: ", products_df["embeddings"])
+    # print("np.stack(products_df[embeddings]): ", np.stack(products_df["embeddings"]))
+    
     similarities = find_similarity_products(prompt, products_df, np.stack(products_df["embeddings"]), business)
 
     if isinstance(similarities, list):  

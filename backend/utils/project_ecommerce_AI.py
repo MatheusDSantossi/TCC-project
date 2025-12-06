@@ -25,7 +25,7 @@ from fuzzywuzzy import fuzz
 
 from config.config import SECRET_KEY
 
-from config.database_connection import conn
+from config.database_connection import get_db_connection
 
 import re
 
@@ -111,6 +111,9 @@ products_list_after_user_input = []
 text_has_section = False
 text_has_brand = False
 sections_find_in_db = find_business_sections() 
+
+conn = get_db_connection()
+
 
 # print("Sections found in db: ", sections_find_in_db)
 

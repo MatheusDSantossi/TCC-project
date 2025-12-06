@@ -10,7 +10,7 @@
 
 import re
 import logging
-from config.database_connection import conn
+from config.database_connection import get_db_connection
 
 from django.core.management.base import BaseCommand
 from django.db import transaction
@@ -21,6 +21,7 @@ from utils.metrics_utils import extract_metric_and_quantity
 
 logger = logging.getLogger(__name__)
 
+conn = get_db_connection()
 
 def parse_product_name(raw_name: str) -> dict:
     """

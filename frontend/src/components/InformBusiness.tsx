@@ -20,7 +20,7 @@ const InformBusiness = () => {
   const [buttonState, setButtonState] = useState("idle");
 
   useEffect(() => {
-    AxiosInstance.get(`api/business/`)
+    AxiosInstance.get(`business/`)
       .then((response) => {
         setBusinessSlugs(response.data);
       })

@@ -2,6 +2,10 @@ FROM node:20-alpine as build
 
 WORKDIR /app
 
+# allow injecting REACT_APP_API_URL at build time
+ARG REACT_APP_API_URL=""
+ENV REACT_APP_API_URL=${REACT_APP_API_URL}
+
 COPY package.json package-lock.json* ./
 
 RUN npm ci --frozen-lockfile --legacy-peer-deps

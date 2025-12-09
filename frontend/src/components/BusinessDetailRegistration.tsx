@@ -17,7 +17,7 @@ function BusinessDetailRegistration() {
 
     setButtonState("loading");
 
-    AxiosInstance.post(`api/business-detail/`, {
+    AxiosInstance.post(`business-detail/`, {
       key: businessDetailTitle.trim(),
       value: businessDetailDescription.trim(),
     })

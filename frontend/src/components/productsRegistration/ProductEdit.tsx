@@ -73,7 +73,7 @@ function ProductEdit({ open, onClose, product, onSave, refreshTable }) {
     onClose();
     try {
       const response = await AxiosInstance.delete(
-        `api/products/${formData.productId}/`
+        `products/${formData.productId}/`
         // `delete-product/${formData.productId}/`
       );
 

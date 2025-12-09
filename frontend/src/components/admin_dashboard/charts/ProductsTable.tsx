@@ -26,7 +26,7 @@ export default function ProductsTable({
   const handleSave = async (updatedProduct) => {
     try {
       const response = await AxiosInstance.put(
-        `api/products/${updatedProduct.productId}/`,
+        `products/${updatedProduct.productId}/`,
         {
           name: updatedProduct.productName,
           brand: updatedProduct.productBrand,

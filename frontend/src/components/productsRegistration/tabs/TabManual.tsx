@@ -190,7 +190,7 @@ const TabManual = () => {
 
   const GetProductList = (productName) => {
     if (productName.length > 3) {
-      AxiosInstance.get(`api/products/?search=${productName}`)
+      AxiosInstance.get(`products/?search=${productName}`)
         .then((response) => {
           console.log(response.data);
           dispatch({ type: "SET_SUGGESTIONS", payload: response.data });
@@ -270,7 +270,7 @@ const TabManual = () => {
 
     console.log("Product synonyms: ", productSynonyms);
 
-    AxiosInstance.post(`api/products/`, {
+    AxiosInstance.post(`products/`, {
       name: productName.trim(),
       brand: productBrand.trim(),
       quantity: productQuantityFormat.trim(),

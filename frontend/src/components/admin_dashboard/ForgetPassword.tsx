@@ -26,7 +26,7 @@ const ForgetPassword = () => {
   const submission = (data) => {
     setButtonState("loading");
 
-    AxiosInstance.post(`api/password_reset/`, {
+    AxiosInstance.post(`password_reset/`, {
       email: data.email,
     })
       .then((response) => {

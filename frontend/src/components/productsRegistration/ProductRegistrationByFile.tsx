@@ -95,7 +95,7 @@ const ProductRegistrationByFile = () => {
       // POST each row to the single-product endpoint
       // We can also implement here a bulk endpoint for efficiency
       const promises = batch.map((r) =>
-        AxiosInstance.post("/api/products/", {
+        AxiosInstance.post("products/", {
           name: r.name,
           brand: r.brand,
           quantity: r.quantity,
@@ -172,7 +172,7 @@ const ProductRegistrationByFile = () => {
     setStatusMessage("Iniciando upload...");
 
     try {
-      const res = await AxiosInstance.post("/api/products/import/", form, {
+      const res = await AxiosInstance.post("products/import/", form, {
         onUploadProgress: (progressEvent: AxiosProgressEvent) => {
           const percent = Math.round(
             (progressEvent.loaded * 100) / progressEvent.total
@@ -224,7 +224,7 @@ const ProductRegistrationByFile = () => {
       const timer = setInterval(async () => {
         try {
           const r = await AxiosInstance.get(
-            `/api/products/import/status/${jobId}/`
+            `products/import/status/${jobId}/`
           );
           // Example server response: { status: 'PENDING'|'PROGRESS'|'SUCCESS'|'FAILURE', progress: 45, message: 'parsing' }
           const data = r.data;

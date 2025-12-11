@@ -13,7 +13,7 @@ const BusinessDetailList = () => {
 
   const fetchBusinessDetailData = () => {
     setLoading(true);
-    AxiosInstance.get(`api/business-detail/`)
+    AxiosInstance.get(`business-detail/`)
       // .then((response) => setMenuOptions(response.data))
       .then((response) => {
         console.log("Response: ", response);

@@ -19,7 +19,7 @@ Relação de produtos 16_05_2025.xls
 # ENV
 /*/.env
 /*/.env.local
-.env
+*.env
 
 # Frontend
 

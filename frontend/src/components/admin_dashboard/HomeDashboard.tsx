@@ -23,7 +23,7 @@ function HomeDashboard() {
       totalProducts || 0;
 
   const fetchProductsData = () => {
-    AxiosInstance.get(`api/products/`)
+    AxiosInstance.get(`products/`)
       // .then((response) => setMenuOptions(response.data))
       .then((response) => {
         setProducts(response.data);

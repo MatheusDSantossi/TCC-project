@@ -1,7 +1,15 @@
 import axios from "axios";
 
 // const baseUrl = "http://127.0.0.1:8000/";
-const baseUrl = '/api'
+// const rawApiBase = process.env.REACT_APP_API_URL || '';
+// Access the environment variable using import.meta.env
+const rawApiBase = import.meta.env.VITE_REACT_APP_API_URL || ''; 
+console.log("rawApiBase: ", rawApiBase);
+
+console.log("All ENV variables:", import.meta.env);
+
+const apiBase = rawApiBase.replace(/\/+$/,''); // remove trailing slash if present
+const baseUrl = apiBase ? `${apiBase}` : '/api';
 
 const AxiosInstance = axios.create({
   baseURL: baseUrl,

@@ -22,7 +22,7 @@ const GoogleButton = () => {
       if (code) {
         try {
           const response = await AxiosInstance.post(
-            "/api/auth/google/callback/",
+            "auth/google/callback/",
             { code }
           );
           localStorage.setItem("Token", response.data.token);

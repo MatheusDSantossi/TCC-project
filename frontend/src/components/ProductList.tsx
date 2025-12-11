@@ -9,7 +9,7 @@ const ProductList = () => {
 
   const fetchProductsData = () => {
     setIsLoading(true);
-    AxiosInstance.get(`api/products/`)
+    AxiosInstance.get(`products/`)
       // .then((response) => setMenuOptions(response.data))
       .then((response) => {
         setProducts(response.data);

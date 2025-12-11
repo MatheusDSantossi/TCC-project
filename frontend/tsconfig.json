@@ -3,11 +3,10 @@
     "module": "esnext",
     "moduleResolution": "bundler",
     "target": "esnext",
-    "types": [],
     // For nodejs:
-    // "lib": ["esnext"],
-    // "types": ["node"],
-    // and npm install -D @types/node
+    "types": ["node"],
+     // Make sure 'dom' and 'esnext' are included in the 'lib' array
+    "lib": ["dom", "dom.iterable", "esnext"], 
 
     // Other Outputs
     "sourceMap": true,
@@ -39,6 +38,6 @@
     "checkJs": true,
     "noEmit": true
   },
-  "include": ["src", "src/global.d.ts"],
+  "include": ["src", "src/global.d.ts", "vite-env.d.ts", "env"],
   "exclude": ["node_modules", "dist"]
 }

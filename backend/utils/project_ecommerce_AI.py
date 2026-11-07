@@ -23,7 +23,7 @@ import unicodedata
 
 from fuzzywuzzy import fuzz
 
-from config.config import SECRET_KEY
+from config.config import GEMINI_API_KEY
 
 from config.database_connection import get_db_connection
 
@@ -51,7 +51,7 @@ from .tfidf_matcher import tfidf_match
 # retornar mais produtos quando for generico
 
 # Configurando a API do Gemini
-GOOGLE_API_KEY = SECRET_KEY
+GOOGLE_API_KEY = GEMINI_API_KEY
 genai.configure(api_key=GOOGLE_API_KEY)
 
 

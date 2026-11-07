@@ -16,10 +16,11 @@ load_dotenv(encoding="UTF-8")
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-6qqj(^f&4ex4n!q3r^52@yk9u#n)ba&&6*d5*3n5!()vha&r-h"
+# No fallback on purpose: a missing key must stop startup, not run on a known default
+SECRET_KEY = os.environ["DJANGO_SECRET_KEY"]
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get("DEBUG", "0") == "1"
 
 def parse_allowed_hosts(env_value: str):
     # Accept comma-separated hosts. Keep only non-empty entries.
@@ -193,8 +194,7 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_HOST_USER = os.environ.get("USER_EMAIL")
-DEFAULT_FROM_EMAIL = os.environ.get("USER_EMAIL")
-EMAIL_HOST_PASSWORD = 'gaoz cqnw bnas wqew'
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
 DEFAULT_FROM_EMAIL = 'CHATBOT HECATE'

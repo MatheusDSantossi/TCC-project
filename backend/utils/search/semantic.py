@@ -16,7 +16,7 @@ def create_semantic_dictionary(user_input: str, find_section, business) -> dict:
     Returns:
         A dictionary where the keys are the products and the values are similar products lists
     """
-    products_df = get_cached_products_df(business, connection)
+    products_df = get_cached_products_df(business)
     semantic_dictonary = {}
     # "REFRIG. GUARANA ANTARCT PET"	"Seção 3"	6	"PC"	"22021000"	4.89	4.89	6	true
 

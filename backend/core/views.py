@@ -5,10 +5,12 @@ from .serializers import BusinessSerializer
 
 from rest_framework import permissions
 
-class BusinessListCreateView(generics.ListCreateAPIView):
+class BusinessListView(generics.ListAPIView):
     """
-    GET /api/business/ -> list details (allows everyone)
-    POST /api/business-detail/ -> create a new business
+    GET /api/business/ -> list businesses (public: the store picker in the frontend)
+
+    Read-only on purpose: creating a business is an admin task (Django shell),
+    not something an anonymous visitor can do.
     """
     permission_classes = [permissions.AllowAny]
     queryset = Business.objects.all()

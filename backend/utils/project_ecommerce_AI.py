@@ -25,7 +25,7 @@ from fuzzywuzzy import fuzz
 
 from config.config import GEMINI_API_KEY
 
-from config.database_connection import get_db_connection
+from django.db import connection
 
 import re
 
@@ -110,9 +110,6 @@ products_list_after_user_input = []
 
 text_has_section = False
 text_has_brand = False
-sections_find_in_db = find_business_sections() 
-
-conn = get_db_connection()
 
 
 # print("Sections found in db: ", sections_find_in_db)
@@ -188,7 +185,7 @@ def find_similarity_products(prompt, products_df, embeddings_products=None, busi
 
 def generate_and_search(prompt, business):
     # print("Business gen and ser: ", business)
-    products_df = get_cached_products_df(business, conn)
+    products_df = get_cached_products_df(business)
     # print("Products df generate and serach: ", products_df)
     # print("prompt: ", prompt)
     # print("products_df: ", products_df)
@@ -225,7 +222,7 @@ def chatbot_response(user_prompt, text_related_to="default", business=None):
     global dict_of_client_products
     global products_list_after_user_input
 
-    business_detail_list = load_business_details(business, conn)
+    business_detail_list = load_business_details(business)
     
     business_detail_text = "" 
     for k, v in business_detail_list.items():
@@ -233,7 +230,7 @@ def chatbot_response(user_prompt, text_related_to="default", business=None):
         business_detail_text += ":\n"
         business_detail_text += v
         
-    products_df = get_cached_products_df(business, conn)
+    products_df = get_cached_products_df(business)
 
     print("Products df: ", products_df)
 
@@ -399,7 +396,7 @@ def chatbot_response(user_prompt, text_related_to="default", business=None):
                 {products_alike} \n
                 """
                         
-            with conn.cursor() as cursor:
+            with connection.cursor() as cursor:
                 
                 sql_query = """
                 SELECT name, section, price, stock FROM products_with_embeddings
@@ -462,7 +459,7 @@ def chatbot_response(user_prompt, text_related_to="default", business=None):
         answer_prompt+=f"""
         The user's message **mentions something related to store sections**. The available sections in the store are:
 
-        {sections_find_in_db}
+        {find_business_sections(business)}
 
         Take this into account when generating the response.
         \n 
@@ -777,7 +774,7 @@ def generate_synonymous(product=None, product_list=None, brand=None, synonyms=No
         original_product = original_product.strip()
 
         print("original product: ", original_product)
-        with conn.cursor() as cursor:
+        with connection.cursor() as cursor:
             cursor.execute("""
                         UPDATE products_with_embeddings
                         SET synonymous = %s

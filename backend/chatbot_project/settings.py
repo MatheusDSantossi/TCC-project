@@ -109,6 +109,11 @@ DATABASES = {
         "PASSWORD": os.environ.get("DATABASE_PASSWORD"),
         "HOST": os.environ.get("DATABASE_HOST"),
         "PORT": os.environ.get("DATABASE_PORT"),
+        # Persistent connections: reuse one connection per worker for up to 60s
+        # instead of opening a new one per request; the health check reconnects
+        # after Postgres restarts or drops an idle connection
+        "CONN_MAX_AGE": 60,
+        "CONN_HEALTH_CHECKS": True,
     }
 }
 

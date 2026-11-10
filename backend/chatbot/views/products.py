@@ -1,4 +1,4 @@
-from rest_framework import generics
+from rest_framework import generics, permissions
 
 from chatbot.models.product import Product
 from chatbot.serializers import ProductSerializer
@@ -10,6 +10,7 @@ from chatbot.services.product_ai import generate_synonyms_for, generate_embeddin
 from core.mixins import BusinessQuerysetMixin
 
 class ProductListCreateView(BusinessQuerysetMixin, generics.ListCreateAPIView):
+    permission_classes = [permissions.IsAuthenticated]
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     
@@ -55,7 +56,10 @@ class ProductListCreateView(BusinessQuerysetMixin, generics.ListCreateAPIView):
             # Saving with the business and the same synonymous
             instance.synonymous = incoming
             
-class ProductRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
+class ProductRetrieveUpdateDestroyView(BusinessQuerysetMixin, generics.RetrieveUpdateDestroyAPIView):
+    # Scoped by BusinessQuerysetMixin: another business's product returns 404, not 403,
+    # so the API does not reveal which product ids exist
+    permission_classes = [permissions.IsAuthenticated]
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
 

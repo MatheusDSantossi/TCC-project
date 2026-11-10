@@ -6,6 +6,8 @@ services:
       - ./backend:/app
       - static_volume:/app/staticfiles
       - media_volume:/app/media
+    ports:
+      - "8000:8000"
     env_file:
       - .env
     depends_on:
@@ -23,6 +25,9 @@ services:
       dockerfile: Dockerfile
     ports:
       - "80:80"
+    environment:
+      # The compose backend service; set API_UPSTREAM in .env to point elsewhere
+      - API_UPSTREAM=${API_UPSTREAM:-http://backend:8000/api/}
     depends_on:
       - backend
 

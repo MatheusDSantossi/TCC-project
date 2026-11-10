@@ -1,8 +1,8 @@
 from django.urls import path, include
 
-from .views import BusinessListCreateView
+from .views import BusinessListView
 
 urlpatterns = [     
-    path('business/', BusinessListCreateView.as_view(),
+    path('business/', BusinessListView.as_view(),
     name='business-list'),
 ]

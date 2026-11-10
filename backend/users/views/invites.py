@@ -48,6 +48,8 @@ class InviteRegisterView(generics.CreateAPIView):
     """
     Accepts { token, password } -> creates the user under invite.business
     """
+    # Public: the invited person has no account yet; the invite token is the credential
+    permission_classes = [permissions.AllowAny]
     serializer_class = serializers.Serializer # We'll do it manually
     
     def create(self, request, *args, **kwargs):

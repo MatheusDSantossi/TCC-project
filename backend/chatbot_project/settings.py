@@ -90,8 +90,10 @@ WSGI_APPLICATION = "chatbot_project.wsgi.application"
 
 REST_FRAMEWORK = {
     # "DEFAULT_AUTHENTICATION_CLASSES": ('rest_framework_simplejwt_authentication.JWTAuthentication',),
-    # "DEFAULT_PERMISSION_CLASSES": ('rest_framework_permissions.IsAuthenticated',),
-    'DEFAULT_AUTHENTICATION_CLASSES': ('knox.auth.TokenAuthentication',)
+    'DEFAULT_AUTHENTICATION_CLASSES': ('knox.auth.TokenAuthentication',),
+    # Fail closed: a view that forgets permission_classes requires a login instead
+    # of being public. Public views must declare AllowAny explicitly.
+    'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.IsAuthenticated',),
 }
 
 # SIMPLE_JWT = {

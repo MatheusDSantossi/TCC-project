@@ -34,7 +34,8 @@ class ChatbotResponse(viewsets.GenericViewSet):
     """
 
     serializer_class = ChatbotRequestSerializer
-    permission_classes = []  # or [AllowAny]
+    # Public: store customers chat without an account
+    permission_classes = [permissions.AllowAny]
 
     @action(detail=False, methods=["post"])
     def post(self, request):
